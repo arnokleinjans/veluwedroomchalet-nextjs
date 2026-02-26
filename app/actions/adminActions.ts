@@ -18,6 +18,11 @@ async function saveToFile(newData: any) {
     }
 }
 
+// Securely fetch data for client-side Admin Panel
+export async function fetchAdminData() {
+    return await getAppData();
+}
+
 export async function updatePropertyInfo(name: string, hostName: string, phone: string) {
     const appData = await getAppData();
     const updatedData = { ...appData };

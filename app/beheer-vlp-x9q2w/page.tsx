@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAppData } from "../utils/db";
-import { updatePropertyInfo, updateWifi, updateRules, addBooking, removeBooking } from "../actions/adminActions";
+import { updatePropertyInfo, updateWifi, updateRules, addBooking, removeBooking, fetchAdminData } from "../actions/adminActions";
 
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -31,8 +30,8 @@ export default function AdminPage() {
         const auth = localStorage.getItem("veluwe_admin_auth");
         if (auth === "true") setIsAuthenticated(true);
 
-        // Fetch live database metrics
-        getAppData().then(data => {
+        // Fetch live database metrics via secure server action
+        fetchAdminData().then(data => {
             setPropName(data.property.name);
             setHostName(data.property.host.name);
             setPhone(data.property.host.phone);
