@@ -3,10 +3,16 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 let kvInstance: Redis | null = null;
 export function getKV(): Redis {
+    // VERCEL DEBUG SCANNER
+    console.log("KV INIT ENV DUMP:");
+    console.log("- KV_REST_API_URL exists:", !!process.env.KV_REST_API_URL);
+    console.log("- KV_REST_API_TOKEN exists:", !!process.env.KV_REST_API_TOKEN);
+    console.log("- UPSTASH_REST_URL exists:", !!process.env.UPSTASH_REDIS_REST_URL);
+
     if (!kvInstance) {
         kvInstance = new Redis({
-            url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "",
-            token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "",
+            url: (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) as string,
+            token: (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN) as string,
         });
     }
     return kvInstance;
