@@ -4,6 +4,8 @@ import { useState } from "react";
 import { appData } from "../../utils/mockData";
 import { useBooking } from "../../context/BookingContext";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   const [showWifiModal, setShowWifiModal] = useState(false);
   const booking = useBooking();

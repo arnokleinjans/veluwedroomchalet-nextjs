@@ -3,6 +3,8 @@ import { BookingProvider, BookingInfo } from "../../context/BookingContext";
 import { notFound } from "next/navigation";
 import ClientLayout from "../../components/ClientLayout";
 
+export const dynamic = "force-dynamic"; // CRUCIAL: Forces Vercel to read params live instead of serving a static 404 fallback
+
 export default async function BookingLayout({
     children,
     params,

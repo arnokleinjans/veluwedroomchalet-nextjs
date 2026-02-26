@@ -32,7 +32,8 @@ export default function ClientLayout({ children, basePath = "" }: { children: Re
 
     if (!isMounted) return null; // Prevent hydration mismatch
 
-    if (!isAuthenticated) {
+    // If a basePath is provided (we are in a personalized /b/[id] route), skip the general access code login
+    if (!isAuthenticated && !basePath) {
         return (
             <div className="login-overlay active">
                 {/* ... login overlay JSX ... */}
