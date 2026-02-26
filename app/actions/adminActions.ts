@@ -1,8 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { kv } from '@vercel/kv';
-import { getAppData } from "../utils/db";
+import { kv, getAppData } from "../utils/db";
 
 // Helper to write the appData object back to Vercel KV
 async function saveToFile(newData: any) {
