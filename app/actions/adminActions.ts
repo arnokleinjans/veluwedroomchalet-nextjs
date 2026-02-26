@@ -7,13 +7,15 @@ import { getAppData } from "../utils/db";
 // Helper to write the appData object back to Vercel KV
 async function saveToFile(newData: any) {
     try {
+        console.log("Attempting to write to Vercel KV...");
         await kv.set('veluwe_app_data', newData);
+        console.log("Write successful. Revalidating path...");
         // Instruct Next.js to clear cache for the entire site
         revalidatePath("/", "layout");
         return { success: true };
-    } catch (error) {
-        console.error("Fout bij opslaan van data in KV:", error);
-        return { success: false, error: "Kon data niet opslaan in de database. Controleer de Vercel integratie." };
+    } catch (error: any) {
+        console.error("Vercel KV Write Error DUMP:", error);
+        return { success: false, error: "Kon data niet opslaan in de database. " + (error.message || "Onbekende fout.") };
     }
 }
 
