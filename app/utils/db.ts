@@ -1,10 +1,16 @@
 import { Redis } from '@upstash/redis';
 import { unstable_noStore as noStore } from 'next/cache';
 
-export const kv = new Redis({
-    url: process.env.KV_REST_API_URL!,
-    token: process.env.KV_REST_API_TOKEN!,
-});
+let kvInstance: Redis | null = null;
+export function getKV(): Redis {
+    if (!kvInstance) {
+        kvInstance = new Redis({
+            url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "",
+            token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "",
+        });
+    }
+    return kvInstance;
+}
 
 const defaultAppData = {
     "accessCode": "VELUWE2026",
@@ -96,9 +102,11 @@ const defaultAppData = {
 export async function getAppData() {
     noStore();
     try {
+        const kv = getKV();
         const data = await kv.get('veluwe_app_data');
         if (!data) {
             // Seed the database with defaults if it's completely empty
+            const kv = getKV();
             await kv.set('veluwe_app_data', defaultAppData);
             return defaultAppData;
         }

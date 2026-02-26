@@ -1,13 +1,14 @@
 "use server";
 
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
-import { kv, getAppData } from "../utils/db";
+import { getKV, getAppData } from "../utils/db";
 
 // Helper to write the appData object back to Vercel KV
 async function saveToFile(newData: any) {
     noStore();
     try {
         console.log("Attempting to write to Vercel KV...");
+        const kv = getKV();
         await kv.set('veluwe_app_data', newData);
         console.log("Write successful. Revalidating path...");
         // Instruct Next.js to clear cache for the entire site
