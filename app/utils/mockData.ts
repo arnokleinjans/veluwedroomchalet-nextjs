@@ -1,0 +1,85 @@
+export const appData = {
+    "accessCode": "VELUWE2026",
+    "bookings": [
+        {
+            "id": "FAMILIE-L1JD",
+            "guestName": "Familie van der Horst",
+            "checkIn": "2026-02-27",
+            "checkOut": "2026-03-02"
+        },
+        {
+            "id": "KITTY-7R9X",
+            "guestName": "Kitty van der Pijll",
+            "checkIn": "2026-02-27",
+            "checkOut": "2026-05-03"
+        }
+    ],
+    "property": {
+        "name": "Veluwe Droom Chalet",
+        "headerImage": "images/Boshuisje.jpg",
+        "wifi": {
+            "network": "Wegwezen",
+            "password": "BomenZijnFijn2026"
+        },
+        "host": {
+            "name": "Kitty",
+            "phone": "+31653238603",
+            "avatar": "https://ui-avatars.com/api/?name=Arno&background=4A5D23&color=fff&rounded=true"
+        }
+    },
+    "rules": [
+        {
+            "title": "Afvalscheiding",
+            "desc": "Groenbak achter het schuurtje. Papier in de blauwe bak. Restafval in de grijze bak."
+        },
+        {
+            "title": "Testje",
+            "desc": "Test"
+        }
+    ],
+    "videos": [
+        {
+            "title": "vakantiehuisje",
+            "thumb": "images/Boshuisje.jpg",
+            "url": "https://www.youtube.com/watch?v=S1WnqtMAeS4"
+        }
+    ],
+    "restaurants": [
+        {
+            "name": "Pannenkoekenboerderij De Boswachter",
+            "desc": "Heerlijk voor de kinderen. 5 minuten fietsen.",
+            "url": "https://www.nu.nl/"
+        },
+        {
+            "name": "Bar het suffertje",
+            "desc": "testbar",
+            "url": "https://www.nu.nl/"
+        }
+    ],
+    "insights": [
+        {
+            "icon": "wifi-outline",
+            "title": "Wifi",
+            "subtitle": "test",
+            "action": "wifi-modal"
+        },
+        {
+            "icon": "time-outline",
+            "title": "In- en uitchecken",
+            "subtitle": "Inchecken kan vanaf 15.00 uur en gaat contactloos via een sleutelkastje. Het uitchecken is uiterlijk om 10.30 uur. ",
+            "action": "none"
+        },
+        {
+            "icon": "key-outline",
+            "title": "Sleutelkastje",
+            "subtitle": "Het sleutelkastje kun je vinden....",
+            "action": "none"
+        },
+        {
+            "icon": "restaurant-outline",
+            "title": "Lekker Eten",
+            "subtitle": "Check onze lokale restaurant tips!",
+            "action": "none"
+        }
+    ]
+};
