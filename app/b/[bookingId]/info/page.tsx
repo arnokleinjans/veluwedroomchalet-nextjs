@@ -2,9 +2,12 @@
 "use client";
 
 import { useState } from "react";
-import { appData } from "../../../utils/mockData";
+import { getAppData } from "../../../utils/db";
 
-export default function Info() {
+export const dynamic = "force-dynamic";
+
+export default async function Info() {
+    const appData = await getAppData();
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
     const getEmbedUrl = (url: string) => {

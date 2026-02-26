@@ -1,6 +1,9 @@
-import { appData } from "../../../utils/mockData";
+import { getAppData } from "../../../utils/db";
 
-export default function Omgeving() {
+export const dynamic = "force-dynamic";
+
+export default async function Omgeving() {
+    const appData = await getAppData();
     return (
         <div className="tab-content active" id="omgeving-tab">
             <div className="info-list" id="restaurants-container">

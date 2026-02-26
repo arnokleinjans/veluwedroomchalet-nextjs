@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { appData } from "../../../utils/mockData";
 import { useBooking } from "../../../context/BookingContext";
 
 export default function ChatPage() {
-    const booking = useBooking();
+    const { booking, appData } = useBooking();
     const [messages, setMessages] = useState<{ role: "user" | "bot", text: string }[]>(
         [{ role: "bot", text: `Hoi ${booking.guestName}! Ik ben de digitale conciërge van ${appData.property.name}. Hoe kan ik je vandaag helpen?` }]
     );

@@ -1,4 +1,6 @@
-export const appData = {
+import { kv } from '@vercel/kv';
+
+const defaultAppData = {
     "accessCode": "VELUWE2026",
     "bookings": [
         {
@@ -83,3 +85,20 @@ export const appData = {
         }
     ]
 };
+
+// Main function to retrieve data from Vercel KV
+export async function getAppData() {
+    try {
+        const data = await kv.get('veluwe_app_data');
+        if (!data) {
+            // Seed the database with defaults if it's completely empty
+            await kv.set('veluwe_app_data', defaultAppData);
+            return defaultAppData;
+        }
+        return data as typeof defaultAppData;
+    } catch (error) {
+        console.error("Vercel KV Error: ", error);
+        // Fallback to static defaults if KV is not configured yet (e.g. local without .env)
+        return defaultAppData;
+    }
+}

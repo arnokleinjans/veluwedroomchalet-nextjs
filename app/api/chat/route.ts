@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { appData } from '../../utils/mockData';
+import { getAppData } from '../../utils/db';
 
 export async function POST(req: Request) {
     try {
@@ -10,6 +10,9 @@ export async function POST(req: Request) {
         const guestName = guestContext?.name || "Gast";
         const checkIn = guestContext?.checkIn || "onbekend";
         const checkOut = guestContext?.checkOut || "onbekend";
+
+        // Fetch live Database context
+        const appData = await getAppData();
 
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json(

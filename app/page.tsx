@@ -1,6 +1,7 @@
-import { appData } from "./utils/mockData";
+import { getAppData } from "./utils/db";
 
-export default function RootLanding() {
+export default async function RootLanding() {
+    const appData = await getAppData();
     return (
         <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#f4f4f4", padding: "20px", textAlign: "center" }}>
             <div style={{ backgroundColor: "white", padding: "40px", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.1)", maxWidth: "500px" }}>

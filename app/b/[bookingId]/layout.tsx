@@ -1,9 +1,9 @@
-import { appData } from "../../utils/mockData";
+import { getAppData } from "../../utils/db";
 import { BookingProvider, BookingInfo } from "../../context/BookingContext";
 import { notFound } from "next/navigation";
 import ClientLayout from "../../components/ClientLayout";
 
-export const dynamic = "force-dynamic"; // CRUCIAL: Forces Vercel to read params live instead of serving a static 404 fallback
+export const dynamic = "force-dynamic";
 
 export default async function BookingLayout({
     children,
@@ -13,8 +13,10 @@ export default async function BookingLayout({
     params: Promise<{ bookingId: string }>;
 }) {
     const { bookingId } = await params;
+    const appData = await getAppData();
+
     // Find the current booking
-    const booking = appData.bookings?.find(b => b.id === bookingId);
+    const booking = appData.bookings?.find((b: any) => b.id === bookingId);
 
     // Fallback if URL is invalid
     if (!booking) {
@@ -29,8 +31,8 @@ export default async function BookingLayout({
     };
 
     return (
-        <BookingProvider booking={bookingInfo}>
-            <ClientLayout basePath={`/b/${bookingInfo.id}`}>
+        <BookingProvider booking={bookingInfo} appData={appData}>
+            <ClientLayout basePath={`/b/${bookingInfo.id}`} appData={appData}>
                 {children}
             </ClientLayout>
         </BookingProvider>

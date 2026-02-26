@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { appData } from "../../utils/mockData";
 import { useBooking } from "../../context/BookingContext";
 
 export const dynamic = "force-dynamic";
 
 export default function Home() {
+  const { booking, appData } = useBooking();
   const [showWifiModal, setShowWifiModal] = useState(false);
-  const booking = useBooking();
 
   const handleAction = (action: string) => {
     if (action === "wifi-modal") {

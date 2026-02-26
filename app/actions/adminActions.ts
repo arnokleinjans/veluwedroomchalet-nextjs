@@ -1,27 +1,24 @@
 "use server";
 
-import fs from "fs/promises";
-import path from "path";
 import { revalidatePath } from "next/cache";
+import { kv } from '@vercel/kv';
+import { getAppData } from "../utils/db";
 
-const dataFilePath = path.join(process.cwd(), "app", "utils", "mockData.ts");
-
-// Helper to write the appData object back to the TypeScript file
+// Helper to write the appData object back to Vercel KV
 async function saveToFile(newData: any) {
     try {
-        const fileContent = `export const appData = ${JSON.stringify(newData, null, 4)};\n`;
-        await fs.writeFile(dataFilePath, fileContent, "utf8");
+        await kv.set('veluwe_app_data', newData);
         // Instruct Next.js to clear cache for the entire site
         revalidatePath("/", "layout");
         return { success: true };
     } catch (error) {
-        console.error("Fout bij opslaan van data:", error);
-        return { success: false, error: "Kon data niet opslaan. Let op: dit werkt mogelijk niet in productie op Vercel (read-only filesystem)." };
+        console.error("Fout bij opslaan van data in KV:", error);
+        return { success: false, error: "Kon data niet opslaan in de database. Controleer de Vercel integratie." };
     }
 }
 
 export async function updatePropertyInfo(name: string, hostName: string, phone: string) {
-    const { appData } = await import("../utils/mockData");
+    const appData = await getAppData();
     const updatedData = { ...appData };
 
     updatedData.property.name = name;
@@ -32,7 +29,7 @@ export async function updatePropertyInfo(name: string, hostName: string, phone: 
 }
 
 export async function updateWifi(network: string, pass: string) {
-    const { appData } = await import("../utils/mockData");
+    const appData = await getAppData();
     const updatedData = { ...appData };
 
     updatedData.property.wifi.network = network;
@@ -42,7 +39,7 @@ export async function updateWifi(network: string, pass: string) {
 }
 
 export async function updateRules(newRules: { title: string, desc: string }[]) {
-    const { appData } = await import("../utils/mockData");
+    const appData = await getAppData();
     const updatedData = { ...appData };
 
     updatedData.rules = newRules;
@@ -53,7 +50,7 @@ export async function updateRules(newRules: { title: string, desc: string }[]) {
 // Nieuwe functionaliteit voor Gepersonaliseerde Gasten Links
 
 export async function addBooking(guestName: string, checkIn: string, checkOut: string) {
-    const { appData } = await import("../utils/mockData");
+    const appData = await getAppData();
     const updatedData = { ...appData };
 
     // Genereer snelle unieke en leesbare ID
@@ -78,7 +75,7 @@ export async function addBooking(guestName: string, checkIn: string, checkOut: s
 }
 
 export async function removeBooking(id: string) {
-    const { appData } = await import("../utils/mockData");
+    const appData = await getAppData();
     const updatedData = { ...appData };
 
     if (!updatedData.bookings) return { success: false, error: "Geen boekingen gevonden." };

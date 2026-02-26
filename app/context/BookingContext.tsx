@@ -9,7 +9,7 @@ export type BookingInfo = {
     checkOut: string;
 };
 
-const BookingContext = createContext<BookingInfo | null>(null);
+const BookingContext = createContext<{ booking: BookingInfo, appData: any } | null>(null);
 
 export const useBooking = () => {
     const context = useContext(BookingContext);
@@ -19,9 +19,9 @@ export const useBooking = () => {
     return context;
 }
 
-export const BookingProvider = ({ children, booking }: { children: ReactNode, booking: BookingInfo }) => {
+export const BookingProvider = ({ children, booking, appData }: { children: ReactNode, booking: BookingInfo, appData: any }) => {
     return (
-        <BookingContext.Provider value={booking}>
+        <BookingContext.Provider value={{ booking, appData }}>
             {children}
         </BookingContext.Provider>
     );

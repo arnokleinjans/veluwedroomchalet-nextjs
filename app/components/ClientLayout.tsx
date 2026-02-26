@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { appData } from "../utils/mockData";
 
-export default function ClientLayout({ children, basePath = "" }: { children: React.ReactNode, basePath?: string }) {
+export default function ClientLayout({ children, basePath = "", appData }: { children: React.ReactNode, basePath?: string, appData: any }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [accessCode, setAccessCode] = useState("");
     const [error, setError] = useState(false);

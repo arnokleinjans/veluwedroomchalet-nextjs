@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { appData } from "../utils/mockData";
+import { getAppData } from "../utils/db";
 import { updatePropertyInfo, updateWifi, updateRules, addBooking, removeBooking } from "../actions/adminActions";
 
 export default function AdminPage() {
@@ -27,14 +27,20 @@ export default function AdminPage() {
     const [saveMessage, setSaveMessage] = useState("");
 
     useEffect(() => {
-        // Init states from mockData when authenticated
-        setPropName(appData.property.name);
-        setHostName(appData.property.host.name);
-        setPhone(appData.property.host.phone);
-        setWifiNetwork(appData.property.wifi.network);
-        setWifiPass(appData.property.wifi.password);
-        setRules([...appData.rules]);
-        setBookings(appData.bookings || []);
+        // Init auth
+        const auth = localStorage.getItem("veluwe_admin_auth");
+        if (auth === "true") setIsAuthenticated(true);
+
+        // Fetch live database metrics
+        getAppData().then(data => {
+            setPropName(data.property.name);
+            setHostName(data.property.host.name);
+            setPhone(data.property.host.phone);
+            setWifiNetwork(data.property.wifi.network);
+            setWifiPass(data.property.wifi.password);
+            setRules(data.rules || []);
+            setBookings(data.bookings || []);
+        });
     }, []);
 
     const handleLogin = () => {
@@ -141,7 +147,7 @@ export default function AdminPage() {
             <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "white", borderRadius: "16px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", overflow: "hidden" }}>
                 <div style={{ backgroundColor: "#4A5D23", padding: "30px", color: "white" }}>
                     <h1 style={{ margin: 0, fontSize: "2rem", fontFamily: "'Lora', serif" }}>Geheim Beheer</h1>
-                    <p style={{ margin: "5px 0 0", opacity: 0.9 }}>Pas direct app-teksten aan. (Let op: Lokale modus overschrijft 'mockData.ts')</p>
+                    <p style={{ margin: "5px 0 0", opacity: 0.9 }}>Pas direct app-teksten aan. (Opgeslagen via Vercel KV)</p>
                 </div>
 
                 <div style={{ padding: "30px" }}>
