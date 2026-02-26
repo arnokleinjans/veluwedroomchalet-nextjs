@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { kv, getAppData } from "../utils/db";
 
 // Helper to write the appData object back to Vercel KV
 async function saveToFile(newData: any) {
+    noStore();
     try {
         console.log("Attempting to write to Vercel KV...");
         await kv.set('veluwe_app_data', newData);
@@ -20,10 +21,12 @@ async function saveToFile(newData: any) {
 
 // Securely fetch data for client-side Admin Panel
 export async function fetchAdminData() {
+    noStore();
     return await getAppData();
 }
 
 export async function updatePropertyInfo(name: string, hostName: string, phone: string) {
+    noStore();
     const appData = await getAppData();
     const updatedData = { ...appData };
 
@@ -35,6 +38,7 @@ export async function updatePropertyInfo(name: string, hostName: string, phone: 
 }
 
 export async function updateWifi(network: string, pass: string) {
+    noStore();
     const appData = await getAppData();
     const updatedData = { ...appData };
 
@@ -45,6 +49,7 @@ export async function updateWifi(network: string, pass: string) {
 }
 
 export async function updateRules(newRules: { title: string, desc: string }[]) {
+    noStore();
     const appData = await getAppData();
     const updatedData = { ...appData };
 
@@ -56,6 +61,7 @@ export async function updateRules(newRules: { title: string, desc: string }[]) {
 // Nieuwe functionaliteit voor Gepersonaliseerde Gasten Links
 
 export async function addBooking(guestName: string, checkIn: string, checkOut: string) {
+    noStore();
     const appData = await getAppData();
     const updatedData = { ...appData };
 
@@ -81,6 +87,7 @@ export async function addBooking(guestName: string, checkIn: string, checkOut: s
 }
 
 export async function removeBooking(id: string) {
+    noStore();
     const appData = await getAppData();
     const updatedData = { ...appData };
 

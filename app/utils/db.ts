@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export const kv = new Redis({
     url: process.env.KV_REST_API_URL!,
@@ -93,6 +94,7 @@ const defaultAppData = {
 
 // Main function to retrieve data from Vercel KV
 export async function getAppData() {
+    noStore();
     try {
         const data = await kv.get('veluwe_app_data');
         if (!data) {
