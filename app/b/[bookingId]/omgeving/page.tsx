@@ -14,18 +14,23 @@ export default async function Omgeving({ params }: { params: { bookingId: string
         <div className="tab-content active" id="omgeving-tab">
             <div className="info-list" id="restaurants-container">
                 {appData.restaurants.map((restaurant: any, index: number) => (
-                    <div key={index} className="info-item">
-                        <div>
+                    <a
+                        key={index}
+                        href={restaurant.url || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="info-item"
+                        style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", cursor: "pointer" }}
+                    >
+                        <div style={{ flex: 1 }}>
                             <h4 style={{ color: "var(--primary-color)" }}>
-                                <a href={restaurant.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit" }}>
-                                    {parseTemplateString(restaurant.name, booking)}
-                                </a>
+                                {parseTemplateString(restaurant.name, booking)}
                             </h4>
                             <p>{parseTemplateString(restaurant.desc, booking)}</p>
                         </div>
                         {/* @ts-ignore */}
-                        <ion-icon name="open-outline" style={{ color: "var(--text-secondary)" }}></ion-icon>
-                    </div>
+                        <ion-icon name="chevron-forward-outline" style={{ fontSize: "1.2rem", color: "var(--text-secondary)", flexShrink: 0, marginLeft: "10px" }}></ion-icon>
+                    </a>
                 ))}
             </div>
         </div>
