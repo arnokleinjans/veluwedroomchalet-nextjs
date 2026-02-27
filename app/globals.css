@@ -150,6 +150,15 @@ h3 {
     padding-bottom: 80px;
     /* Space for nav */
     background-color: var(--bg-color);
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+.app-content::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
 }
 
 /* Tab contents */

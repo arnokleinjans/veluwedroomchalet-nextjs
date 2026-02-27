@@ -56,8 +56,8 @@ export default function ChatPage() {
     };
 
     return (
-        <div className="tab-content active" id="contact-tab">
-            <div id="chat-window" style={{ height: "350px", overflowY: "auto", padding: "10px", backgroundColor: "var(--card-bg)", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div className="tab-content active" id="contact-tab" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+            <div id="chat-window" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "10px", backgroundColor: "var(--card-bg)", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 {messages.map((msg, idx) => (
                     <div key={idx} style={{
                         alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
