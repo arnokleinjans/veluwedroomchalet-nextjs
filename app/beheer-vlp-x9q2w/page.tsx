@@ -45,10 +45,17 @@ export default function AdminPage() {
     const handleLogin = () => {
         if (pin === "2026") {
             setIsAuthenticated(true);
+            localStorage.setItem("veluwe_admin_auth", "true");
             setError(false);
         } else {
             setError(true);
         }
+    };
+
+    const handleLogout = () => {
+        setIsAuthenticated(false);
+        localStorage.removeItem("veluwe_admin_auth");
+        setPin("");
     };
 
     const handleSaveGeneral = async () => {
@@ -144,9 +151,14 @@ export default function AdminPage() {
     return (
         <div style={{ backgroundColor: "#f9f9f9", minHeight: "100vh", padding: "40px 20px" }}>
             <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "white", borderRadius: "16px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", overflow: "hidden" }}>
-                <div style={{ backgroundColor: "#4A5D23", padding: "30px", color: "white" }}>
-                    <h1 style={{ margin: 0, fontSize: "2rem", fontFamily: "'Lora', serif" }}>Geheim Beheer</h1>
-                    <p style={{ margin: "5px 0 0", opacity: 0.9 }}>Pas direct app-teksten aan. (Opgeslagen via Vercel KV)</p>
+                <div style={{ backgroundColor: "#4A5D23", padding: "30px", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
+                    <div>
+                        <h1 style={{ margin: 0, fontSize: "2rem", fontFamily: "'Lora', serif" }}>Geheim Beheer</h1>
+                        <p style={{ margin: "5px 0 0", opacity: 0.9 }}>Pas direct app-teksten aan. (Opgeslagen via Vercel KV)</p>
+                    </div>
+                    <button onClick={handleLogout} style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: "6px", color: "white", padding: "8px 16px", cursor: "pointer", fontWeight: "bold", backdropFilter: "blur(4px)" }}>
+                        Uitloggen
+                    </button>
                 </div>
 
                 <div style={{ padding: "30px" }}>
