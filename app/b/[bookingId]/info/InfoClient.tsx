@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { parseTemplateString } from "../../../utils/templateParser";
 
-export default function InfoClient({ appData }: { appData: any }) {
+export default function InfoClient({ appData, booking }: { appData: any, booking: any }) {
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
     const getEmbedUrl = (url: string) => {
+        if (!url) return "";
         // Basic conversion from regular youtube url to embed url
         if (url.includes('youtube.com/watch?v=')) {
             return url.replace('watch?v=', 'embed/');
@@ -15,26 +17,12 @@ export default function InfoClient({ appData }: { appData: any }) {
 
     return (
         <div className="tab-content active" id="info-tab">
-            <div className="info-list" id="rules-container">
-                {appData.rules.map((rule: any, index: number) => (
-                    <div key={index} className="info-item">
-                        <div>
-                            <h4>{rule.title}</h4>
-                            <p>{rule.desc}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <h2 style={{ fontSize: "1.4rem", marginBottom: "15px", marginTop: "25px" }}>
-                Apparatuur Instructies
-            </h2>
             <div className="video-card" id="videos-container">
                 {appData.videos.map((video: any, index: number) => (
                     <div key={index} style={{ width: "100%", marginBottom: "20px" }}>
                         <div
                             className="video-thumb"
-                            style={{ backgroundImage: `url('${video.thumb}')` }}
+                            style={{ backgroundImage: `url('/${video.thumb}')` }}
                             onClick={() => setVideoUrl(getEmbedUrl(video.url))}
                         >
                             <div className="play-overlay">
@@ -43,7 +31,7 @@ export default function InfoClient({ appData }: { appData: any }) {
                             </div>
                         </div>
                         <h4 style={{ marginTop: "10px", fontFamily: "Nunito, sans-serif", fontSize: "1.1rem" }}>
-                            {video.title}
+                            {parseTemplateString(video.title, booking)}
                         </h4>
                     </div>
                 ))}

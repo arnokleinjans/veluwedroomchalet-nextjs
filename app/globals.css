@@ -193,6 +193,9 @@ h3 {
     color: var(--primary-color);
     width: 45px;
     height: 45px;
+    min-width: 45px;
+    min-height: 45px;
+    flex-shrink: 0;
     border-radius: 12px;
     display: flex;
     justify-content: center;

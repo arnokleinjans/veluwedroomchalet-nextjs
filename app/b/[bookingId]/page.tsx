@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useBooking } from "../../context/BookingContext";
+import { parseTemplateString, formatDutchDate } from "../../utils/templateParser";
 
 export const dynamic = "force-dynamic";
 
@@ -17,39 +18,34 @@ export default function Home() {
 
   return (
     <div className="tab-content active" id="home-tab">
-      <div className="card">
-        <div className="icon-wrapper">
-          {/* @ts-ignore */}
-          <ion-icon name="calendar-outline"></ion-icon>
-        </div>
-        <div className="card-content">
-          <h3>Uw Verblijf</h3>
-          <p id="guest-stay-dates">
-            {booking.checkIn} t/m {booking.checkOut}
-          </p>
-        </div>
-      </div>
-
-      <h2 style={{ fontSize: "1.4rem", marginBottom: "15px", marginTop: "25px" }}>
-        Handig om te weten
-      </h2>
       <div id="insights-container">
-        {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string }, index: number) => (
-          <div key={index} className="card clickable" onClick={() => handleAction(insight.action)}>
-            <div className="icon-wrapper">
-              {/* @ts-ignore */}
-              <ion-icon name={insight.icon}></ion-icon>
+        {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string }, index: number) => {
+          // Check if icon string is an image file path (like "icons/home.png") or a fallback ion-icon string
+          const isImage = insight.icon && insight.icon.includes('.');
+
+          return (
+            <div key={index} className="card clickable" onClick={() => handleAction(insight.action)}>
+              <div className="icon-wrapper">
+                {isImage ? (
+                  <img src={`/${insight.icon}`} alt="" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
+                ) : (
+                  /* @ts-ignore */
+                  <ion-icon name={insight.icon || "information-circle-outline"}></ion-icon>
+                )}
+              </div>
+              <div className="card-content">
+                <h3>{parseTemplateString(insight.title, booking)}</h3>
+                <p>{parseTemplateString(insight.subtitle, booking)}</p>
+              </div>
+              {insight.action === "wifi-modal" && (
+                <div style={{ marginLeft: "auto", color: "var(--text-secondary)", display: "flex", alignItems: "center" }}>
+                  {/* @ts-ignore */}
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              )}
             </div>
-            <div className="card-content">
-              <h3>{insight.title}</h3>
-              <p>{insight.subtitle}</p>
-            </div>
-            <div style={{ marginLeft: "auto", color: "var(--text-secondary)" }}>
-              {/* @ts-ignore */}
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {showWifiModal && (

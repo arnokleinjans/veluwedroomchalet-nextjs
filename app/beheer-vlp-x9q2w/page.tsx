@@ -1,20 +1,61 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { updatePropertyInfo, updateWifi, updateRules, addBooking, removeBooking, fetchAdminData } from "../actions/adminActions";
+import {
+    updatePropertyInfo, updateWifi, addBooking, removeBooking, fetchAdminData,
+    updateHeaderImage, updateInsights, updateVideos, updateRestaurants,
+    updateChatbotContext
+} from "../actions/adminActions";
+import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+function SortableItem({ id, children }: { id: string, children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+    return (
+        <div ref={setNodeRef} style={style}>
+            <div style={{ padding: "15px", backgroundColor: "#f4f4f4", borderRadius: "8px", position: "relative" as const }}>
+                <div {...attributes} {...listeners} style={{ position: "absolute" as const, top: "12px", left: "10px", cursor: "grab", fontSize: "1.2rem", color: "#999", touchAction: "none", userSelect: "none" }} title="Sleep om te herordenen">
+                    ☰
+                </div>
+                <div style={{ marginLeft: "30px" }}>
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [pin, setPin] = useState("");
     const [error, setError] = useState(false);
 
+    // Dropdown assets
+    const [availableImages, setAvailableImages] = useState<string[]>([]);
+    const [availableIcons, setAvailableIcons] = useState<string[]>([]);
+    const [availableThumbnails, setAvailableThumbnails] = useState<string[]>([]);
+
     // Form states
     const [propName, setPropName] = useState("");
     const [hostName, setHostName] = useState("");
     const [phone, setPhone] = useState("");
+    const [headerImage, setHeaderImage] = useState("");
+    const [subtitle, setSubtitle] = useState("");
     const [wifiNetwork, setWifiNetwork] = useState("");
     const [wifiPass, setWifiPass] = useState("");
-    const [rules, setRules] = useState<{ title: string, desc: string }[]>([]);
+
+    // Dynamic Arrays
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string }[]>([]);
+    const [videos, setVideos] = useState<{ title: string, thumb: string, url: string }[]>([]);
+    const [restaurants, setRestaurants] = useState<{ name: string, desc: string, url: string }[]>([]);
+    const [chatbotContext, setChatbotContext] = useState("");
 
     // Bookings states
     const [bookings, setBookings] = useState<{ id: string, guestName: string, checkIn: string, checkOut: string }[]>([]);
@@ -26,19 +67,28 @@ export default function AdminPage() {
     const [saveMessage, setSaveMessage] = useState("");
 
     useEffect(() => {
-        // Init auth
         const auth = localStorage.getItem("veluwe_admin_auth");
         if (auth === "true") setIsAuthenticated(true);
 
-        // Fetch live database metrics via secure server action
+        fetchAvailableHeaderImages().then(setAvailableImages);
+        fetchAvailableIcons().then(setAvailableIcons);
+        fetchAvailableThumbnails().then(setAvailableThumbnails);
+
         fetchAdminData().then(data => {
             setPropName(data.property.name);
             setHostName(data.property.host.name);
             setPhone(data.property.host.phone);
+            setHeaderImage(data.property.headerImage || "");
+            setSubtitle(data.property.subtitle || "Welkom terug");
+
             setWifiNetwork(data.property.wifi.network);
             setWifiPass(data.property.wifi.password);
-            setRules(data.rules || []);
+
+            setInsights(data.insights || []);
+            setVideos(data.videos || []);
+            setRestaurants(data.restaurants || []);
             setBookings(data.bookings || []);
+            setChatbotContext(data.chatbotContext || "");
         });
     }, []);
 
@@ -58,32 +108,41 @@ export default function AdminPage() {
         setPin("");
     };
 
-    const handleSaveGeneral = async () => {
+    const runSaveAction = async (actionFn: () => Promise<any>, successMsg: string) => {
         setIsSaving(true);
         setSaveMessage("");
-        const res = await updatePropertyInfo(propName, hostName, phone);
+        const res = await actionFn();
         setIsSaving(false);
-        if (res.success) setSaveMessage("✅ Algemene info succesvol opgeslagen!");
+        if (res.success) setSaveMessage("✅ " + successMsg);
         else setSaveMessage("❌ " + res.error);
     };
 
-    const handleSaveWifi = async () => {
-        setIsSaving(true);
-        setSaveMessage("");
-        const res = await updateWifi(wifiNetwork, wifiPass);
-        setIsSaving(false);
-        if (res.success) setSaveMessage("✅ WiFi succesvol opgeslagen!");
-        else setSaveMessage("❌ " + res.error);
-    };
+    const handleSaveGeneral = () => runSaveAction(async () => {
+        await updateHeaderImage(headerImage);
+        return await updatePropertyInfo(propName, hostName, phone, subtitle);
+    }, "Algemene info succesvol opgeslagen!");
 
-    const handleSaveRules = async () => {
-        setIsSaving(true);
-        setSaveMessage("");
-        const res = await updateRules(rules);
-        setIsSaving(false);
-        if (res.success) setSaveMessage("✅ Huisregels succesvol opgeslagen!");
-        else setSaveMessage("❌ " + res.error);
-    };
+    const handleSaveWifi = () => runSaveAction(() => updateWifi(wifiNetwork, wifiPass), "WiFi succesvol opgeslagen!");
+    const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!");
+    const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!");
+    const handleSaveRestaurants = () => runSaveAction(() => updateRestaurants(restaurants), "Omgeving succesvol opgeslagen!");
+    const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
+
+    function makeDragEnd<T>(items: T[], setItems: (items: T[]) => void) {
+        return (event: DragEndEvent) => {
+            const { active, over } = event;
+            if (over && active.id !== over.id) {
+                const oldIndex = items.findIndex((_, i) => `item-${i}` === active.id);
+                const newIndex = items.findIndex((_, i) => `item-${i}` === over.id);
+                setItems(arrayMove(items, oldIndex, newIndex));
+            }
+        };
+    }
 
     const handleAddBooking = async () => {
         if (!newGuestName || !newCheckIn || !newCheckOut) {
@@ -96,7 +155,6 @@ export default function AdminPage() {
         setIsSaving(false);
         if (res.success) {
             setSaveMessage("✅ Boeking toegevoegd! Kopiëer de link hieronder.");
-            // Reload page smoothly to fetch new data
             window.location.reload();
         } else {
             setSaveMessage("❌ " + res.error);
@@ -111,15 +169,6 @@ export default function AdminPage() {
         if (res.success) window.location.reload();
         else setSaveMessage("❌ " + res.error);
     };
-
-    const handleRuleChange = (index: number, field: 'title' | 'desc', value: string) => {
-        const newRules = [...rules];
-        newRules[index][field] = value;
-        setRules(newRules);
-    };
-
-    const addRule = () => setRules([...rules, { title: "Nieuwe Regel", desc: "Uitleg..." }]);
-    const removeRule = (idx: number) => setRules(rules.filter((_, i) => i !== idx));
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -169,7 +218,7 @@ export default function AdminPage() {
                     )}
 
                     <div style={{ display: "grid", gap: "30px" }}>
-                        {/* Sectie: Boekingen / Gasten Links */}
+                        {/* Sectie: Boekingen */}
                         <div style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "20px", backgroundColor: "#fcfefc" }}>
                             <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#4A5D23", borderBottom: "2px solid #e5ebe5", paddingBottom: "10px" }}>✨ Gepersonaliseerde Gasten Links</h2>
                             <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
@@ -178,8 +227,8 @@ export default function AdminPage() {
                                 <h3 style={{ fontSize: "1rem", marginBottom: "10px", color: "#333" }}>Nieuwe Link Aanmaken</h3>
                                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                                     <div style={{ flex: "1 1 200px" }}>
-                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast (zoals: Jan & Mien)</label>
-                                        <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Verplicht" />
+                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
+                                        <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
                                     </div>
                                     <div style={{ flex: "1 1 120px" }}>
                                         <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Aankomst</label>
@@ -200,17 +249,17 @@ export default function AdminPage() {
                                         <div key={booking.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", backgroundColor: "white", borderRadius: "8px", border: "1px solid #eee" }}>
                                             <div>
                                                 <strong style={{ color: "#333", display: "block" }}>{booking.guestName}</strong>
-                                                <span style={{ fontSize: "0.85rem", color: "#777" }}>{booking.checkIn} t/m {booking.checkOut} • ID: {booking.id}</span>
+                                                <span style={{ fontSize: "0.85rem", color: "#777" }}>{booking.checkIn} t/m {booking.checkOut}</span>
                                                 <div style={{ fontSize: "0.85rem", color: "#4A5D23", marginTop: "4px", wordBreak: "break-all" }}>{shareUrl}</div>
                                             </div>
                                             <div style={{ display: "flex", gap: "10px" }}>
-                                                <button onClick={() => copyToClipboard(shareUrl)} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }}>Kopieer Link</button>
+                                                <button onClick={() => copyToClipboard(shareUrl)} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }}>Kopieer</button>
                                                 <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>
                                             </div>
                                         </div>
                                     )
                                 })}
-                                {bookings.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen actieve boekingen gevonden.</p>}
+                                {bookings.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen boekingen gevonden.</p>}
                             </div>
                         </div>
 
@@ -232,7 +281,129 @@ export default function AdminPage() {
                                         <input type="text" value={phone} onChange={e => setPhone(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
                                     </div>
                                 </div>
-                                <button onClick={handleSaveGeneral} disabled={isSaving} style={{ alignSelf: "flex-start", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                <div>
+                                    <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Header Afbeelding (bovenaan de app)</label>
+                                    <select value={headerImage} onChange={e => setHeaderImage(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                        <option value="">-- Geen afbeelding --</option>
+                                        {availableImages.map((img, i) => (
+                                            <option key={i} value={img}>{img}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Subtitel (boven de naam, bijv. "Welkom terug")</label>
+                                    <input type="text" value={subtitle} onChange={e => setSubtitle(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                </div>
+                                <button onClick={handleSaveGeneral} disabled={isSaving} style={{ alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                            </div>
+                        </div>
+
+                        {/* Sectie: Home Items */}
+                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>📱 Home Pagina Items (Uw verblijf)</h2>
+                            <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>.</p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
+                                    <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
+                                        {insights.map((item, idx) => (
+                                            <SortableItem key={`insight-${idx}`} id={`item-${idx}`}>
+                                                <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+
+                                                <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel</label>
+                                                        <input type="text" value={item.title} onChange={e => { const n = [...insights]; n[idx].title = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Icoon (uit map `/public/icons`)</label>
+                                                        <select value={item.icon} onChange={e => { const n = [...insights]; n[idx].icon = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                                            <option value={item.icon}>{item.icon} (huidig)</option>
+                                                            {availableIcons.map((ic, i) => <option key={i} value={ic}>{ic}</option>)}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst</label>
+                                                <textarea value={item.subtitle} onChange={e => { const n = [...insights]; n[idx].subtitle = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "60px", fontFamily: "inherit" }} />
+                                            </SortableItem>
+                                        ))}
+                                    </SortableContext>
+                                </DndContext>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <button onClick={() => setInsights([...insights, { title: "Nieuw", subtitle: "", icon: "icons/default.png", action: "none" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Item Toevoegen</button>
+                                    <button onClick={handleSaveInsights} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sectie: Videoinstructies */}
+                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>🎥 Videoinstructies</h2>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(videos, setVideos)}>
+                                    <SortableContext items={videos.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
+                                        {videos.map((vid, idx) => (
+                                            <SortableItem key={`vid-${idx}`} id={`item-${idx}`}>
+                                                <button onClick={() => setVideos(videos.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+
+                                                <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Video</label>
+                                                        <input type="text" value={vid.title} onChange={e => { const n = [...videos]; n[idx].title = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Thumbnail (uit `/public/thumbnails`)</label>
+                                                        <select value={vid.thumb} onChange={e => { const n = [...videos]; n[idx].thumb = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                                            <option value={vid.thumb}>{vid.thumb} (huidig)</option>
+                                                            {availableThumbnails.map((ic, i) => <option key={i} value={ic}>{ic}</option>)}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>YouTube URL</label>
+                                                <input type="text" value={vid.url} onChange={e => { const n = [...videos]; n[idx].url = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="https://youtube.com/..." />
+                                            </SortableItem>
+                                        ))}
+                                    </SortableContext>
+                                </DndContext>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <button onClick={() => setVideos([...videos, { title: "Nieuwe Video", thumb: "thumbnails/default.jpg", url: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Video Toevoegen</button>
+                                    <button onClick={handleSaveVideos} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sectie: Omgeving */}
+                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>🌲 Omgeving TIPS</h2>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(restaurants, setRestaurants)}>
+                                    <SortableContext items={restaurants.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
+                                        {restaurants.map((rest, idx) => (
+                                            <SortableItem key={`rest-${idx}`} id={`item-${idx}`}>
+                                                <button onClick={() => setRestaurants(restaurants.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+
+                                                <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel (bijv. Restaurant de Koperen Pot)</label>
+                                                        <input type="text" value={rest.name} onChange={e => { const n = [...restaurants]; n[idx].name = e.target.value; setRestaurants(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Website URL</label>
+                                                        <input type="text" value={rest.url} onChange={e => { const n = [...restaurants]; n[idx].url = e.target.value; setRestaurants(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="https://..." />
+                                                    </div>
+                                                </div>
+
+                                                <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst / Omschrijving</label>
+                                                <textarea value={rest.desc} onChange={e => { const n = [...restaurants]; n[idx].desc = e.target.value; setRestaurants(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "60px", fontFamily: "inherit" }} />
+                                            </SortableItem>
+                                        ))}
+                                    </SortableContext>
+                                </DndContext>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <button onClick={() => setRestaurants([...restaurants, { name: "Nieuwe Tip", desc: "", url: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
+                                    <button onClick={handleSaveRestaurants} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                </div>
                             </div>
                         </div>
 
@@ -248,27 +419,22 @@ export default function AdminPage() {
                                     <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Wachtwoord</label>
                                     <input type="text" value={wifiPass} onChange={e => setWifiPass(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
                                 </div>
-                                <button onClick={handleSaveWifi} disabled={isSaving} style={{ marginTop: "5px", alignSelf: "flex-start", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>WiFi Opslaan</button>
+                                <button onClick={handleSaveWifi} disabled={isSaving} style={{ marginTop: "5px", alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>WiFi Opslaan</button>
                             </div>
                         </div>
 
-                        {/* Sectie: Huisregels */}
+                        {/* Sectie: Chatbot Context */}
                         <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>📜 Huisregels</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                                {rules.map((rule, idx) => (
-                                    <div key={idx} style={{ padding: "15px", backgroundColor: "#f4f4f4", borderRadius: "8px", position: "relative" }}>
-                                        <button onClick={() => removeRule(idx)} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>Verwijder</button>
-                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Titel (bijv. Afval)</label>
-                                        <input type="text" value={rule.title} onChange={e => handleRuleChange(idx, 'title', e.target.value)} style={{ width: "calc(100% - 80px)", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", marginBottom: "10px", display: "block" }} />
-                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Beschrijving</label>
-                                        <textarea value={rule.desc} onChange={e => handleRuleChange(idx, 'desc', e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "60px", fontFamily: "inherit" }} />
-                                    </div>
-                                ))}
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <button onClick={addRule} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Nieuwe Regel Toevoegen</button>
-                                    <button onClick={handleSaveRules} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Alle Regels Opslaan</button>
-                                </div>
+                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>🤖 Chatbot Kennisbank</h2>
+                            <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Alles wat je hier invoert wordt als extra context meegegeven aan de Digitale Conciërge. Hoe meer detail, hoe beter de chatbot kan antwoorden.</p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                <textarea
+                                    value={chatbotContext}
+                                    onChange={e => setChatbotContext(e.target.value)}
+                                    style={{ width: "100%", padding: "12px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "200px", fontFamily: "inherit", fontSize: "0.95rem", lineHeight: "1.5" }}
+                                    placeholder="Bijv: De sauna mag alleen aan tussen 16:00 en 22:00. De sleutel van het schuurtje zit onder de bloempot. Dekens en kussens liggen in de gang-kast..."
+                                />
+                                <button onClick={handleSaveChatbotContext} disabled={isSaving} style={{ alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                             </div>
                         </div>
 

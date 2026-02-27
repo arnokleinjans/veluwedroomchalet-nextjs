@@ -26,12 +26,13 @@ export async function fetchAdminData() {
     return await getAppData();
 }
 
-export async function updatePropertyInfo(name: string, hostName: string, phone: string) {
+export async function updatePropertyInfo(name: string, hostName: string, phone: string, subtitle: string) {
     noStore();
     const appData = await getAppData();
     const updatedData = { ...appData };
 
     updatedData.property.name = name;
+    updatedData.property.subtitle = subtitle;
     updatedData.property.host.name = hostName;
     updatedData.property.host.phone = phone;
 
@@ -56,6 +57,51 @@ export async function updateRules(newRules: { title: string, desc: string }[]) {
 
     updatedData.rules = newRules;
 
+    return await saveToFile(updatedData);
+}
+
+export async function updateHeaderImage(headerImage: string) {
+    noStore();
+    const appData = await getAppData();
+    const updatedData = { ...appData };
+
+    updatedData.property.headerImage = headerImage;
+    return await saveToFile(updatedData);
+}
+
+export async function updateInsights(newInsights: any[]) {
+    noStore();
+    const appData = await getAppData();
+    const updatedData = { ...appData };
+
+    updatedData.insights = newInsights;
+    return await saveToFile(updatedData);
+}
+
+export async function updateVideos(newVideos: any[]) {
+    noStore();
+    const appData = await getAppData();
+    const updatedData = { ...appData };
+
+    updatedData.videos = newVideos;
+    return await saveToFile(updatedData);
+}
+
+export async function updateRestaurants(newRestaurants: any[]) {
+    noStore();
+    const appData = await getAppData();
+    const updatedData = { ...appData };
+
+    updatedData.restaurants = newRestaurants;
+    return await saveToFile(updatedData);
+}
+
+export async function updateChatbotContext(context: string) {
+    noStore();
+    const appData = await getAppData();
+    const updatedData = { ...appData };
+
+    updatedData.chatbotContext = context;
     return await saveToFile(updatedData);
 }
 

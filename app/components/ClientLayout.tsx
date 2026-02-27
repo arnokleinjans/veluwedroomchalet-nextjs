@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { parseTemplateString } from "../utils/templateParser";
 
-export default function ClientLayout({ children, basePath = "", appData }: { children: React.ReactNode, basePath?: string, appData: any }) {
+export default function ClientLayout({ children, basePath = "", appData, booking = null }: { children: React.ReactNode, basePath?: string, appData: any, booking?: any }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [accessCode, setAccessCode] = useState("");
     const [error, setError] = useState(false);
@@ -58,9 +59,11 @@ export default function ClientLayout({ children, basePath = "", appData }: { chi
     // Determine if we are on the home page of the current booking
     const isHomePage = pathname === basePath || pathname === `${basePath}/`;
 
+    const subtitle = parseTemplateString(appData.property.subtitle || "Welkom terug", booking);
+
     // Determine the page title for the compact top bar
-    let pageTitle = "Welkom terug";
-    if (pathname.includes("/info")) pageTitle = "Info & Regels";
+    let pageTitle = subtitle;
+    if (pathname.includes("/info")) pageTitle = "Videoinstructies";
     else if (pathname.includes("/omgeving")) pageTitle = "In de Omgeving";
     else if (pathname.includes("/chat")) pageTitle = "Digitale Conciërge";
 
@@ -70,7 +73,7 @@ export default function ClientLayout({ children, basePath = "", appData }: { chi
                 <header className="app-header" style={{ backgroundImage: `url('/${appData.property.headerImage}')` }}>
                     <div className="header-overlay">
                         <div className="welcome-text">
-                            <p className="greeting" id="greeting-text">Welkom terug</p>
+                            <p className="greeting" id="greeting-text">{subtitle}</p>
                             <h1 id="property-name">{appData.property.name}</h1>
                         </div>
                     </div>
@@ -93,8 +96,8 @@ export default function ClientLayout({ children, basePath = "", appData }: { chi
                 </Link>
                 <Link href={`${basePath}/info`} className={`nav-item ${pathname === `${basePath}/info` ? "active" : ""}`} prefetch={false}>
                     {/* @ts-ignore */}
-                    <ion-icon name="information-circle-outline"></ion-icon>
-                    <span>Info & Regels</span>
+                    <ion-icon name="videocam-outline"></ion-icon>
+                    <span>Videoinstructies</span>
                 </Link>
                 <Link href={`${basePath}/omgeving`} className={`nav-item ${pathname === `${basePath}/omgeving` ? "active" : ""}`} prefetch={false}>
                     {/* @ts-ignore */}
@@ -104,7 +107,7 @@ export default function ClientLayout({ children, basePath = "", appData }: { chi
                 <Link href={`${basePath}/chat`} className={`nav-item ${pathname === `${basePath}/chat` ? "active" : ""}`} prefetch={false}>
                     {/* @ts-ignore */}
                     <ion-icon name="chatbubbles-outline"></ion-icon>
-                    <span>Conciërge</span>
+                    <span>Digitale Conciërge</span>
                 </Link>
             </nav>
         </div>

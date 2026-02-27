@@ -36,6 +36,7 @@ const defaultAppData = {
     ],
     "property": {
         "name": "Veluwe Droom Chalet",
+        "subtitle": "Welkom terug",
         "headerImage": "images/Boshuisje.jpg",
         "wifi": {
             "network": "Wegwezen",
@@ -101,7 +102,8 @@ const defaultAppData = {
             "subtitle": "Check onze lokale restaurant tips!",
             "action": "none"
         }
-    ]
+    ],
+    "chatbotContext": ""
 };
 
 // Main function to retrieve data from Vercel KV

@@ -13,7 +13,7 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Great Stay - Veluwe Droomchalet",
+  title: "Veluwe Droomchalet",
   description: "Digitale Conciërge voor uw verblijf.",
 };
 

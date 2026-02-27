@@ -32,7 +32,7 @@ export default async function BookingLayout({
 
     return (
         <BookingProvider booking={bookingInfo} appData={appData}>
-            <ClientLayout basePath={`/b/${bookingInfo.id}`} appData={appData}>
+            <ClientLayout basePath={`/b/${bookingInfo.id}`} appData={appData} booking={bookingInfo}>
                 {children}
             </ClientLayout>
         </BookingProvider>

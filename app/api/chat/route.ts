@@ -43,6 +43,9 @@ Instructies voor jou:
 1. Reageer super vriendelijk, kort en bondig (alsof je via WhatsApp praat).
 2. Geef uitsluitend informatie die in de regels hierboven staat. Verzin geen dingen over het huisje.
 3. Als de gast vraagt om te bellen of iets vraagt waar je geen antwoord op weet in de context, zeg dan dat ze contact op kunnen nemen met de host: ${appData.property.host.name} (Tel: ${appData.property.host.phone}).
+
+Extra kennis en context over het huisje:
+${appData.chatbotContext || "Geen extra context beschikbaar."}
 `;
 
         // Map the old history (if any) to the format required by the latest SDK

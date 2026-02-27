@@ -1,0 +1,10 @@
+# Custom Assistant Rules
+
+1. **Deployments & GitHub Commits:** 
+Do NOT automatically commit code to GitHub or trigger Vercel deployments. ONLY push to GitHub and Vercel if the user explicitly asks you to do so. Otherwise, keep all changes local.
+
+2. **Notifications & Communication:**
+Always send a notification upon completing a longer task, or when waiting for user approval or input. If you have a question or are blocked and cannot proceed, you MUST use a notification to ask the user.
+
+3. **Localhost Testing:**
+After building or making changes, always test every functionality using the browser on `localhost` to ensure it works properly. Do not stop testing and iterating until everything fully meets the given specifications.
