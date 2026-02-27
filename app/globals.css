@@ -55,15 +55,16 @@ h3 {
     background-color: var(--bg-color);
     width: 100%;
     max-width: 414px;
+    height: 100dvh;
     height: 100vh;
-    max-height: 100dvh;
+    /* fallback for older browsers */
+    height: 100dvh;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
     border-radius: 0;
-    /* Flat flush on mobile */
 }
 
 @media (min-width: 415px) {
@@ -338,7 +339,7 @@ h3 {
 
 /* Bottom Nav */
 .bottom-nav {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
@@ -349,7 +350,9 @@ h3 {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    z-index: 10;
+    z-index: 100;
+    max-width: 414px;
+    margin: 0 auto;
 }
 
 .nav-item {
