@@ -40,9 +40,16 @@ body {
     color: var(--foreground);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
+}
+
+@media (min-width: 415px) {
+    body {
+        align-items: center;
+    }
 }
 
 h1,
