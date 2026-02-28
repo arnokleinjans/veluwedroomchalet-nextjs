@@ -1,6 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="208" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/>
-  <circle cx="176" cy="176" r="24" fill="currentColor"/>
-  <circle cx="256" cy="128" r="24" fill="currentColor"/>
-  <circle cx="256" cy="224" r="24" fill="currentColor"/>
+  <!-- Bowling Ball -->
+  <circle cx="160" cy="320" r="140" fill="currentColor"/>
+  <circle cx="100" cy="260" r="24" fill="white" transform="rotate(-15, 100, 260)"/>
+  <circle cx="160" cy="220" r="24" fill="white"/>
+  <circle cx="200" cy="270" r="24" fill="white"/>
+
+  <!-- Bowling Pin -->
+  <path d="M400,80 C360,80 340,140 340,180 C340,240 310,280 310,360 C310,440 340,480 400,480 C460,480 490,440 490,360 C490,280 460,240 460,180 C460,140 440,80 400,80 Z" fill="none" stroke="currentColor" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Strepen op de kegel -->
+  <rect x="345" y="160" width="110" height="24" fill="currentColor"/>
+  <rect x="345" y="210" width="110" height="24" fill="currentColor"/>
 </svg>
