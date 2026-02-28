@@ -10,7 +10,7 @@ export default async function Omgeving({ params }: { params: { bookingId: string
 
     const appData = await getAppData();
     const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
-    const items = appData.omgeving || appData.restaurants || [];
+    const items = (appData as any).omgeving || (appData as any).restaurants || [];
 
     return (
         <div className="tab-content active" id="omgeving-tab">

@@ -37,7 +37,7 @@ Huisregels:
 ${appData.rules.map(r => `- ${r.title}: ${r.desc}`).join('\n')}
 
 Tips in de omgeving:
-${(appData.omgeving || appData.restaurants || []).map((r: any) => `- ${r.name}: ${r.desc}`).join('\n')}
+${((appData as any).omgeving || (appData as any).restaurants || []).map((r: any) => `- ${r.name}: ${r.desc}`).join('\n')}
 
 Instructies voor jou:
 1. Reageer super vriendelijk, kort en bondig (alsof je via WhatsApp praat).
