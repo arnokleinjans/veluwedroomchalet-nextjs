@@ -507,3 +507,25 @@ h3 {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     z-index: 2001;
 }
+
+/* Rich content styles (Omgeving detail page) */
+.rich-content { line-height: 1.7 !important; color: var(--text-primary) !important; }
+.rich-content h3 { font-size: 1.1rem !important; color: var(--primary-color) !important; margin: 16px 0 6px !important; font-weight: bold !important; }
+.rich-content h4 { font-size: 1rem !important; color: #555 !important; margin: 12px 0 4px !important; font-weight: bold !important; }
+.rich-content p { margin: 6px 0 !important; }
+.rich-content ul { padding-left: 20px !important; margin: 6px 0 !important; list-style-type: disc !important; }
+.rich-content ol { padding-left: 20px !important; margin: 6px 0 !important; list-style-type: decimal !important; }
+.rich-content li { display: list-item !important; margin-bottom: 4px !important; }
+.rich-content li p { display: inline !important; margin: 0 !important; }
+.rich-content a { color: var(--primary-color) !important; text-decoration: underline !important; }
+.rich-content table { border-collapse: collapse !important; width: 100% !important; margin: 12px 0 !important; font-size: 0.95rem !important; display: table !important; }
+.rich-content thead { display: table-header-group !important; }
+.rich-content tbody { display: table-row-group !important; }
+.rich-content tr { display: table-row !important; }
+.rich-content th, .rich-content td { border: 1px solid #ddd !important; padding: 8px 12px !important; text-align: left !important; display: table-cell !important; }
+.rich-content th { background-color: #f0efe8 !important; font-weight: bold !important; color: var(--primary-color) !important; }
+.rich-content strong { font-weight: bold !important; }
+.rich-content em { font-style: italic !important; }
+.rich-content blockquote { border-left: 3px solid var(--primary-color) !important; padding-left: 12px !important; margin: 8px 0 !important; color: #555 !important; font-style: italic !important; }
+.rich-content hr { border: none !important; border-top: 2px solid #ddd !important; margin: 12px 0 !important; }
+.rich-content mark { border-radius: 3px; padding: 1px 3px; }

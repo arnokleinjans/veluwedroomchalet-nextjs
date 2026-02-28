@@ -15,5 +15,5 @@ export default async function Info({ params }: { params: { bookingId: string } }
     const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
 
     // 3. Pass serialized data JSON to the React client handler
-    return <InfoClient appData={appData} booking={booking} />;
+    return <InfoClient appData={appData} booking={booking} basePath={`/b/${bookingId}`} />;
 }

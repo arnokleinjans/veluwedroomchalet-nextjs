@@ -8,3 +8,20 @@ Always send a notification upon completing a longer task, or when waiting for us
 
 3. **Localhost Testing:**
 After building or making changes, always test every functionality using the browser on `localhost` to ensure it works properly. Do not stop testing and iterating until everything fully meets the given specifications.
+
+4. **Documentation & Obsidian Sync:**
+Project documentation (walkthroughs, logs, tasks) is stored in the AI "brain" folder (`/Users/kleinjansarno/.gemini/antigravity/brain/`). When the user asks for documentation, latest progress, or project logs, verify these locations and sync the latest versions to the user's Obsidian vault at: `/Users/kleinjansarno/Obsidian/Prive/Prive/Veluwedroomchalet/`.
+
+5. **Real Screenshots for Documentation (Puppeteer method):**
+When the user asks for screenshots of the running app (e.g. for a manual or handleiding), use the following approach — do NOT use the browser subagent as it does not work on macOS:
+   1. Ensure the local dev server is running (`npm run dev` in the project folder). If not, start it as a background command and wait for it to be ready on `http://localhost:3000`.
+   2. Install puppeteer if needed: `npm install puppeteer --save-dev` in the project folder.
+   3. Write a script at `scripts/take_screenshots.mjs` that:
+      - Launches a headless browser via `puppeteer.launch({ headless: true })`.
+      - Sets viewport to `1280x900`.
+      - Navigates to `http://localhost:3000/beheer-vlp-x9q2w` and takes a screenshot of the login page.
+      - Types the PIN (currently `2026`) into the first input and clicks the first button to log in.
+      - Waits ~3 seconds for the page to load, then takes screenshots while scrolling down in increments to capture each section.
+      - Saves all screenshots directly to `/Users/kleinjansarno/Obsidian/Prive/Prive/Veluwedroomchalet/`.
+   4. Run the script with `node scripts/take_screenshots.mjs`.
+   5. After all screenshots are saved, write the handleiding/manual markdown file to the Obsidian vault, embedding the screenshots using relative paths (e.g. `![Login](screen_01_login.png)`).

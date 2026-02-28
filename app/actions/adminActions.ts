@@ -87,12 +87,12 @@ export async function updateVideos(newVideos: any[]) {
     return await saveToFile(updatedData);
 }
 
-export async function updateRestaurants(newRestaurants: any[]) {
+export async function updateOmgeving(newOmgeving: any[]) {
     noStore();
     const appData = await getAppData();
     const updatedData = { ...appData };
 
-    updatedData.restaurants = newRestaurants;
+    updatedData.omgeving = newOmgeving;
     return await saveToFile(updatedData);
 }
 

@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import {
     updatePropertyInfo, updateWifi, addBooking, removeBooking, fetchAdminData,
-    updateHeaderImage, updateInsights, updateVideos, updateRestaurants,
+    updateHeaderImage, updateInsights, updateVideos, updateOmgeving,
     updateChatbotContext
 } from "../actions/adminActions";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import RichTextEditor from "../components/RichTextEditor";
 
 function SortableItem({ id, children }: { id: string, children: React.ReactNode }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
@@ -54,7 +55,7 @@ export default function AdminPage() {
     // Dynamic Arrays
     const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string }[]>([]);
-    const [restaurants, setRestaurants] = useState<{ name: string, desc: string, url: string }[]>([]);
+    const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
 
     // Bookings states
@@ -86,7 +87,7 @@ export default function AdminPage() {
 
             setInsights(data.insights || []);
             setVideos(data.videos || []);
-            setRestaurants(data.restaurants || []);
+            setOmgeving(data.omgeving || data.restaurants || []);
             setBookings(data.bookings || []);
             setChatbotContext(data.chatbotContext || "");
         });
@@ -125,7 +126,7 @@ export default function AdminPage() {
     const handleSaveWifi = () => runSaveAction(() => updateWifi(wifiNetwork, wifiPass), "WiFi succesvol opgeslagen!");
     const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!");
     const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!");
-    const handleSaveRestaurants = () => runSaveAction(() => updateRestaurants(restaurants), "Omgeving succesvol opgeslagen!");
+    const handleSaveOmgeving = () => runSaveAction(() => updateOmgeving(omgeving), "Omgeving succesvol opgeslagen!");
     const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
 
     const sensors = useSensors(
@@ -377,32 +378,46 @@ export default function AdminPage() {
                         <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
                             <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>🌲 Omgeving TIPS</h2>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(restaurants, setRestaurants)}>
-                                    <SortableContext items={restaurants.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
-                                        {restaurants.map((rest, idx) => (
-                                            <SortableItem key={`rest-${idx}`} id={`item-${idx}`}>
-                                                <button onClick={() => setRestaurants(restaurants.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(omgeving, setOmgeving)}>
+                                    <SortableContext items={omgeving.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
+                                        {omgeving.map((tip, idx) => (
+                                            <SortableItem key={`omg-${idx}`} id={`item-${idx}`}>
+                                                <button onClick={() => setOmgeving(omgeving.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
                                                 <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
+                                                    <div style={{ flex: 2 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel</label>
+                                                        <input type="text" value={tip.name} onChange={e => { const n = [...omgeving]; n[idx].name = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                                    </div>
+                                                    <div style={{ flex: 2 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
+                                                        <select value={tip.image || ""} onChange={e => { const n = [...omgeving]; n[idx].image = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
+                                                            <option value="">-- Kies een afbeelding --</option>
+                                                            {availableImages.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
                                                     <div style={{ flex: 1 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel (bijv. Restaurant de Koperen Pot)</label>
-                                                        <input type="text" value={rest.name} onChange={e => { const n = [...restaurants]; n[idx].name = e.target.value; setRestaurants(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Website link (optioneel)</label>
+                                                        <input type="text" value={tip.url || ""} onChange={e => { const n = [...omgeving]; n[idx].url = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="https://..." />
                                                     </div>
                                                     <div style={{ flex: 1 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Website URL</label>
-                                                        <input type="text" value={rest.url} onChange={e => { const n = [...restaurants]; n[idx].url = e.target.value; setRestaurants(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="https://..." />
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>📍 Adres (optioneel)</label>
+                                                        <input type="text" value={tip.adres || ""} onChange={e => { const n = [...omgeving]; n[idx].adres = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Straat 1, Plaatsnaam" />
                                                     </div>
                                                 </div>
 
                                                 <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst / Omschrijving</label>
-                                                <textarea value={rest.desc} onChange={e => { const n = [...restaurants]; n[idx].desc = e.target.value; setRestaurants(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "60px", fontFamily: "inherit" }} />
+                                                <RichTextEditor content={tip.desc} onChange={html => { const n = [...omgeving]; n[idx].desc = html; setOmgeving(n); }} />
                                             </SortableItem>
                                         ))}
                                     </SortableContext>
                                 </DndContext>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <button onClick={() => setRestaurants([...restaurants, { name: "Nieuwe Tip", desc: "", url: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
-                                    <button onClick={handleSaveRestaurants} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                    <button onClick={() => setOmgeving([...omgeving, { name: "Nieuwe Tip", desc: "", image: "", url: "", adres: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
+                                    <button onClick={handleSaveOmgeving} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                                 </div>
                             </div>
                         </div>

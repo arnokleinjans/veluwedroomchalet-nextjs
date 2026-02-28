@@ -65,16 +65,20 @@ const defaultAppData = {
             "url": "https://www.youtube.com/watch?v=S1WnqtMAeS4"
         }
     ],
-    "restaurants": [
+    "omgeving": [
         {
             "name": "Pannenkoekenboerderij De Boswachter",
             "desc": "Heerlijk voor de kinderen. 5 minuten fietsen.",
-            "url": "https://www.nu.nl/"
+            "image": "",
+            "url": "https://www.nu.nl/",
+            "adres": ""
         },
         {
             "name": "Bar het suffertje",
             "desc": "testbar",
-            "url": "https://www.nu.nl/"
+            "image": "",
+            "url": "",
+            "adres": ""
         }
     ],
     "insights": [

@@ -36,8 +36,8 @@ Hier zijn de regels en gegevens van het huisje waar je ze mee kunt helpen:
 Huisregels:
 ${appData.rules.map(r => `- ${r.title}: ${r.desc}`).join('\n')}
 
-Restaurants in de buurt:
-${appData.restaurants.map(r => `- ${r.name}: ${r.desc}`).join('\n')}
+Tips in de omgeving:
+${(appData.omgeving || appData.restaurants || []).map((r: any) => `- ${r.name}: ${r.desc}`).join('\n')}
 
 Instructies voor jou:
 1. Reageer super vriendelijk, kort en bondig (alsof je via WhatsApp praat).

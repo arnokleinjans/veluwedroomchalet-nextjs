@@ -1,66 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { parseTemplateString } from "../../../utils/templateParser";
 
-export default function InfoClient({ appData, booking }: { appData: any, booking: any }) {
-    const [videoUrl, setVideoUrl] = useState<string | null>(null);
-
-    const getEmbedUrl = (url: string) => {
-        if (!url) return "";
-        // Basic conversion from regular youtube url to embed url
-        if (url.includes('youtube.com/watch?v=')) {
-            return url.replace('watch?v=', 'embed/');
-        }
-        return url;
-    };
-
+export default function InfoClient({ appData, booking, basePath }: { appData: any, booking: any, basePath: string }) {
     return (
         <div className="tab-content active" id="info-tab">
             <div className="video-card" id="videos-container">
                 {appData.videos.map((video: any, index: number) => (
                     <div key={index} style={{ width: "100%", marginBottom: "20px" }}>
-                        <div
-                            className="video-thumb"
-                            style={{ backgroundImage: `url('/${video.thumb}')` }}
-                            onClick={() => setVideoUrl(getEmbedUrl(video.url))}
-                        >
-                            <div className="play-overlay">
-                                {/* @ts-ignore */}
-                                <ion-icon name="play-circle"></ion-icon>
+                        <Link href={`${basePath}/video/${index}`}>
+                            <div
+                                className="video-thumb"
+                                style={{ backgroundImage: `url('/${video.thumb}')` }}
+                            >
+                                <div className="play-overlay">
+                                    {/* @ts-ignore */}
+                                    <ion-icon name="play-circle"></ion-icon>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                         <h4 style={{ marginTop: "10px", fontFamily: "Nunito, sans-serif", fontSize: "1.1rem" }}>
                             {parseTemplateString(video.title, booking)}
                         </h4>
                     </div>
                 ))}
             </div>
-
-            {videoUrl && (
-                <div className="modal show" onClick={() => setVideoUrl(null)}>
-                    <div className="modal-content" style={{ padding: "15px", width: "95%" }} onClick={(e) => e.stopPropagation()}>
-                        <span
-                            className="close-video-btn"
-                            onClick={() => setVideoUrl(null)}
-                            style={{ position: "absolute", top: "10px", right: "15px", fontSize: "1.8rem", cursor: "pointer", color: "var(--text-secondary)", zIndex: 10 }}
-                        >
-                            &times;
-                        </span>
-                        <h2 style={{ margin: "10px 0 15px", fontSize: "1.2rem", paddingLeft: "10px" }}>Instructie Video</h2>
-                        <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", borderRadius: "8px", background: "#000" }}>
-                            <iframe
-                                id="video-iframe"
-                                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-                                src={videoUrl}
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            ></iframe>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
