@@ -28,7 +28,7 @@ export default async function VideoPage({ params }: { params: { bookingId: strin
         embedUrl = embedUrl.replace("watch?v=", "embed/");
     }
     // Add autoplay parameter
-    embedUrl += (embedUrl.includes("?") ? "&" : "?") + "autoplay=1&rel=0";
+    embedUrl += (embedUrl.includes("?") ? "&" : "?") + "autoplay=1&mute=1&playsinline=1&rel=0";
 
     const title = parseTemplateString(video.title, booking);
 

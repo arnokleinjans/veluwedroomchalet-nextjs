@@ -80,14 +80,14 @@ export default function CinemaPlayer({ embedUrl, title, bookingId }: { embedUrl:
             <div style={{
                 width: "100%",
                 maxWidth: "900px",
-                padding: "0 16px",
+                padding: "0",
             }}>
                 <div style={{
                     position: "relative",
                     paddingBottom: "56.25%",
                     height: 0,
                     overflow: "hidden",
-                    borderRadius: "12px",
+                    borderRadius: "0",
                     boxShadow: "0 0 60px rgba(255,255,255,0.05)",
                 }}>
                     <iframe
@@ -100,7 +100,7 @@ export default function CinemaPlayer({ embedUrl, title, bookingId }: { embedUrl:
                             border: "none",
                         }}
                         src={embedUrl}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         allowFullScreen
                     />
                 </div>
