@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <path d="M112,112L128,448c1.2,34,31,64,64,64h128c33,0,62.8-30,64-64L400,112" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" />
+  <line x1="80" y1="112" x2="432" y2="112" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" />
+  <path d="M192,112V72h0a23.9,23.9,0,0,1,24-24h80a23.9,23.9,0,0,1,24,24v40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" />
+  <line x1="256" y1="176" x2="256" y2="432" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" />
+  <line x1="184" y1="176" x2="192" y2="432" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" />
+  <line x1="328" y1="176" x2="320" y2="432" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" />
+</svg>
