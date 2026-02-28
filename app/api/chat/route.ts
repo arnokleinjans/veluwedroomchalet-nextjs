@@ -36,6 +36,9 @@ Hier zijn de regels en gegevens van het huisje waar je ze mee kunt helpen:
 Huisregels:
 ${appData.rules.map(r => `- ${r.title}: ${r.desc}`).join('\n')}
 
+Informatie over het chalet en park (Home pagina):
+${appData.insights.map(i => `- ${i.title}: ${i.subtitle}`).join('\n')}
+
 Tips in de omgeving:
 ${((appData as any).omgeving || (appData as any).restaurants || []).map((r: any) => `- ${r.name}: ${r.desc}`).join('\n')}
 
