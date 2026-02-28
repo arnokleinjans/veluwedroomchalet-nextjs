@@ -87,7 +87,7 @@ export default function AdminPage() {
 
             setInsights(data.insights || []);
             setVideos(data.videos || []);
-            setOmgeving(data.omgeving || data.restaurants || []);
+            setOmgeving((data as any).omgeving || (data as any).restaurants || []);
             setBookings(data.bookings || []);
             setChatbotContext(data.chatbotContext || "");
         });
