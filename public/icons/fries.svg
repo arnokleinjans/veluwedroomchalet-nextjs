@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- De frites (die achter de zak uitsteken) -->
+  <rect x="200" y="60" width="30" height="180" rx="8" fill="none" stroke="currentColor" stroke-width="32" stroke-linecap="round"/>
+  <rect x="250" y="40" width="30" height="200" rx="8" fill="none" stroke="currentColor" stroke-width="32" stroke-linecap="round"/>
+  <rect x="300" y="70" width="30" height="170" rx="8" fill="none" stroke="currentColor" stroke-width="32" stroke-linecap="round"/>
+  <rect x="340" y="110" width="30" height="140" rx="8" fill="none" stroke="currentColor" stroke-width="32" stroke-linecap="round" transform="rotate(15, 355, 180)"/>
+  <rect x="145" y="100" width="30" height="150" rx="8" fill="none" stroke="currentColor" stroke-width="32" stroke-linecap="round" transform="rotate(-15, 160, 175)"/>
+  
+  <!-- Het frietzakje (de cone) -->
+  <path d="M120,220 L256,480 L392,220 Z" fill="white" stroke="currentColor" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120,220 C120,220 256,260 392,220" fill="none" stroke="currentColor" stroke-width="32" stroke-linecap="round"/>
+</svg>
