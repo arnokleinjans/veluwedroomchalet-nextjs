@@ -39,16 +39,7 @@ export async function updatePropertyInfo(name: string, hostName: string, phone: 
     return await saveToFile(updatedData);
 }
 
-export async function updateWifi(network: string, pass: string) {
-    noStore();
-    const appData = await getAppData();
-    const updatedData = { ...appData };
-
-    updatedData.property.wifi.network = network;
-    updatedData.property.wifi.password = pass;
-
-    return await saveToFile(updatedData);
-}
+// updateWifi removed — WiFi info is now managed as a regular Home item with detailContent
 
 export async function updateRules(newRules: { title: string, desc: string }[]) {
     noStore();
@@ -102,6 +93,16 @@ export async function updateChatbotContext(context: string) {
     const updatedData = { ...appData };
 
     updatedData.chatbotContext = context;
+    return await saveToFile(updatedData);
+}
+
+export async function updateAiSettings(aiPrompt: string, aiMaxChars: number) {
+    noStore();
+    const appData = await getAppData();
+    const updatedData = { ...appData } as any;
+
+    updatedData.aiPrompt = aiPrompt;
+    updatedData.aiMaxChars = aiMaxChars;
     return await saveToFile(updatedData);
 }
 

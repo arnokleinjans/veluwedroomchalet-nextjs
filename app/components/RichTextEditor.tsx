@@ -11,6 +11,7 @@ import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Highlight } from "@tiptap/extension-highlight";
 import { TextAlign } from "@tiptap/extension-text-align";
+import { Image } from "@tiptap/extension-image";
 import { useEffect } from "react";
 
 const btn = (active: boolean) => ({
@@ -43,7 +44,7 @@ const HIGHLIGHTS = [
     { label: "Roze", value: "#fce7f3" },
 ];
 
-function Toolbar({ editor }: { editor: any }) {
+function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
     if (!editor) return null;
 
     const addLink = () => {
@@ -134,11 +135,25 @@ function Toolbar({ editor }: { editor: any }) {
                     <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} style={{ ...btn(false), borderColor: "#d9534f", color: "#d9534f" }}>🗑️ Tabel</button>
                 </>
             )}
+
+            {images && images.length > 0 && (
+                <>
+                    <div style={sep} />
+                    <select
+                        onChange={e => { if (e.target.value) { editor.chain().focus().setImage({ src: `/${e.target.value}`, alt: e.target.value.split('/').pop() }).run(); e.target.value = ""; } }}
+                        style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", cursor: "pointer" }}
+                        defaultValue=""
+                    >
+                        <option value="" disabled>📷 Afbeelding</option>
+                        {images.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
+                    </select>
+                </>
+            )}
         </div>
     );
 }
 
-export default function RichTextEditor({ content, onChange }: { content: string, onChange: (html: string) => void }) {
+export default function RichTextEditor({ content, onChange, images }: { content: string, onChange: (html: string) => void, images?: string[] }) {
     const editor = useEditor({
         immediatelyRender: false,
         extensions: [
@@ -152,6 +167,7 @@ export default function RichTextEditor({ content, onChange }: { content: string,
             Color,
             Highlight.configure({ multicolor: true }),
             TextAlign.configure({ types: ["heading", "paragraph"] }),
+            Image.configure({ inline: false, allowBase64: false }),
         ],
         content: content || "",
         onUpdate: ({ editor }) => {
@@ -168,7 +184,7 @@ export default function RichTextEditor({ content, onChange }: { content: string,
 
     return (
         <div style={{ border: "1px solid #ccc", borderRadius: "8px", overflow: "hidden", backgroundColor: "#fff" }}>
-            <Toolbar editor={editor} />
+            <Toolbar editor={editor} images={images} />
             <EditorContent
                 editor={editor}
                 style={{ padding: "12px", minHeight: "150px" }}

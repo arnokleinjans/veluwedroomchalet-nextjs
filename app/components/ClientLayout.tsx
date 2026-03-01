@@ -63,7 +63,8 @@ export default function ClientLayout({ children, basePath = "", appData, booking
 
     // Determine the page title for the compact top bar
     let pageTitle = subtitle;
-    if (pathname.includes("/info")) pageTitle = "Videoinstructies";
+    if (pathname.includes("/info/home/")) pageTitle = subtitle;
+    else if (pathname.includes("/info")) pageTitle = "Videoinstructies";
     else if (pathname.includes("/omgeving")) pageTitle = "In de Omgeving";
     else if (pathname.includes("/chat")) pageTitle = "Digitale Conciërge";
 

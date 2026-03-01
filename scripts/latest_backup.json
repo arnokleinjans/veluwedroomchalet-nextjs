@@ -1,0 +1,156 @@
+{
+  "accessCode": "VELUWE2026",
+  "bookings": [
+    {
+      "id": "KITTY-7R9X",
+      "guestName": "Kitty van der Pijll",
+      "checkIn": "2026-02-27",
+      "checkOut": "2026-05-03"
+    }
+  ],
+  "property": {
+    "name": "Veluwe Droom Chalet",
+    "headerImage": "images/Boshuisje.jpg",
+    "wifi": {
+      "network": "Wegwezen",
+      "password": "BomenZijnFijn2026"
+    },
+    "host": {
+      "name": "Arno & Kitty",
+      "phone": "+31653238603",
+      "avatar": "https://ui-avatars.com/api/?name=Arno&background=4A5D23&color=fff&rounded=true"
+    },
+    "subtitle": "Welkom @naamgast"
+  },
+  "rules": [
+    {
+      "title": "Afvalscheidingkje",
+      "desc": "Groenbak achter het schuurtje. Papier in de blauwe bak. Restafval in de grijze bakje"
+    },
+    {
+      "title": "test",
+      "desc": "test..."
+    }
+  ],
+  "videos": [
+    {
+      "title": "Test2",
+      "thumb": "thumbnails/video-placeholder.jpg",
+      "url": "https://www.youtube.com/watch?v=S1WnqtMAeS4"
+    },
+    {
+      "title": "vakantiehuisjes",
+      "thumb": "images/Boshuisje.jpg",
+      "url": "https://www.youtube.com/watch?v=S1WnqtMAeS4"
+    }
+  ],
+  "restaurants": [
+    {
+      "name": "Bar het suffertje",
+      "desc": "testbar",
+      "url": "https://www.nu.nl/"
+    },
+    {
+      "name": "Pannenkoekenboerderij De Boswachter",
+      "desc": "Heerlijk voor de kinderen. 5 minuten fietsen.",
+      "url": "https://www.nu.nl/"
+    },
+    {
+      "name": "Nieuwe Tip",
+      "desc": "Tip",
+      "url": "https://www.nu.nl/"
+    }
+  ],
+  "insights": [
+    {
+      "title": "Verblijf",
+      "subtitle": "De reservering bij Veluwe Droom Chalet is gemaakt van @aankomst tot @vertrek.",
+      "icon": "icons/info.svg",
+      "action": "none"
+    },
+    {
+      "icon": "icons/clock.svg",
+      "title": "In- en uitchecken",
+      "subtitle": "Inchecken kan op @aankomst vanaf 15.00 uur en gaat contactloos. Het sleutelkastje hangt aan het hek. Het uitchecken is @vertrek uiterlijk om 10.30 uur en is eveneens contactloos. ",
+      "action": "none"
+    },
+    {
+      "icon": "icons/key.svg",
+      "title": "Sleutelkastje",
+      "subtitle": "Het sleutelkastje hangt aan het hek rechts van het chalet. De code om het sleutelkastje te openen is xxxx. Hier Graag bij vertrek de sleutel weer terughangen in het sleutelkastje en het deurtje vergrendelen.",
+      "action": "none"
+    },
+    {
+      "icon": "icons/cutlery.svg",
+      "title": "Park-en Chaletregels",
+      "subtitle": "Om het verblijf voor iedereen aangenaam te maken, gelden de volgende park- en chaletregels op Recreatiepark 't Veluws Hof en in het Veluwe Droom Chalet. Klik hier voor de regels",
+      "action": "none"
+    },
+    {
+      "icon": "icons/wifi.svg",
+      "title": "Wifi",
+      "subtitle": "Wees welkom om gebruik te maken van ons gratis WIFI netwerk. Klik hier voor de code en het wachtwoord.",
+      "action": "wifi-modal"
+    },
+    {
+      "title": "Openingstijden Receptie",
+      "subtitle": "De receptie van het park is direct bij de entree. \nDe openingstijden zijn:\nMaandag tot en met vrijdag van 9.00 tot 17.00 uur.\nZaterdag van 10.00 tot 16.30 uur.\nZondag van 12.00 tot 16.00 uur.\n\nDe receptie is bereikbaar onder telefoon: 055-3781777.\nBij brand of EHBO altijd de receptie waarschuwen!\n",
+      "icon": "icons/phone.svg",
+      "action": "none"
+    },
+    {
+      "title": "Wasserette",
+      "subtitle": "De wasserette is van 1 april tot 1 oktober dagelijks geopend van 10.00 tot 21.00 uur en is voorzien van 2 wasmachines en 2 drogers. Het wasmiddel zit al in de machine en kan niet los worden toegevoegd.  Betaling alleen met muntgeld.",
+      "icon": "icons/washing-machine.svg",
+      "action": "none"
+    },
+    {
+      "title": "Huisvuil",
+      "subtitle": "Iedereen geniet toch van een schone omgeving. Daarom vragen wij je het huisvuil zelf te deponeren bij:\nBlauwgraslaan, aan de achterzijde van het witte huis en/of\nHet kampeerterrein, C-veld.\nHartelijk dank!",
+      "icon": "icons/trash.svg",
+      "action": "none"
+    },
+    {
+      "title": "Restaurant de Ruggestee",
+      "subtitle": "Op Recreatiepark 't Veluws Hof bevindt zich Restaurant de Ruggestee; een echte aanrader! U kunt hier heerlijk culinair genieten.\nHet restaurant is geopend op donderdag tot en met zondag vanaf 12.00 uur.\nDe keuken is geopend tot 20.00 uur.\nTijdens vakanties zijn er aangepaste (verruimde) openingstijden. Deze worden ook in deze app gepubliceerd.",
+      "icon": "icons/phone.svg",
+      "action": "none"
+    },
+    {
+      "title": "Snackbar De Friterie en bar Het Witte Huis",
+      "subtitle": "Recreatiepark 't Veluws Hof heeft - naast een culinair restaurant - ook snackbar De Friterie en kantine/bar Het Witte Huis. Schuif gezellig aan voor een hapje en drankje. Zowel de snackbar als de bar zijn geopend van1 april tot 1 oktober.",
+      "icon": "icons/fries.svg",
+      "action": "none"
+    },
+    {
+      "title": "Bowling",
+      "subtitle": "Op zoek naar een gezellig én actief uitje tijdens je verblijf? Bij De Ruggestee zit je altijd goed. Met zes moderne bowlingbanen is er volop ruimte voor een ontspannen potje plezier – of je nu komt met vrienden, familie of voor een kinderfeestje.\n\nVoor kinderen is er extra fun met disco bowlen: muziek, lichteffecten en een echte discobal maken het helemaal af. Dankzij automatische bumpers, lichtere ballen en handige rekjes kan iedereen meedoen en scoren.\n\nJe huurt een baan per 55 minuten (vanaf het hele uur . Reserveren kan eenvoudig telefonisch via 055 - 378 1666 of tijdens de openingstijden op locatie.\n\nKortom: plezier gegarandeerd – en wie weet gooi jij die perfecte strike!\n",
+      "icon": "icons/bowling.svg",
+      "action": "none"
+    }
+  ],
+  "chatbotContext": "EXTRA GEDRAGREGELS:\n- gebruik veel icoontjes smileys. De mensen gaan vakantie vieren dus het is feest!\n\nSauna: \ner is een sauna om de hoek\n\nFietsverhuur:\nOp de receptie verhuren wij de fietsen van Rooth66 uit Hoenderloo, de fietsen zijn tijdens de openingstijden van de receptie op te halen en terug te brengen.\nZo zijn er o.a. dames en herenfietsen voorzien van 7 versnellingen voor slechts € 10,00 per dag, uiteraard ook voor een week en midweek. Vanaf 7 dagen ontvangt u 15% korting op de totale huurprijs. Genoemde prijzen zijn dagprijzen inclusief BTW. De fietsen dienen dezelfde dag voor sluitingstijd weer ingeleverd te worden. \n\n",
+  "omgeving": [
+    {
+      "name": "Test",
+      "desc": "<h3 style=\"text-align: center;\"><strong>Functies Geschikt voor</strong></h3><ul><li><p style=\"text-align: center;\">Vegetariërs <strong>Lunch</strong>,</p></li><li><p><mark data-color=\"#fef9c3\" style=\"background-color: rgb(254, 249, 195); color: inherit;\">Diner Service</mark> aan tafel</p></li></ul><ul><li><p><span style=\"color: rgb(192, 57, 43);\">Voor het hele <em>gezin</em></span></p></li></ul><hr><blockquote><p>Dit is een citaat</p></blockquote><hr><p style=\"text-align: right;\">Dit is rechts</p><p style=\"text-align: right;\"></p><p style=\"text-align: left;\">Dit is links</p><p style=\"text-align: left;\"></p><table style=\"min-width: 50px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p>Openingstijden</p></th><th colspan=\"1\" rowspan=\"1\"><p></p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>maandag</p></td><td colspan=\"1\" rowspan=\"1\"><p>gesloten</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Dinsdag</p></td><td colspan=\"1\" rowspan=\"1\"><p>10:00-17:00</p></td></tr></tbody></table><p></p>",
+      "url": "",
+      "image": "images/Restaurant in een oogopslag.jpg",
+      "adres": "De Smaak van Hoenderloo krimweg"
+    },
+    {
+      "name": "De Smaak van Hoenderloo",
+      "desc": "Heerlijk voor de kinderen. 5 minuten fietsen.",
+      "url": "https://www.desmaakvanhoenderloo.nl/",
+      "image": "images/Restaurant in een oogopslag.jpg",
+      "adres": "De Smaak van Hoenderloo krimweg"
+    },
+    {
+      "name": "Nieuwe Tip",
+      "desc": "Tip",
+      "url": "https://www.nu.nl/"
+    }
+  ],
+  "aiPrompt": "Je bent een perfecte assistent die websites samenvat voor een vakantie-app. Maak een aantrekkelijke, beknopte samenvatting in HTML-opmaak geschikt voor vakantiegasten.\n\nGebruik deze HTML-elementen:\n- <h3> voor kopjes\n- <p> voor alinea's\n- <ul><li> voor opsommingen\n- <strong> voor belangrijke woorden\n- <em> voor sfeervolle beschrijvingen\n\nHoud het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nederlands.",
+  "aiMaxChars": 500
+}

@@ -1,7 +1,8 @@
 # Custom Assistant Rules
 
 1. **Deployments & GitHub Commits:** 
-Do NOT automatically commit code to GitHub or trigger Vercel deployments. ONLY push to GitHub and Vercel if the user explicitly asks you to do so. Otherwise, keep all changes local.
+   Do NOT automatically commit code to GitHub or trigger Vercel deployments. The Vercel "Edge Requests" limit is strictly 1 million per month on the Hobby plan; every deployment and subsequent test browse consumes these resources. ONLY push to GitHub/Vercel if the user explicitly asks for a production update. Keep all development and testing strictly on `localhost`.
+
 
 2. **Notifications & Communication:**
 Always send a notification upon completing a longer task, or when waiting for user approval or input. If you have a question or are blocked and cannot proceed, you MUST use a notification to ask the user.
@@ -25,3 +26,12 @@ When the user asks for screenshots of the running app (e.g. for a manual or hand
       - Saves all screenshots directly to `/Users/kleinjansarno/Obsidian/Prive/Prive/Veluwedroomchalet/`.
    4. Run the script with `node scripts/take_screenshots.mjs`.
    5. After all screenshots are saved, write the handleiding/manual markdown file to the Obsidian vault, embedding the screenshots using relative paths (e.g. `![Login](screen_01_login.png)`).
+
+6. **Database Backup (Vercel KV method):**
+When the user asks for a backup of the database (JSON backup), follow this procedure:
+   1. Read credentials (`KV_REST_API_URL` and `KV_REST_API_TOKEN`) from `.env` or `.env.local`.
+   2. Create a temporary script at `scripts/backup_kv.mjs` using `@upstash/redis` to fetch the key `veluwe_app_data`.
+   3. Run the script with `node scripts/backup_kv.mjs` and capture the JSON output.
+   4. Save the full JSON output to `/Users/kleinjansarno/Antigravity/veluwedroomchalet/scripts/latest_backup.json`.
+   5. Provide the user with the full absolute path and a snippet of the JSON in the chat.
+   6. Remove the temporary script `scripts/backup_kv.mjs` after completion.

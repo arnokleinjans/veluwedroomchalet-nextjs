@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import {
-    updatePropertyInfo, updateWifi, addBooking, removeBooking, fetchAdminData,
+    updatePropertyInfo, addBooking, removeBooking, fetchAdminData,
     updateHeaderImage, updateInsights, updateVideos, updateOmgeving,
-    updateChatbotContext
+    updateChatbotContext, updateAiSettings
 } from "../actions/adminActions";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
@@ -49,14 +49,24 @@ export default function AdminPage() {
     const [phone, setPhone] = useState("");
     const [headerImage, setHeaderImage] = useState("");
     const [subtitle, setSubtitle] = useState("");
-    const [wifiNetwork, setWifiNetwork] = useState("");
-    const [wifiPass, setWifiPass] = useState("");
 
     // Dynamic Arrays
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
+    const [aiPrompt, setAiPrompt] = useState(`Je bent een assistent die websites samenvat voor een vakantie-app. Maak een aantrekkelijke, beknopte samenvatting in HTML-opmaak geschikt voor vakantiegasten.
+
+Gebruik deze HTML-elementen:
+- <h3> voor kopjes
+- <p> voor alinea's
+- <ul><li> voor opsommingen
+- <strong> voor belangrijke woorden
+- <em> voor sfeervolle beschrijvingen
+
+Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nederlands.`);
+    const [summarizingIndex, setSummarizingIndex] = useState<number | null>(null);
+    const [aiMaxChars, setAiMaxChars] = useState(4000);
 
     // Bookings states
     const [bookings, setBookings] = useState<{ id: string, guestName: string, checkIn: string, checkOut: string }[]>([]);
@@ -82,14 +92,14 @@ export default function AdminPage() {
             setHeaderImage(data.property.headerImage || "");
             setSubtitle(data.property.subtitle || "Welkom terug");
 
-            setWifiNetwork(data.property.wifi.network);
-            setWifiPass(data.property.wifi.password);
+            setInsights((data.insights || []).map((item: any) => ({ ...item, detailContent: item.detailContent || "" })));
 
-            setInsights(data.insights || []);
             setVideos(data.videos || []);
             setOmgeving((data as any).omgeving || (data as any).restaurants || []);
             setBookings(data.bookings || []);
             setChatbotContext(data.chatbotContext || "");
+            if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
+            if ((data as any).aiMaxChars) setAiMaxChars((data as any).aiMaxChars);
         });
     }, []);
 
@@ -123,11 +133,37 @@ export default function AdminPage() {
         return await updatePropertyInfo(propName, hostName, phone, subtitle);
     }, "Algemene info succesvol opgeslagen!");
 
-    const handleSaveWifi = () => runSaveAction(() => updateWifi(wifiNetwork, wifiPass), "WiFi succesvol opgeslagen!");
     const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!");
     const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!");
-    const handleSaveOmgeving = () => runSaveAction(() => updateOmgeving(omgeving), "Omgeving succesvol opgeslagen!");
+    const handleSaveOmgeving = () => runSaveAction(async () => {
+        await updateOmgeving(omgeving);
+        return await updateAiSettings(aiPrompt, aiMaxChars);
+    }, "Omgeving succesvol opgeslagen!");
     const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
+
+    const handleAiSummary = async (idx: number) => {
+        const tip = omgeving[idx];
+        if (!tip.url) return;
+        setSummarizingIndex(idx);
+        try {
+            const res = await fetch('/api/summarize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: tip.url, prompt: aiPrompt, maxChars: aiMaxChars }),
+            });
+            const data = await res.json();
+            if (data.error) {
+                alert('❌ ' + data.error);
+            } else {
+                const n = [...omgeving];
+                n[idx].desc = data.summary;
+                setOmgeving(n);
+            }
+        } catch (e) {
+            alert('❌ Er ging iets mis bij het ophalen.');
+        }
+        setSummarizingIndex(null);
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -220,54 +256,56 @@ export default function AdminPage() {
 
                     <div style={{ display: "grid", gap: "30px" }}>
                         {/* Sectie: Boekingen */}
-                        <div style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "20px", backgroundColor: "#fcfefc" }}>
-                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#4A5D23", borderBottom: "2px solid #e5ebe5", paddingBottom: "10px" }}>✨ Gepersonaliseerde Gasten Links</h2>
-                            <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
+                        <details style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "20px", backgroundColor: "#fcfefc" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#4A5D23", borderBottom: "2px solid #e5ebe5", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>✨ Gepersonaliseerde Gasten Links</summary>
+                            <div style={{ marginTop: "15px" }}>
+                                <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
 
-                            <div style={{ marginBottom: "20px", backgroundColor: "white", padding: "15px", borderRadius: "8px", border: "1px solid #ccc" }}>
-                                <h3 style={{ fontSize: "1rem", marginBottom: "10px", color: "#333" }}>Nieuwe Link Aanmaken</h3>
-                                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                                    <div style={{ flex: "1 1 200px" }}>
-                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
-                                        <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
-                                    </div>
-                                    <div style={{ flex: "1 1 120px" }}>
-                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Aankomst</label>
-                                        <input type="date" value={newCheckIn} onChange={e => setNewCheckIn(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                    </div>
-                                    <div style={{ flex: "1 1 120px" }}>
-                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Vertrek</label>
-                                        <input type="date" value={newCheckOut} onChange={e => setNewCheckOut(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                    </div>
-                                </div>
-                                <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
-                            </div>
-
-                            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                {bookings.map((booking) => {
-                                    const shareUrl = `${window.location.origin}/b/${booking.id}`;
-                                    return (
-                                        <div key={booking.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", backgroundColor: "white", borderRadius: "8px", border: "1px solid #eee" }}>
-                                            <div>
-                                                <strong style={{ color: "#333", display: "block" }}>{booking.guestName}</strong>
-                                                <span style={{ fontSize: "0.85rem", color: "#777" }}>{booking.checkIn} t/m {booking.checkOut}</span>
-                                                <div style={{ fontSize: "0.85rem", color: "#4A5D23", marginTop: "4px", wordBreak: "break-all" }}>{shareUrl}</div>
-                                            </div>
-                                            <div style={{ display: "flex", gap: "10px" }}>
-                                                <button onClick={() => copyToClipboard(shareUrl)} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }}>Kopieer</button>
-                                                <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>
-                                            </div>
+                                <div style={{ marginBottom: "20px", backgroundColor: "white", padding: "15px", borderRadius: "8px", border: "1px solid #ccc" }}>
+                                    <h3 style={{ fontSize: "1rem", marginBottom: "10px", color: "#333" }}>Nieuwe Link Aanmaken</h3>
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                        <div style={{ flex: "1 1 200px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
+                                            <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
                                         </div>
-                                    )
-                                })}
-                                {bookings.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen boekingen gevonden.</p>}
+                                        <div style={{ flex: "1 1 120px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Aankomst</label>
+                                            <input type="date" value={newCheckIn} onChange={e => setNewCheckIn(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                        </div>
+                                        <div style={{ flex: "1 1 120px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Vertrek</label>
+                                            <input type="date" value={newCheckOut} onChange={e => setNewCheckOut(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                        </div>
+                                    </div>
+                                    <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
+                                </div>
+
+                                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                    {bookings.map((booking) => {
+                                        const shareUrl = `${window.location.origin}/b/${booking.id}`;
+                                        return (
+                                            <div key={booking.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", backgroundColor: "white", borderRadius: "8px", border: "1px solid #eee" }}>
+                                                <div>
+                                                    <strong style={{ color: "#333", display: "block" }}>{booking.guestName}</strong>
+                                                    <span style={{ fontSize: "0.85rem", color: "#777" }}>{booking.checkIn} t/m {booking.checkOut}</span>
+                                                    <div style={{ fontSize: "0.85rem", color: "#4A5D23", marginTop: "4px", wordBreak: "break-all" }}>{shareUrl}</div>
+                                                </div>
+                                                <div style={{ display: "flex", gap: "10px" }}>
+                                                    <button onClick={() => copyToClipboard(shareUrl)} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }}>Kopieer</button>
+                                                    <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                    {bookings.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen boekingen gevonden.</p>}
+                                </div>
                             </div>
-                        </div>
+                        </details>
 
                         {/* Sectie: Algemeen */}
-                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>🏡 Algemene Informatie</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🏡 Algemene Informatie</summary>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <div>
                                     <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Naam Huisje</label>
                                     <input type="text" value={propName} onChange={e => setPropName(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
@@ -297,50 +335,58 @@ export default function AdminPage() {
                                 </div>
                                 <button onClick={handleSaveGeneral} disabled={isSaving} style={{ alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                             </div>
-                        </div>
+                        </details>
 
                         {/* Sectie: Home Items */}
-                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>📱 Home Pagina Items (Uw verblijf)</h2>
-                            <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>.</p>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
-                                    <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
-                                        {insights.map((item, idx) => (
-                                            <SortableItem key={`insight-${idx}`} id={`item-${idx}`}>
-                                                <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📱 Home Pagina Items (Uw verblijf)</summary>
+                            <div style={{ marginTop: "15px" }}>
+                                <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>.</p>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
+                                        <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
+                                            {insights.map((item, idx) => (
+                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`}>
+                                                    <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
-                                                <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel</label>
-                                                        <input type="text" value={item.title} onChange={e => { const n = [...insights]; n[idx].title = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                                    <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel</label>
+                                                            <input type="text" value={item.title} onChange={e => { const n = [...insights]; n[idx].title = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                                        </div>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Icoon (uit map `/public/icons`)</label>
+                                                            <select value={item.icon} onChange={e => { const n = [...insights]; n[idx].icon = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                                                <option value={item.icon}>{item.icon} (huidig)</option>
+                                                                {availableIcons.map((ic, i) => <option key={i} value={ic}>{ic}</option>)}
+                                                            </select>
+                                                        </div>
                                                     </div>
-                                                    <div style={{ flex: 1 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Icoon (uit map `/public/icons`)</label>
-                                                        <select value={item.icon} onChange={e => { const n = [...insights]; n[idx].icon = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
-                                                            <option value={item.icon}>{item.icon} (huidig)</option>
-                                                            {availableIcons.map((ic, i) => <option key={i} value={ic}>{ic}</option>)}
-                                                        </select>
-                                                    </div>
-                                                </div>
 
-                                                <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst</label>
-                                                <textarea value={item.subtitle} onChange={e => { const n = [...insights]; n[idx].subtitle = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "60px", fontFamily: "inherit" }} />
-                                            </SortableItem>
-                                        ))}
-                                    </SortableContext>
-                                </DndContext>
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <button onClick={() => setInsights([...insights, { title: "Nieuw", subtitle: "", icon: "icons/default.png", action: "none" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Item Toevoegen</button>
-                                    <button onClick={handleSaveInsights} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                                    <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst</label>
+                                                    <textarea value={item.subtitle} onChange={e => { const n = [...insights]; n[idx].subtitle = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "60px", fontFamily: "inherit" }} />
+
+                                                    <details style={{ marginTop: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "12px" }}>
+                                                        <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>📄 Detailpagina (klik om te bewerken)</summary>
+                                                        <p style={{ fontSize: "0.75rem", color: "#888", margin: "8px 0" }}>Als je hier content invult, wordt het item klikbaar in de app en opent het een detailpagina.</p>
+                                                        <RichTextEditor content={item.detailContent || ""} onChange={html => { const n = [...insights]; n[idx].detailContent = html; setInsights(n); }} images={availableImages} />
+                                                    </details>
+                                                </SortableItem>
+                                            ))}
+                                        </SortableContext>
+                                    </DndContext>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <button onClick={() => setInsights([...insights, { title: "Nieuw", subtitle: "", icon: "icons/default.png", action: "none", detailContent: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Item Toevoegen</button>
+                                        <button onClick={handleSaveInsights} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </details>
 
                         {/* Sectie: Videoinstructies */}
-                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>🎥 Videoinstructies</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎥 Videoinstructies</summary>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(videos, setVideos)}>
                                     <SortableContext items={videos.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                         {videos.map((vid, idx) => (
@@ -372,86 +418,108 @@ export default function AdminPage() {
                                     <button onClick={handleSaveVideos} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                                 </div>
                             </div>
-                        </div>
+                        </details>
 
                         {/* Sectie: Omgeving */}
-                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>🌲 Omgeving TIPS</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(omgeving, setOmgeving)}>
-                                    <SortableContext items={omgeving.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
-                                        {omgeving.map((tip, idx) => (
-                                            <SortableItem key={`omg-${idx}`} id={`item-${idx}`}>
-                                                <button onClick={() => setOmgeving(omgeving.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🌲 Omgeving TIPS</summary>
+                            <div style={{ marginTop: "15px" }}>
 
-                                                <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
-                                                    <div style={{ flex: 2 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel</label>
-                                                        <input type="text" value={tip.name} onChange={e => { const n = [...omgeving]; n[idx].name = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                                    </div>
-                                                    <div style={{ flex: 2 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
-                                                        <select value={tip.image || ""} onChange={e => { const n = [...omgeving]; n[idx].image = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
-                                                            <option value="">-- Kies een afbeelding --</option>
-                                                            {availableImages.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
-                                                        </select>
-                                                    </div>
-                                                </div>
+                                {/* AI Prompt */}
+                                <details style={{ marginBottom: "15px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "12px" }}>
+                                    <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem", color: "#4A5D23" }}>🤖 AI Samenvatting Prompt (klik om aan te passen)</summary>
+                                    <textarea value={aiPrompt} onChange={e => setAiPrompt(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "120px", fontFamily: "inherit", fontSize: "0.85rem", marginTop: "10px", lineHeight: "1.5" }} />
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "8px" }}>
+                                        <label style={{ fontSize: "0.85rem", color: "#555", whiteSpace: "nowrap" }}>Max tekens van website:</label>
+                                        <input type="number" value={aiMaxChars} onChange={e => setAiMaxChars(Math.max(500, parseInt(e.target.value) || 4000))} min={500} max={15000} step={500} style={{ width: "100px", padding: "6px 10px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
+                                        <span style={{ fontSize: "0.75rem", color: "#999" }}>Minder = sneller & goedkoper, meer = uitgebreider</span>
+                                    </div>
+                                    <p style={{ fontSize: "0.75rem", color: "#999", marginTop: "5px" }}>Deze prompt wordt gebruikt wanneer je op "✨ AI Samenvatting" klikt bij een tip. De AI leest de website en maakt een samenvatting op basis van deze instructie.</p>
+                                </details>
 
-                                                <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Website link (optioneel)</label>
-                                                        <input type="text" value={tip.url || ""} onChange={e => { const n = [...omgeving]; n[idx].url = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="https://..." />
-                                                    </div>
-                                                    <div style={{ flex: 1 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>📍 Adres (optioneel)</label>
-                                                        <input type="text" value={tip.adres || ""} onChange={e => { const n = [...omgeving]; n[idx].adres = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Straat 1, Plaatsnaam" />
-                                                    </div>
-                                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(omgeving, setOmgeving)}>
+                                        <SortableContext items={omgeving.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
+                                            {omgeving.map((tip, idx) => (
+                                                <SortableItem key={`omg-${idx}`} id={`item-${idx}`}>
+                                                    <button onClick={() => setOmgeving(omgeving.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
-                                                <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst / Omschrijving</label>
-                                                <RichTextEditor content={tip.desc} onChange={html => { const n = [...omgeving]; n[idx].desc = html; setOmgeving(n); }} />
-                                            </SortableItem>
-                                        ))}
-                                    </SortableContext>
-                                </DndContext>
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <button onClick={() => setOmgeving([...omgeving, { name: "Nieuwe Tip", desc: "", image: "", url: "", adres: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
-                                    <button onClick={handleSaveOmgeving} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                                    <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
+                                                        <div style={{ flex: 2 }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel</label>
+                                                            <input type="text" value={tip.name} onChange={e => { const n = [...omgeving]; n[idx].name = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                                        </div>
+                                                        <div style={{ flex: 2 }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
+                                                            <select value={tip.image || ""} onChange={e => { const n = [...omgeving]; n[idx].image = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
+                                                                <option value="">-- Kies een afbeelding --</option>
+                                                                {availableImages.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Website link (optioneel)</label>
+                                                            <input type="text" value={tip.url || ""} onChange={e => { const n = [...omgeving]; n[idx].url = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="https://..." />
+                                                        </div>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>📍 Adres (optioneel)</label>
+                                                            <input type="text" value={tip.adres || ""} onChange={e => { const n = [...omgeving]; n[idx].adres = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Straat 1, Plaatsnaam" />
+                                                        </div>
+                                                    </div>
+
+                                                    <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst / Omschrijving</label>
+                                                    {tip.url && tip.url.length > 0 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleAiSummary(idx)}
+                                                            disabled={summarizingIndex !== null}
+                                                            style={{
+                                                                marginBottom: "8px",
+                                                                padding: "6px 14px",
+                                                                borderRadius: "6px",
+                                                                border: "1px solid #4A5D23",
+                                                                backgroundColor: summarizingIndex === idx ? "#4A5D23" : "#f8f7f2",
+                                                                color: summarizingIndex === idx ? "white" : "#4A5D23",
+                                                                cursor: summarizingIndex !== null ? "wait" : "pointer",
+                                                                fontWeight: "bold",
+                                                                fontSize: "0.8rem",
+                                                            }}
+                                                        >
+                                                            {summarizingIndex === idx ? "⏳ Bezig met samenvatten..." : "✨ AI Samenvatting"}
+                                                        </button>
+                                                    )}
+                                                    <RichTextEditor content={tip.desc} onChange={html => { const n = [...omgeving]; n[idx].desc = html; setOmgeving(n); }} />
+                                                </SortableItem>
+                                            ))}
+                                        </SortableContext>
+                                    </DndContext>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <button onClick={() => setOmgeving([...omgeving, { name: "Nieuwe Tip", desc: "", image: "", url: "", adres: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
+                                        <button onClick={handleSaveOmgeving} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </details>
 
-                        {/* Sectie: WiFi */}
-                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>📶 WiFi Instellingen</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Netwerknaam (SSID)</label>
-                                    <input type="text" value={wifiNetwork} onChange={e => setWifiNetwork(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                </div>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Wachtwoord</label>
-                                    <input type="text" value={wifiPass} onChange={e => setWifiPass(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                </div>
-                                <button onClick={handleSaveWifi} disabled={isSaving} style={{ marginTop: "5px", alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>WiFi Opslaan</button>
-                            </div>
-                        </div>
 
                         {/* Sectie: Chatbot Context */}
-                        <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <h2 style={{ fontSize: "1.3rem", marginBottom: "15px", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>🤖 Chatbot Kennisbank</h2>
-                            <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Alles wat je hier invoert wordt als extra context meegegeven aan de Digitale Conciërge. Hoe meer detail, hoe beter de chatbot kan antwoorden.</p>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                <textarea
-                                    value={chatbotContext}
-                                    onChange={e => setChatbotContext(e.target.value)}
-                                    style={{ width: "100%", padding: "12px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "200px", fontFamily: "inherit", fontSize: "0.95rem", lineHeight: "1.5" }}
-                                    placeholder="Bijv: De sauna mag alleen aan tussen 16:00 en 22:00. De sleutel van het schuurtje zit onder de bloempot. Dekens en kussens liggen in de gang-kast..."
-                                />
-                                <button onClick={handleSaveChatbotContext} disabled={isSaving} style={{ alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>
+                            <div style={{ marginTop: "15px" }}>
+                                <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Alles wat je hier invoert wordt als extra context meegegeven aan de Digitale Conciërge. Hoe meer detail, hoe beter de chatbot kan antwoorden.</p>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                    <textarea
+                                        value={chatbotContext}
+                                        onChange={e => setChatbotContext(e.target.value)}
+                                        style={{ width: "100%", padding: "12px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "200px", fontFamily: "inherit", fontSize: "0.95rem", lineHeight: "1.5" }}
+                                        placeholder="Bijv: De sauna mag alleen aan tussen 16:00 en 22:00. De sleutel van het schuurtje zit onder de bloempot. Dekens en kussens liggen in de gang-kast..."
+                                    />
+                                    <button onClick={handleSaveChatbotContext} disabled={isSaving} style={{ alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                </div>
                             </div>
-                        </div>
+                        </details>
 
                     </div>
                 </div>

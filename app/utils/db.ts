@@ -86,25 +86,29 @@ const defaultAppData = {
             "icon": "wifi-outline",
             "title": "Wifi",
             "subtitle": "test",
-            "action": "wifi-modal"
+            "action": "wifi-modal",
+            "detailContent": ""
         },
         {
             "icon": "time-outline",
             "title": "In- en uitchecken",
             "subtitle": "Inchecken kan vanaf 15.00 uur en gaat contactloos via een sleutelkastje. Het uitchecken is uiterlijk om 10.30 uur. ",
-            "action": "none"
+            "action": "none",
+            "detailContent": ""
         },
         {
             "icon": "key-outline",
             "title": "Sleutelkastje",
             "subtitle": "Het sleutelkastje kun je vinden....",
-            "action": "none"
+            "action": "none",
+            "detailContent": ""
         },
         {
             "icon": "restaurant-outline",
             "title": "Lekker Eten",
             "subtitle": "Check onze lokale restaurant tips!",
-            "action": "none"
+            "action": "none",
+            "detailContent": ""
         }
     ],
     "chatbotContext": ""
