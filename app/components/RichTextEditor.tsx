@@ -166,7 +166,7 @@ export default function RichTextEditor({ content, onChange, images }: { content:
             TextStyle,
             Color,
             Highlight.configure({ multicolor: true }),
-            TextAlign.configure({ types: ["heading", "paragraph"] }),
+            TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
             Image.configure({ inline: false, allowBase64: false }),
         ],
         content: content || "",
@@ -208,6 +208,9 @@ export default function RichTextEditor({ content, onChange, images }: { content:
                 .tiptap tr { display: table-row !important; }
                 .tiptap th, .tiptap td { border: 1px solid #ccc !important; padding: 6px 10px !important; text-align: left !important; display: table-cell !important; }
                 .tiptap th { background-color: #f0efe8 !important; font-weight: bold !important; }
+                .tiptap img { max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0; }
+                .tiptap img[style*="text-align: center"], .tiptap [style*="text-align: center"] img { display: block; margin-left: auto; margin-right: auto; }
+                .tiptap img[style*="text-align: right"], .tiptap [style*="text-align: right"] img { display: block; margin-left: auto; margin-right: 0; }
             `}</style>
         </div>
     );
