@@ -22,7 +22,7 @@ export default async function Omgeving({ params }: { params: { bookingId: string
                         className="info-item"
                         style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", cursor: "pointer", gap: "14px", padding: "12px" }}
                     >
-                        {tip.image ? (
+                        {tip.image && (
                             <img
                                 src={`/${tip.image}`}
                                 alt={tip.name}
@@ -34,17 +34,8 @@ export default async function Omgeving({ params }: { params: { bookingId: string
                                     flexShrink: 0,
                                 }}
                             />
-                        ) : (
-                            <div style={{
-                                width: "80px",
-                                height: "80px",
-                                borderRadius: "10px",
-                                backgroundColor: "var(--primary-color)",
-                                opacity: 0.15,
-                                flexShrink: 0,
-                            }} />
                         )}
-                        <h4 style={{ color: "var(--primary-color)", flex: 1, margin: 0 }}>
+                        <h4 style={{ color: "var(--primary-color)", flex: 1, margin: 0, marginLeft: tip.image ? 0 : "94px" }}>
                             {parseTemplateString(tip.name, booking)}
                         </h4>
                         {/* @ts-ignore */}

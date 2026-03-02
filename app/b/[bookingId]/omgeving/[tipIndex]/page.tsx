@@ -27,16 +27,15 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
 
     return (
         <div className="tab-content active" style={{ padding: 0 }}>
-            {/* Header met afbeelding en terugknop */}
-            <div style={{
-                position: "relative",
-                width: "100%",
-                height: "200px",
-                backgroundColor: hasImage ? "transparent" : "var(--primary-color)",
-                borderRadius: "0 0 16px 16px",
-                overflow: "hidden",
-            }}>
-                {hasImage && (
+            {/* Header met afbeelding */}
+            {hasImage ? (
+                <div style={{
+                    position: "relative",
+                    width: "100%",
+                    height: "200px",
+                    borderRadius: "0 0 16px 16px",
+                    overflow: "hidden",
+                }}>
                     <img
                         src={`/${tip.image}`}
                         alt={tip.name}
@@ -46,35 +45,49 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
                             objectFit: "cover",
                         }}
                     />
-                )}
-                <Link
-                    href={`/b/${bookingId}/omgeving`}
-                    style={{
-                        position: "absolute",
-                        top: "12px",
-                        left: "12px",
-                        backgroundColor: "rgba(0,0,0,0.45)",
-                        color: "white",
-                        borderRadius: "50%",
-                        width: "36px",
-                        height: "36px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        textDecoration: "none",
-                        fontSize: "1.2rem",
-                        backdropFilter: "blur(4px)",
-                    }}
-                >
-                    ←
-                </Link>
-            </div>
+                    <Link
+                        href={`/b/${bookingId}/omgeving`}
+                        style={{
+                            position: "absolute",
+                            top: "12px",
+                            left: "12px",
+                            backgroundColor: "rgba(0,0,0,0.45)",
+                            color: "white",
+                            borderRadius: "50%",
+                            width: "36px",
+                            height: "36px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            textDecoration: "none",
+                            fontSize: "1.2rem",
+                            backdropFilter: "blur(4px)",
+                        }}
+                    >
+                        ←
+                    </Link>
+                </div>
+            ) : (
+                <div style={{ padding: "12px 12px 0" }}>
+                    <Link
+                        href={`/b/${bookingId}/omgeving`}
+                        style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            color: "var(--primary-color)",
+                            textDecoration: "none",
+                            fontSize: "0.95rem",
+                            fontWeight: "bold",
+                        }}
+                    >
+                        ← Terug
+                    </Link>
+                </div>
+            )}
 
             {/* Content */}
             <div style={{ padding: "20px" }}>
-                <h2 style={{ color: "var(--primary-color)", marginBottom: "12px", fontSize: "1.4rem" }}>
-                    {parseTemplateString(tip.name, booking)}
-                </h2>
                 <div
                     className="rich-content"
                     dangerouslySetInnerHTML={{ __html: parseTemplateString(tip.desc, booking) }}

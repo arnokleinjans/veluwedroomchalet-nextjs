@@ -51,7 +51,7 @@ export default function AdminPage() {
     const [subtitle, setSubtitle] = useState("");
 
     // Dynamic Arrays
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
@@ -363,6 +363,14 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         </div>
                                                     </div>
 
+                                                    <div style={{ marginBottom: "10px" }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
+                                                        <select value={item.image || ""} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], image: e.target.value }; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                                            <option value="">-- Geen afbeelding --</option>
+                                                            {availableImages.map((img, i) => <option key={i} value={img}>{img.split('/').pop()}</option>)}
+                                                        </select>
+                                                    </div>
+
                                                     <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst</label>
                                                     <textarea value={item.subtitle} onChange={e => { const n = [...insights]; n[idx].subtitle = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "60px", fontFamily: "inherit" }} />
 
@@ -376,7 +384,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         </SortableContext>
                                     </DndContext>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <button onClick={() => setInsights([...insights, { title: "Nieuw", subtitle: "", icon: "icons/default.png", action: "none", detailContent: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Item Toevoegen</button>
+                                        <button onClick={() => setInsights([...insights, { title: "Nieuw", subtitle: "", icon: "icons/default.png", action: "none", detailContent: "", image: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Item Toevoegen</button>
                                         <button onClick={handleSaveInsights} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                                     </div>
                                 </div>
@@ -452,7 +460,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <div style={{ flex: 2 }}>
                                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
                                                             <select value={tip.image || ""} onChange={e => { const n = [...omgeving]; n[idx].image = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
-                                                                <option value="">-- Kies een afbeelding --</option>
+                                                                <option value="">-- Geen afbeelding --</option>
                                                                 {availableImages.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
                                                             </select>
                                                         </div>

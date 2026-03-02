@@ -23,51 +23,68 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
         );
     }
 
+    const hasImage = item.image && item.image.length > 0;
+
     return (
         <div className="tab-content active" style={{ padding: 0 }}>
-            {/* Groene header balk */}
-            <div style={{
-                position: "relative",
-                width: "100%",
-                backgroundColor: "var(--primary-color)",
-                borderRadius: "0 0 16px 16px",
-                padding: "24px 20px 20px 60px",
-                minHeight: "70px",
-                display: "flex",
-                alignItems: "center",
-            }}>
-                <Link
-                    href={`/b/${bookingId}`}
-                    style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "12px",
-                        transform: "translateY(-50%)",
-                        backgroundColor: "rgba(255,255,255,0.2)",
-                        color: "white",
-                        borderRadius: "50%",
-                        width: "36px",
-                        height: "36px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        textDecoration: "none",
-                        fontSize: "1.2rem",
-                        backdropFilter: "blur(4px)",
-                    }}
-                >
-                    ←
-                </Link>
-                <h2 style={{
-                    color: "white",
-                    margin: 0,
-                    fontSize: "1.3rem",
-                    fontFamily: "'Nunito', sans-serif",
-                    fontWeight: "bold",
+            {/* Header met afbeelding */}
+            {hasImage ? (
+                <div style={{
+                    position: "relative",
+                    width: "100%",
+                    height: "200px",
+                    borderRadius: "0 0 16px 16px",
+                    overflow: "hidden",
                 }}>
-                    {parseTemplateString(item.title, booking)}
-                </h2>
-            </div>
+                    <img
+                        src={`/${item.image}`}
+                        alt={item.title}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                        }}
+                    />
+                    <Link
+                        href={`/b/${bookingId}`}
+                        style={{
+                            position: "absolute",
+                            top: "12px",
+                            left: "12px",
+                            backgroundColor: "rgba(0,0,0,0.45)",
+                            color: "white",
+                            borderRadius: "50%",
+                            width: "36px",
+                            height: "36px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            textDecoration: "none",
+                            fontSize: "1.2rem",
+                            backdropFilter: "blur(4px)",
+                        }}
+                    >
+                        ←
+                    </Link>
+                </div>
+            ) : (
+                <div style={{ padding: "12px 12px 0" }}>
+                    <Link
+                        href={`/b/${bookingId}`}
+                        style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            color: "var(--primary-color)",
+                            textDecoration: "none",
+                            fontSize: "0.95rem",
+                            fontWeight: "bold",
+                        }}
+                    >
+                        ← Terug
+                    </Link>
+                </div>
+            )}
 
             {/* Content */}
             <div style={{ padding: "20px" }}>

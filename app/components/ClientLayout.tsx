@@ -63,8 +63,19 @@ export default function ClientLayout({ children, basePath = "", appData, booking
 
     // Determine the page title for the compact top bar
     let pageTitle = subtitle;
-    if (pathname.includes("/info/home/")) pageTitle = subtitle;
+    const omgevingDetailMatch = pathname.match(/\/omgeving\/(\d+)/);
+    const homeDetailMatch = pathname.match(/\/info\/home\/(\d+)/);
+    if (homeDetailMatch) {
+        const itemIndex = parseInt(homeDetailMatch[1], 10);
+        const insights = appData.insights || [];
+        pageTitle = (insights[itemIndex] as any)?.title || subtitle;
+    }
     else if (pathname.includes("/info")) pageTitle = "Videoinstructies";
+    else if (omgevingDetailMatch) {
+        const tipIndex = parseInt(omgevingDetailMatch[1], 10);
+        const omgevingItems = (appData as any).omgeving || (appData as any).restaurants || [];
+        pageTitle = omgevingItems[tipIndex]?.name || "In de Omgeving";
+    }
     else if (pathname.includes("/omgeving")) pageTitle = "In de Omgeving";
     else if (pathname.includes("/chat")) pageTitle = "Digitale Conciërge";
 
