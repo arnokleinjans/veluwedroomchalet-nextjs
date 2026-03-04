@@ -1,6 +1,7 @@
 import { getAppData } from "../../../../../utils/db";
 import { parseTemplateString } from "../../../../../utils/templateParser";
 import Link from "next/link";
+import WidgetEmbed from "../../../../../components/WidgetEmbed";
 
 export const dynamic = "force-dynamic";
 
@@ -92,6 +93,10 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
                     className="rich-content"
                     dangerouslySetInnerHTML={{ __html: parseTemplateString(item.detailContent || "", booking) }}
                 />
+
+                {item.widgetCode && item.widgetCode.trim() !== "" && (
+                    <WidgetEmbed code={item.widgetCode} />
+                )}
             </div>
         </div>
     );

@@ -51,9 +51,9 @@ export default function AdminPage() {
     const [subtitle, setSubtitle] = useState("");
 
     // Dynamic Arrays
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string }[]>([]);
-    const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string }[]>([]);
+    const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
     const [aiPrompt, setAiPrompt] = useState(`Je bent een assistent die websites samenvat voor een vakantie-app. Maak een aantrekkelijke, beknopte samenvatting in HTML-opmaak geschikt voor vakantiegasten.
 
@@ -92,10 +92,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setHeaderImage(data.property.headerImage || "");
             setSubtitle(data.property.subtitle || "Welkom terug");
 
-            setInsights((data.insights || []).map((item: any) => ({ ...item, detailContent: item.detailContent || "" })));
+            setInsights((data.insights || []).map((item: any) => ({ ...item, detailContent: item.detailContent || "", widgetCode: item.widgetCode || "" })));
 
             setVideos(data.videos || []);
-            setOmgeving((data as any).omgeving || (data as any).restaurants || []);
+            setOmgeving(((data as any).omgeving || (data as any).restaurants || []).map((tip: any) => ({ ...tip, widgetCode: tip.widgetCode || "" })));
             setBookings(data.bookings || []);
             setChatbotContext(data.chatbotContext || "");
             if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
@@ -392,13 +392,19 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>📄 Detailpagina (klik om te bewerken)</summary>
                                                         <p style={{ fontSize: "0.75rem", color: "#888", margin: "8px 0" }}>Als je hier content invult, wordt het item klikbaar in de app en opent het een detailpagina.</p>
                                                         <RichTextEditor content={item.detailContent || ""} onChange={html => { const n = [...insights]; n[idx].detailContent = html; setInsights(n); }} images={availableImages} />
+
+                                                        <div style={{ marginTop: "15px", borderTop: "1px dashed #ccc", paddingTop: "15px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px", fontWeight: "bold" }}>Extra Code Snippet (Bijv. Reserveringswidget HTML)</label>
+                                                            <textarea value={item.widgetCode || ""} onChange={e => { const n = [...insights]; n[idx].widgetCode = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "80px", fontFamily: "monospace", fontSize: "0.8rem", backgroundColor: "#fdfdfd" }} placeholder="<div data-widget...><script src='...'></script>" />
+                                                            <p style={{ fontSize: "0.7rem", color: "#888", marginTop: "4px" }}>Voer hier pure HTML/JavaScript in. Dit wordt direct onder de tekst getoond.</p>
+                                                        </div>
                                                     </details>
                                                 </SortableItem>
                                             ))}
                                         </SortableContext>
                                     </DndContext>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <button onClick={() => setInsights([...insights, { title: "Nieuw", subtitle: "", icon: "icons/default.png", action: "none", detailContent: "", image: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Item Toevoegen</button>
+                                        <button onClick={() => setInsights([...insights, { title: "Nieuw", subtitle: "", icon: "icons/default.png", action: "none", detailContent: "", image: "", widgetCode: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Item Toevoegen</button>
                                         <button onClick={handleSaveInsights} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                                     </div>
                                 </div>
@@ -536,7 +542,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         </SortableContext>
                                     </DndContext>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <button onClick={() => setOmgeving([...omgeving, { name: "Nieuwe Tip", desc: "", image: "", url: "", adres: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
+                                        <button onClick={() => setOmgeving([...omgeving, { name: "Nieuwe Tip", desc: "", image: "", url: "", adres: "", widgetCode: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
                                         <button onClick={handleSaveOmgeving} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                                     </div>
                                 </div>

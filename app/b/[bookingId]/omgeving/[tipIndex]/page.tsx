@@ -1,6 +1,7 @@
 import { getAppData } from "../../../../utils/db";
 import { parseTemplateString } from "../../../../utils/templateParser";
 import Link from "next/link";
+import WidgetEmbed from "../../../../components/WidgetEmbed";
 
 export const dynamic = "force-dynamic";
 
@@ -92,6 +93,10 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
                     className="rich-content"
                     dangerouslySetInnerHTML={{ __html: parseTemplateString(tip.desc, booking) }}
                 />
+
+                {tip.widgetCode && tip.widgetCode.trim() !== "" && (
+                    <WidgetEmbed code={tip.widgetCode} />
+                )}
 
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "20px" }}>
                     {tip.url && tip.url.length > 0 && (
