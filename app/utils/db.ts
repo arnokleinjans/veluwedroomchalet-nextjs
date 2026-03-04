@@ -37,7 +37,7 @@ const defaultAppData = {
     "property": {
         "name": "Veluwe Droom Chalet",
         "subtitle": "Welkom terug",
-        "headerImage": "images/Boshuisje.jpg",
+        "headerImage": "images/Boshuisje.webp",
         "wifi": {
             "network": "Wegwezen",
             "password": "BomenZijnFijn2026"
@@ -61,7 +61,7 @@ const defaultAppData = {
     "videos": [
         {
             "title": "vakantiehuisje",
-            "thumb": "images/Boshuisje.jpg",
+            "thumb": "images/Boshuisje.webp",
             "url": "https://www.youtube.com/watch?v=S1WnqtMAeS4"
         }
     ],
@@ -79,6 +79,13 @@ const defaultAppData = {
             "image": "",
             "url": "",
             "adres": ""
+        },
+        {
+            "name": "De Smaak van Hoenderloo",
+            "desc": "Heerlijk voor de kinderen. 5 minuten fietsen.",
+            "image": "images/Restaurant in een oogopslag.webp",
+            "url": "https://www.desmaakvanhoenderloo.nl/",
+            "adres": "De Smaak van Hoenderloo krimweg"
         }
     ],
     "insights": [

@@ -14,7 +14,9 @@ export default function Home() {
       <div id="insights-container">
         {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string }, index: number) => {
           const isImage = insight.icon && insight.icon.includes('.');
-          const hasDetail = insight.detailContent && insight.detailContent.trim().length > 0;
+          const rawDetail = (insight.detailContent || '').trim();
+          // TipTap laat vaak lege tags achter als een veld is leeggemaakt.
+          const hasDetail = rawDetail.length > 0 && rawDetail !== '<p></p>' && rawDetail !== '<p><br></p>';
 
           const cardContent = (
             <>

@@ -10,7 +10,7 @@
   ],
   "property": {
     "name": "Veluwe Droom Chalet",
-    "headerImage": "images/Boshuisje.jpg",
+    "headerImage": "images/Boshuisje.webp",
     "wifi": {
       "network": "Wegwezen",
       "password": "BomenZijnFijn2026"
@@ -35,12 +35,12 @@
   "videos": [
     {
       "title": "Test2",
-      "thumb": "thumbnails/video-placeholder.jpg",
+      "thumb": "thumbnails/video-placeholder.webp",
       "url": "https://www.youtube.com/watch?v=S1WnqtMAeS4"
     },
     {
       "title": "vakantiehuisjes",
-      "thumb": "images/Boshuisje.jpg",
+      "thumb": "images/Boshuisje.webp",
       "url": "https://www.youtube.com/watch?v=S1WnqtMAeS4"
     }
   ],
@@ -135,14 +135,14 @@
       "name": "Test",
       "desc": "<h3 style=\"text-align: center;\"><strong>Functies Geschikt voor</strong></h3><ul><li><p style=\"text-align: center;\">Vegetariërs <strong>Lunch</strong>,</p></li><li><p><mark data-color=\"#fef9c3\" style=\"background-color: rgb(254, 249, 195); color: inherit;\">Diner Service</mark> aan tafel</p></li></ul><ul><li><p><span style=\"color: rgb(192, 57, 43);\">Voor het hele <em>gezin</em></span></p></li></ul><hr><blockquote><p>Dit is een citaat</p></blockquote><hr><p style=\"text-align: right;\">Dit is rechts</p><p style=\"text-align: right;\"></p><p style=\"text-align: left;\">Dit is links</p><p style=\"text-align: left;\"></p><table style=\"min-width: 50px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p>Openingstijden</p></th><th colspan=\"1\" rowspan=\"1\"><p></p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>maandag</p></td><td colspan=\"1\" rowspan=\"1\"><p>gesloten</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Dinsdag</p></td><td colspan=\"1\" rowspan=\"1\"><p>10:00-17:00</p></td></tr></tbody></table><p></p>",
       "url": "",
-      "image": "images/Restaurant in een oogopslag.jpg",
+      "image": "images/Restaurant in een oogopslag.webp",
       "adres": "De Smaak van Hoenderloo krimweg"
     },
     {
       "name": "De Smaak van Hoenderloo",
       "desc": "Heerlijk voor de kinderen. 5 minuten fietsen.",
       "url": "https://www.desmaakvanhoenderloo.nl/",
-      "image": "images/Restaurant in een oogopslag.jpg",
+      "image": "images/Restaurant in een oogopslag.webp",
       "adres": "De Smaak van Hoenderloo krimweg"
     },
     {
