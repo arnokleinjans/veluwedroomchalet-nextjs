@@ -322,12 +322,17 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                 </div>
                                 <div>
                                     <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Header Afbeelding (bovenaan de app)</label>
-                                    <select value={headerImage} onChange={e => setHeaderImage(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
-                                        <option value="">-- Geen afbeelding --</option>
-                                        {availableImages.map((img, i) => (
-                                            <option key={i} value={img}>{img}</option>
-                                        ))}
-                                    </select>
+                                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                        {headerImage && (
+                                            <img src={`/${headerImage}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                                        )}
+                                        <select value={headerImage} onChange={e => setHeaderImage(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                            <option value="">-- Geen afbeelding --</option>
+                                            {availableImages.map((img, i) => (
+                                                <option key={i} value={img}>{img}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
                                     <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Subtitel (boven de naam, bijv. "Welkom terug")</label>
@@ -365,10 +370,19 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                                                     <div style={{ marginBottom: "10px" }}>
                                                         <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
-                                                        <select value={item.image || ""} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], image: e.target.value }; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
-                                                            <option value="">-- Geen afbeelding --</option>
-                                                            {availableImages.map((img, i) => <option key={i} value={img}>{img.split('/').pop()}</option>)}
-                                                        </select>
+                                                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                                            {item.image && (
+                                                                <img src={`/${item.image}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                                                            )}
+                                                            <select value={item.image || ""} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], image: e.target.value }; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                                                <option value="">-- Geen afbeelding --</option>
+                                                                {availableImages.map((img, i) => {
+                                                                    const name = img.split('/').pop() || '';
+                                                                    const nameWithoutExt = name.replace(/\.[^/.]+$/, "");
+                                                                    return <option key={i} value={img}>{nameWithoutExt}</option>;
+                                                                })}
+                                                            </select>
+                                                        </div>
                                                     </div>
 
                                                     <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst</label>
@@ -407,11 +421,20 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <input type="text" value={vid.title} onChange={e => { const n = [...videos]; n[idx].title = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
                                                     </div>
                                                     <div style={{ flex: 1 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Thumbnail (uit `/public/thumbnails`)</label>
-                                                        <select value={vid.thumb} onChange={e => { const n = [...videos]; n[idx].thumb = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
-                                                            <option value={vid.thumb}>{vid.thumb} (huidig)</option>
-                                                            {availableThumbnails.map((ic, i) => <option key={i} value={ic}>{ic}</option>)}
-                                                        </select>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Thumbnail (uit `/public/images`)</label>
+                                                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                                            {vid.thumb && (
+                                                                <img src={`/${vid.thumb}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                                                            )}
+                                                            <select value={vid.thumb} onChange={e => { const n = [...videos]; n[idx].thumb = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                                                <option value="">-- Geen thumbnail --</option>
+                                                                {availableImages.map((img, i) => {
+                                                                    const name = img.split('/').pop() || '';
+                                                                    const nameWithoutExt = name.replace(/\.[^/.]+$/, "");
+                                                                    return <option key={i} value={img}>{nameWithoutExt}</option>;
+                                                                })}
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -422,7 +445,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     </SortableContext>
                                 </DndContext>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <button onClick={() => setVideos([...videos, { title: "Nieuwe Video", thumb: "thumbnails/default.jpg", url: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Video Toevoegen</button>
+                                    <button onClick={() => setVideos([...videos, { title: "Nieuwe Video", thumb: "images/default.jpg", url: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Video Toevoegen</button>
                                     <button onClick={handleSaveVideos} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                                 </div>
                             </div>
@@ -459,10 +482,19 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         </div>
                                                         <div style={{ flex: 2 }}>
                                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
-                                                            <select value={tip.image || ""} onChange={e => { const n = [...omgeving]; n[idx].image = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
-                                                                <option value="">-- Geen afbeelding --</option>
-                                                                {availableImages.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
-                                                            </select>
+                                                            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                                                {tip.image && (
+                                                                    <img src={`/${tip.image}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                                                                )}
+                                                                <select value={tip.image || ""} onChange={e => { const n = [...omgeving]; n[idx].image = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
+                                                                    <option value="">-- Geen afbeelding --</option>
+                                                                    {availableImages.map(img => {
+                                                                        const name = img.split('/').pop() || '';
+                                                                        const nameWithoutExt = name.replace(/\.[^/.]+$/, "");
+                                                                        return <option key={img} value={img}>{nameWithoutExt}</option>;
+                                                                    })}
+                                                                </select>
+                                                            </div>
                                                         </div>
                                                     </div>
 
