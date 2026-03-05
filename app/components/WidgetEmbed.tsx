@@ -1,87 +1,93 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function WidgetEmbed({ code }: { code?: string }) {
-    const [height, setHeight] = useState(200); // Standaard start-hoogte
-    const iframeRef = useRef<HTMLIFrameElement>(null);
-    const id = useRef(`widget-${Math.random().toString(36).substring(2, 9)}`).current;
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        // Luister naar resize-berichten vanuit de 'sandbox' iframe
-        const handleMessage = (event: MessageEvent) => {
-            if (event.data && event.data.type === "widget-resize" && event.data.id === id) {
-                // Soms geven widgets een hele kleine hoogte terug voordat ze laden
-                if (event.data.height > 50) {
-                    setHeight(event.data.height);
+        if (!containerRef.current || !code || code.trim() === "") return;
+
+        const container = containerRef.current;
+        container.innerHTML = "";
+
+        // 1. Parse the HTML snippet
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = code;
+
+        // 2. Extract scripts and normal DOM nodes
+        const scripts: HTMLScriptElement[] = [];
+        const nodesToAppend: Node[] = [];
+
+        Array.from(tempDiv.childNodes).forEach(node => {
+            if (node.nodeName === "SCRIPT" || node.nodeName === "CUSTOM-SCRIPT") {
+                scripts.push(node as HTMLScriptElement);
+            } else if (node.nodeName === "CUSTOM-WIDGET") {
+                const realDiv = document.createElement("div");
+                Array.from((node as HTMLElement).attributes).forEach(attr => {
+                    realDiv.setAttribute(attr.name, attr.value);
+                });
+                if ((node as HTMLElement).innerHTML) {
+                    realDiv.innerHTML = (node as HTMLElement).innerHTML;
                 }
+                nodesToAppend.push(realDiv);
+            } else {
+                nodesToAppend.push(node.cloneNode(true));
             }
+        });
+
+        // 3. Append the HTML container first (so LodgePilot script can find its target div!)
+        nodesToAppend.forEach(node => container.appendChild(node));
+
+        // 4. Append the scripts to the document to force browser execution natively
+        const addedScripts: HTMLScriptElement[] = [];
+
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement("script");
+
+            // Copy all attributes (src, type, etc)
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+
+            // Force synchronous execution so document.currentScript is not null!
+            // Essential for LodgePilot and similar DOM-aware scripts.
+            newScript.async = false;
+
+            // Copy inline content if it exists
+            if (oldScript.innerHTML) {
+                newScript.innerHTML = oldScript.innerHTML;
+            }
+
+            // Append to body natively. This solves the document.currentScript origin issue
+            // that caused crashes inside srcDoc iframes.
+            document.body.appendChild(newScript);
+            addedScripts.push(newScript);
+        });
+
+        // 5. Some rigid widgets expect the page to be "loading". Trigger synthetic events just in case.
+        const timer = setTimeout(() => {
+            window.dispatchEvent(new Event("DOMContentLoaded"));
+            window.dispatchEvent(new Event("load"));
+        }, 400);
+
+        return () => {
+            clearTimeout(timer);
+            container.innerHTML = ""; // Clean up the DOM
+            // We intentionally do NOT remove the scripts from body on unmount. 
+            // Most widgets inject global CSS/listeners, removing the script tag often doesn't undo that 
+            // and can break re-mounting if they expect the script to only load once.
         };
 
-        window.addEventListener("message", handleMessage);
-        return () => window.removeEventListener("message", handleMessage);
-    }, [id]);
+    }, [code]);
 
     if (!code || code.trim() === "") return null;
 
-    // We bouwen een virtueel geïsoleerd document, zodat widgets (zoals LodgePilot) 
-    // exact het gedrag krijgen van een normale webpagina.
-    const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <base target="_parent"> <!-- Zorgt dat links buiten de iframe openen -->
-            <style>
-                html, body { 
-                    margin: 0; 
-                    padding: 0; 
-                    background: transparent; 
-                    overflow: hidden; 
-                    font-family: sans-serif;
-                }
-            </style>
-        </head>
-        <body>
-            ${code}
-            
-            <script>
-                // Observeer de hoogte van dit document en stuur deze naar de React app
-                const notify = () => {
-                    const h = document.body.scrollHeight || document.documentElement.scrollHeight;
-                    window.parent.postMessage({ type: 'widget-resize', id: '${id}', height: h }, '*');
-                };
-                
-                // Houd wijzigingen in de gaten (bijv. als LodgePilot z'n iframe inlaadt)
-                const observer = new ResizeObserver(notify);
-                observer.observe(document.body);
-                
-                // Fallbacks voor onzichtbare/late aanpassingen
-                window.addEventListener('load', notify);
-                setTimeout(notify, 500);
-                setTimeout(notify, 2000);
-                setTimeout(notify, 5000);
-            </script>
-        </body>
-        </html>
-    `;
-
     return (
-        <iframe
-            ref={iframeRef}
-            srcDoc={html}
-            style={{
-                width: "100%",
-                height: `${height}px`,
-                border: "none",
-                marginTop: "15px",
-                transition: "height 0.3s ease-out",
-                overflow: "hidden",
-                display: "block",
-            }}
-            scrolling="no"
-            title="Widget Embed"
+        <div
+            ref={containerRef}
+            className="widget-embed-container"
+            style={{ marginTop: "20px", width: "100%", overflow: "hidden" }}
         />
     );
 }

@@ -14,8 +14,9 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
     const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
     const insights = appData.insights || [];
     const item = insights[itemIndex] as any;
+    const hasContent = (item?.detailContent && item.detailContent.trim() !== '' && item.detailContent.trim() !== '<p></p>' && item.detailContent.trim() !== '<p><br></p>') || (item?.widgetCode && item.widgetCode.trim() !== '');
 
-    if (!item || !item.detailContent) {
+    if (!item || !hasContent) {
         return (
             <div className="tab-content active" style={{ padding: "20px", textAlign: "center" }}>
                 <p>Item niet gevonden.</p>
@@ -89,14 +90,9 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
 
             {/* Content */}
             <div style={{ padding: "20px" }}>
-                <div
-                    className="rich-content"
-                    dangerouslySetInnerHTML={{ __html: parseTemplateString(item.detailContent || "", booking) }}
-                />
-
-                {item.widgetCode && item.widgetCode.trim() !== "" && (
-                    <WidgetEmbed code={item.widgetCode} />
-                )}
+                <div className="rich-content">
+                    <WidgetEmbed code={parseTemplateString(item.detailContent || "", booking)} />
+                </div>
             </div>
         </div>
     );

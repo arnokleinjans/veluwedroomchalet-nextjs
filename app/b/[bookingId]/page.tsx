@@ -12,11 +12,12 @@ export default function Home() {
   return (
     <div className="tab-content active" id="home-tab">
       <div id="insights-container">
-        {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string }, index: number) => {
+        {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string, widgetCode?: string }, index: number) => {
           const isImage = insight.icon && insight.icon.includes('.');
           const rawDetail = (insight.detailContent || '').trim();
+          const hasWidgetCode = (insight.widgetCode || '').trim().length > 0;
           // TipTap laat vaak lege tags achter als een veld is leeggemaakt.
-          const hasDetail = rawDetail.length > 0 && rawDetail !== '<p></p>' && rawDetail !== '<p><br></p>';
+          const hasDetail = (rawDetail.length > 0 && rawDetail !== '<p></p>' && rawDetail !== '<p><br></p>') || hasWidgetCode;
 
           const cardContent = (
             <>

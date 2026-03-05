@@ -89,14 +89,9 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
 
             {/* Content */}
             <div style={{ padding: "20px" }}>
-                <div
-                    className="rich-content"
-                    dangerouslySetInnerHTML={{ __html: parseTemplateString(tip.desc, booking) }}
-                />
-
-                {tip.widgetCode && tip.widgetCode.trim() !== "" && (
-                    <WidgetEmbed code={tip.widgetCode} />
-                )}
+                <div className="rich-content">
+                    <WidgetEmbed code={parseTemplateString(tip.desc, booking)} />
+                </div>
 
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "20px" }}>
                     {tip.url && tip.url.length > 0 && (

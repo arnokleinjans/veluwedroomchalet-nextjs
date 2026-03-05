@@ -1,6 +1,7 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
+import { Node, mergeAttributes } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -12,7 +13,112 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Highlight } from "@tiptap/extension-highlight";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Image } from "@tiptap/extension-image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+export const RawScriptNode = Node.create({
+    name: "script",
+    group: "block",
+    atom: true, // atomic, cannot edit text inside it
+    addAttributes() {
+        return {
+            src: { default: null },
+            type: { default: null },
+            async: { default: null },
+            defer: { default: null },
+            innerHTML: { default: null }
+        };
+    },
+    parseHTML() {
+        return [
+            {
+                tag: "script",
+                getAttrs: (node) => ({
+                    innerHTML: (node as HTMLElement).innerHTML || ""
+                }),
+            },
+            {
+                tag: "custom-script",
+                getAttrs: (node) => ({
+                    innerHTML: (node as HTMLElement).innerHTML || ""
+                }),
+            }
+        ];
+    },
+    renderHTML({ HTMLAttributes }) {
+        const { innerHTML, ...attrs } = HTMLAttributes;
+        return ["custom-script", attrs, innerHTML || ""];
+    },
+    addNodeView() {
+        return ReactNodeViewRenderer((props) => (
+            <NodeViewWrapper style={{ padding: "10px", backgroundColor: "#ffebee", border: "1px dashed #d32f2f", borderRadius: "5px", color: "#d32f2f", fontFamily: "monospace", fontSize: "0.8rem", margin: "10px 0" }}>
+                ⚠️ {props.node.attrs.src ? `Widget Script geladen (${props.node.attrs.src})` : "Custom Widget Script Injected"}
+            </NodeViewWrapper>
+        ));
+    },
+});
+
+export const WidgetDivNode = Node.create({
+    name: "widgetDiv",
+    group: "block",
+    atom: true,
+    addAttributes() {
+        return {
+            "data-reservation-widget-id": { default: null },
+            "data-widget": { default: null },
+            id: { default: null },
+            class: { default: null },
+            style: { default: null }
+        };
+    },
+    parseHTML() {
+        return [
+            { tag: "div[data-reservation-widget-id]" },
+            { tag: "div[data-widget]" },
+            { tag: "custom-widget" },
+        ];
+    },
+    renderHTML({ HTMLAttributes }) {
+        return ["custom-widget", mergeAttributes(HTMLAttributes)];
+    },
+    addNodeView() {
+        return ReactNodeViewRenderer((props) => (
+            <NodeViewWrapper style={{ padding: "10px", backgroundColor: "#e3f2fd", border: "1px dashed #1976d2", borderRadius: "5px", color: "#1976d2", fontFamily: "monospace", fontSize: "0.8rem", margin: "10px 0" }}>
+                📅 Widget Container (ID: {props.node.attrs["data-reservation-widget-id"] || "Aangepaste Widget"})
+            </NodeViewWrapper>
+        ));
+    },
+});
+
+export const IframeNode = Node.create({
+    name: "iframe",
+    group: "block",
+    atom: true,
+    addAttributes() {
+        return {
+            src: { default: null },
+            width: { default: null },
+            height: { default: null },
+            style: { default: null },
+            frameborder: { default: null },
+            allowfullscreen: { default: null },
+            allow: { default: null },
+            title: { default: null }
+        };
+    },
+    parseHTML() {
+        return [{ tag: "iframe" }];
+    },
+    renderHTML({ HTMLAttributes }) {
+        return ["iframe", mergeAttributes(HTMLAttributes)];
+    },
+    addNodeView() {
+        return ReactNodeViewRenderer((props) => (
+            <NodeViewWrapper style={{ padding: "10px", backgroundColor: "#e8f5e9", border: "1px dashed #388e3c", borderRadius: "5px", color: "#388e3c", fontFamily: "monospace", fontSize: "0.8rem", margin: "10px 0" }}>
+                🎞️ Video / Iframe Embed ({props.node.attrs.src})
+            </NodeViewWrapper>
+        ));
+    }
+});
 
 const btn = (active: boolean) => ({
     padding: "4px 8px",
@@ -45,6 +151,8 @@ const HIGHLIGHTS = [
 ];
 
 function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
+    const [snippetCode, setSnippetCode] = useState("");
+
     if (!editor) return null;
 
     const addLink = () => {
@@ -55,100 +163,124 @@ function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
     };
 
     return (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", padding: "8px", borderBottom: "1px solid #ddd", alignItems: "center" }}>
-            {/* Undo / Redo */}
-            <button type="button" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} style={{ ...btn(false), opacity: editor.can().undo() ? 1 : 0.4 }}>↩️</button>
-            <button type="button" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} style={{ ...btn(false), opacity: editor.can().redo() ? 1 : 0.4 }}>↪️</button>
+        <div style={{ padding: "8px", borderBottom: "1px solid #ddd", backgroundColor: "#fdfcf9" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", alignItems: "center" }}>
+                {/* Undo / Redo */}
+                <button type="button" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} style={{ ...btn(false), opacity: editor.can().undo() ? 1 : 0.4 }}>↩️</button>
+                <button type="button" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} style={{ ...btn(false), opacity: editor.can().redo() ? 1 : 0.4 }}>↪️</button>
 
-            <div style={sep} />
+                <div style={sep} />
 
-            {/* Tekst opmaak */}
-            <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} style={btn(editor.isActive("bold"))}>B</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} style={btn(editor.isActive("italic"))}>I</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()} style={btn(editor.isActive("strike"))}>S̶</button>
+                {/* Tekst opmaak */}
+                <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} style={btn(editor.isActive("bold"))}>B</button>
+                <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} style={btn(editor.isActive("italic"))}>I</button>
+                <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()} style={btn(editor.isActive("strike"))}>S̶</button>
 
-            <div style={sep} />
+                <div style={sep} />
 
-            {/* Kopjes */}
-            <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} style={btn(editor.isActive("heading", { level: 3 }))}>H3</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()} style={btn(editor.isActive("heading", { level: 4 }))}>H4</button>
+                {/* Kopjes */}
+                <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} style={btn(editor.isActive("heading", { level: 3 }))}>H3</button>
+                <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()} style={btn(editor.isActive("heading", { level: 4 }))}>H4</button>
 
-            <div style={sep} />
+                <div style={sep} />
 
-            {/* Lijsten */}
-            <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} style={btn(editor.isActive("bulletList"))}>• Lijst</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} style={btn(editor.isActive("orderedList"))}>1. Lijst</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} style={btn(editor.isActive("blockquote"))}>❝ Citaat</button>
+                {/* Lijsten */}
+                <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} style={btn(editor.isActive("bulletList"))}>• Lijst</button>
+                <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} style={btn(editor.isActive("orderedList"))}>1. Lijst</button>
+                <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} style={btn(editor.isActive("blockquote"))}>❝ Citaat</button>
 
-            <div style={sep} />
+                <div style={sep} />
 
-            {/* Uitlijning */}
-            <button type="button" onClick={() => editor.chain().focus().setTextAlign("left").run()} style={btn(editor.isActive({ textAlign: "left" }))}>⬅</button>
-            <button type="button" onClick={() => editor.chain().focus().setTextAlign("center").run()} style={btn(editor.isActive({ textAlign: "center" }))}>⬛</button>
-            <button type="button" onClick={() => editor.chain().focus().setTextAlign("right").run()} style={btn(editor.isActive({ textAlign: "right" }))}>➡</button>
+                {/* Uitlijning */}
+                <button type="button" onClick={() => editor.chain().focus().setTextAlign("left").run()} style={btn(editor.isActive({ textAlign: "left" }))}>⬅</button>
+                <button type="button" onClick={() => editor.chain().focus().setTextAlign("center").run()} style={btn(editor.isActive({ textAlign: "center" }))}>⬛</button>
+                <button type="button" onClick={() => editor.chain().focus().setTextAlign("right").run()} style={btn(editor.isActive({ textAlign: "right" }))}>➡</button>
 
-            <div style={sep} />
+                <div style={sep} />
 
-            {/* Kleur */}
-            <select
-                onChange={e => { if (e.target.value === "reset") { editor.chain().focus().unsetColor().run(); } else { editor.chain().focus().setColor(e.target.value).run(); } e.target.value = ""; }}
-                style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", cursor: "pointer" }}
-                defaultValue=""
-            >
-                <option value="" disabled>🎨 Kleur</option>
-                {COLORS.map(c => <option key={c.value} value={c.value} style={{ color: c.value }}>● {c.label}</option>)}
-                <option value="reset">✕ Geen kleur</option>
-            </select>
+                {/* Kleur */}
+                <select
+                    onChange={e => { if (e.target.value === "reset") { editor.chain().focus().unsetColor().run(); } else { editor.chain().focus().setColor(e.target.value).run(); } e.target.value = ""; }}
+                    style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", cursor: "pointer" }}
+                    defaultValue=""
+                >
+                    <option value="" disabled>🎨 Kleur</option>
+                    {COLORS.map(c => <option key={c.value} value={c.value} style={{ color: c.value }}>● {c.label}</option>)}
+                    <option value="reset">✕ Geen kleur</option>
+                </select>
 
-            {/* Markering */}
-            <select
-                onChange={e => { if (e.target.value === "reset") { editor.chain().focus().unsetHighlight().run(); } else { editor.chain().focus().toggleHighlight({ color: e.target.value }).run(); } e.target.value = ""; }}
-                style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", cursor: "pointer" }}
-                defaultValue=""
-            >
-                <option value="" disabled>🖍️ Markeer</option>
-                {HIGHLIGHTS.map(h => <option key={h.value} value={h.value}>■ {h.label}</option>)}
-                <option value="reset">✕ Geen markering</option>
-            </select>
+                {/* Markering */}
+                <select
+                    onChange={e => { if (e.target.value === "reset") { editor.chain().focus().unsetHighlight().run(); } else { editor.chain().focus().toggleHighlight({ color: e.target.value }).run(); } e.target.value = ""; }}
+                    style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", cursor: "pointer" }}
+                    defaultValue=""
+                >
+                    <option value="" disabled>🖍️ Markeer</option>
+                    {HIGHLIGHTS.map(h => <option key={h.value} value={h.value}>■ {h.label}</option>)}
+                    <option value="reset">✕ Geen markering</option>
+                </select>
 
-            <div style={sep} />
+                <div style={sep} />
 
-            {/* Link */}
-            <button type="button" onClick={addLink} style={btn(editor.isActive("link"))}>🔗 Link</button>
-            {editor.isActive("link") && (
-                <button type="button" onClick={() => editor.chain().focus().unsetLink().run()} style={btn(false)}>❌</button>
-            )}
+                {/* Link */}
+                <button type="button" onClick={addLink} style={btn(editor.isActive("link"))}>🔗 Link</button>
+                {editor.isActive("link") && (
+                    <button type="button" onClick={() => editor.chain().focus().unsetLink().run()} style={btn(false)}>❌</button>
+                )}
 
-            {/* Horizontale lijn */}
-            <button type="button" onClick={() => editor.chain().focus().setHorizontalRule().run()} style={btn(false)}>— Lijn</button>
+                {/* Horizontale lijn */}
+                <button type="button" onClick={() => editor.chain().focus().setHorizontalRule().run()} style={btn(false)}>— Lijn</button>
 
-            <div style={sep} />
+                <div style={sep} />
 
-            {/* Tabel */}
-            <button type="button" onClick={() => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()} style={btn(false)}>📊 Tabel</button>
-            {editor.isActive("table") && (
-                <>
-                    <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} style={btn(false)}>+ Kolom</button>
-                    <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} style={btn(false)}>− Kolom</button>
-                    <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} style={btn(false)}>+ Rij</button>
-                    <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} style={btn(false)}>− Rij</button>
-                    <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} style={{ ...btn(false), borderColor: "#d9534f", color: "#d9534f" }}>🗑️ Tabel</button>
-                </>
-            )}
+                {/* Tabel */}
+                <button type="button" onClick={() => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()} style={btn(false)}>📊 Tabel</button>
+                {editor.isActive("table") && (
+                    <>
+                        <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} style={btn(false)}>+ Kolom</button>
+                        <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} style={btn(false)}>− Kolom</button>
+                        <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} style={btn(false)}>+ Rij</button>
+                        <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} style={btn(false)}>− Rij</button>
+                        <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} style={{ ...btn(false), borderColor: "#d9534f", color: "#d9534f" }}>🗑️ Tabel</button>
+                    </>
+                )}
 
-            {images && images.length > 0 && (
-                <>
-                    <div style={sep} />
-                    <select
-                        onChange={e => { if (e.target.value) { editor.chain().focus().setImage({ src: `/${e.target.value}`, alt: e.target.value.split('/').pop() }).run(); e.target.value = ""; } }}
-                        style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", cursor: "pointer" }}
-                        defaultValue=""
-                    >
-                        <option value="" disabled>📷 Afbeelding</option>
-                        {images.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
-                    </select>
-                </>
-            )}
+                {images && images.length > 0 && (
+                    <>
+                        <div style={sep} />
+                        <select
+                            onChange={e => { if (e.target.value) { editor.chain().focus().setImage({ src: `/${e.target.value}`, alt: e.target.value.split('/').pop() }).run(); e.target.value = ""; } }}
+                            style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", cursor: "pointer" }}
+                            defaultValue=""
+                        >
+                            <option value="" disabled>📷 Afbeelding</option>
+                            {images.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
+                        </select>
+                    </>
+                )}
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", marginTop: "10px", alignItems: "center", borderTop: "1px dashed #ccc", paddingTop: "10px" }}>
+                <input
+                    type="text"
+                    value={snippetCode}
+                    onChange={(e) => setSnippetCode(e.target.value)}
+                    placeholder="Extra Code Snippet (HTML Widgets, Youtube Embeds, etc.)"
+                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "monospace", fontSize: "0.8rem" }}
+                />
+                <button
+                    type="button"
+                    onClick={() => {
+                        if (snippetCode) {
+                            editor.chain().focus().insertContent(snippetCode).run();
+                            setSnippetCode("");
+                        }
+                    }}
+                    style={{ backgroundColor: "#4A5D23", color: "white", padding: "8px 12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+                >
+                    Voeg in
+                </button>
+            </div>
         </div>
     );
 }
@@ -168,6 +300,9 @@ export default function RichTextEditor({ content, onChange, images }: { content:
             Highlight.configure({ multicolor: true }),
             TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
             Image.configure({ inline: false, allowBase64: false }),
+            RawScriptNode,
+            WidgetDivNode,
+            IframeNode,
         ],
         content: content || "",
         onUpdate: ({ editor }) => {
