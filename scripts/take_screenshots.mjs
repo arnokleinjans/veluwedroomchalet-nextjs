@@ -1,6 +1,8 @@
 import puppeteer from 'puppeteer';
+import os from 'os';
+import path from 'path';
 
-const OUTPUT_DIR = '/Users/kleinjansarno/Obsidian/Prive/Prive/Veluwedroomchalet';
+const OUTPUT_DIR = path.join(os.homedir(), 'Obsidian', 'Prive', 'Veluwedroomchalet');
 const BASE_URL = 'http://localhost:3000/beheer-vlp-x9q2w';
 
 const browser = await puppeteer.launch({ headless: true });

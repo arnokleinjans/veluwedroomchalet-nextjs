@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { checkRateLimit } from '../../utils/rateLimit';
 
 export async function POST(req: Request) {
+    // Rate limit: max 30 requests per minute
+    const limit = checkRateLimit('summarize-api');
+    if (!limit.allowed) {
+        return NextResponse.json(
+            { error: `Te veel verzoeken. Probeer het over ${Math.ceil((limit.retryAfterMs || 0) / 1000)} seconden opnieuw.` },
+            { status: 429 }
+        );
+    }
+
     try {
         const { url, prompt, maxChars } = await req.json();
         const charLimit = Math.min(Math.max(maxChars || 4000, 500), 15000);

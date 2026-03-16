@@ -3,12 +3,6 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 let kvInstance: Redis | null = null;
 export function getKV(): Redis {
-    // VERCEL DEBUG SCANNER
-    console.log("KV INIT ENV DUMP:");
-    console.log("- KV_REST_API_URL exists:", !!process.env.KV_REST_API_URL);
-    console.log("- KV_REST_API_TOKEN exists:", !!process.env.KV_REST_API_TOKEN);
-    console.log("- UPSTASH_REST_URL exists:", !!process.env.UPSTASH_REDIS_REST_URL);
-
     if (!kvInstance) {
         kvInstance = new Redis({
             url: (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) as string,
@@ -125,22 +119,58 @@ const defaultAppData = {
     "chatbotContext": ""
 };
 
-// Main function to retrieve data from Vercel KV
+// Cached read for guest-facing pages (revalidates every 60 seconds)
+// This prevents every single page view from hitting Upstash Redis
+let cachedData: typeof defaultAppData | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 60_000; // 60 seconds
+
 export async function getAppData() {
+    const now = Date.now();
+    if (cachedData && (now - cacheTimestamp) < CACHE_TTL_MS) {
+        return cachedData;
+    }
+
+    try {
+        const kv = getKV();
+        const data = await kv.get('veluwe_app_data');
+        if (!data) {
+            await kv.set('veluwe_app_data', defaultAppData);
+            cachedData = defaultAppData;
+            cacheTimestamp = now;
+            return defaultAppData;
+        }
+        cachedData = data as typeof defaultAppData;
+        cacheTimestamp = now;
+        return cachedData;
+    } catch (error) {
+        console.error("Vercel KV Error: ", error);
+        return cachedData || defaultAppData;
+    }
+}
+
+// Uncached read for admin panel — always gets fresh data
+export async function getAppDataFresh() {
     noStore();
     try {
         const kv = getKV();
         const data = await kv.get('veluwe_app_data');
         if (!data) {
-            // Seed the database with defaults if it's completely empty
-            const kv = getKV();
             await kv.set('veluwe_app_data', defaultAppData);
             return defaultAppData;
         }
+        // Also update cache so guest pages get the latest after admin saves
+        cachedData = data as typeof defaultAppData;
+        cacheTimestamp = Date.now();
         return data as typeof defaultAppData;
     } catch (error) {
         console.error("Vercel KV Error: ", error);
-        // Fallback to static defaults if KV is not configured yet (e.g. local without .env)
         return defaultAppData;
     }
+}
+
+// Invalidate the in-memory cache (call after admin saves)
+export function invalidateCache() {
+    cachedData = null;
+    cacheTimestamp = 0;
 }

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import {
-    updatePropertyInfo, addBooking, removeBooking, fetchAdminData,
-    updateHeaderImage, updateInsights, updateVideos, updateOmgeving,
-    updateChatbotContext, updateAiSettings
+    updateGeneralInfo, addBooking, removeBooking, fetchAdminData,
+    updateInsights, updateVideos, updateOmgevingWithAi,
+    updateChatbotContext
 } from "../actions/adminActions";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
@@ -128,17 +128,17 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         else setSaveMessage("❌ " + res.error);
     };
 
-    const handleSaveGeneral = () => runSaveAction(async () => {
-        await updateHeaderImage(headerImage);
-        return await updatePropertyInfo(propName, hostName, phone, subtitle);
-    }, "Algemene info succesvol opgeslagen!");
+    const handleSaveGeneral = () => runSaveAction(
+        () => updateGeneralInfo(propName, hostName, phone, subtitle, headerImage),
+        "Algemene info succesvol opgeslagen!"
+    );
 
     const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!");
     const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!");
-    const handleSaveOmgeving = () => runSaveAction(async () => {
-        await updateOmgeving(omgeving);
-        return await updateAiSettings(aiPrompt, aiMaxChars);
-    }, "Omgeving succesvol opgeslagen!");
+    const handleSaveOmgeving = () => runSaveAction(
+        () => updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
+        "Omgeving succesvol opgeslagen!"
+    );
     const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
 
     const handleAiSummary = async (idx: number) => {

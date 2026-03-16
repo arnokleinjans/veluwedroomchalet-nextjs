@@ -3,7 +3,7 @@ import { BookingProvider, BookingInfo } from "../../context/BookingContext";
 import { notFound } from "next/navigation";
 import ClientLayout from "../../components/ClientLayout";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // Cache guest pages for 60 seconds (ISR)
 
 export default async function BookingLayout({
     children,

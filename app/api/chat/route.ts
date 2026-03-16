@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { getAppData } from '../../utils/db';
+import { checkRateLimit } from '../../utils/rateLimit';
 
 export async function POST(req: Request) {
+    // Rate limit: max 30 requests per minute
+    const limit = checkRateLimit('chat-api');
+    if (!limit.allowed) {
+        return NextResponse.json(
+            { reply: `Te veel verzoeken. Probeer het over ${Math.ceil((limit.retryAfterMs || 0) / 1000)} seconden opnieuw.` },
+            { status: 429 }
+        );
+    }
+
     try {
         const { message, history, guestContext } = await req.json();
 
