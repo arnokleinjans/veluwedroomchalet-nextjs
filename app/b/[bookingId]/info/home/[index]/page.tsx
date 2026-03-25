@@ -28,70 +28,74 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
     const hasImage = item.image && item.image.length > 0;
 
     return (
-        <div className="tab-content active" style={{ padding: 0 }}>
-            {/* Header met afbeelding */}
-            {hasImage ? (
-                <div style={{
-                    position: "relative",
-                    width: "100%",
-                    height: "200px",
-                    borderRadius: "0 0 16px 16px",
-                    overflow: "hidden",
-                }}>
-                    <img
-                        src={`/${item.image}`}
-                        alt={item.title}
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                        }}
-                    />
-                    <Link
-                        href={`/b/${bookingId}`}
-                        style={{
-                            position: "absolute",
-                            top: "12px",
-                            left: "12px",
-                            backgroundColor: "rgba(0,0,0,0.45)",
-                            color: "white",
-                            borderRadius: "50%",
-                            width: "36px",
-                            height: "36px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            textDecoration: "none",
-                            fontSize: "1.2rem",
-                            backdropFilter: "blur(4px)",
-                        }}
-                    >
-                        ←
-                    </Link>
-                </div>
-            ) : (
-                <div style={{ padding: "12px 12px 0" }}>
-                    <Link
-                        href={`/b/${bookingId}`}
-                        style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            color: "var(--primary-color)",
-                            textDecoration: "none",
-                            fontSize: "0.95rem",
-                            fontWeight: "bold",
-                        }}
-                    >
-                        ← Terug
-                    </Link>
-                </div>
-            )}
+        <div className="tab-content active" style={{ padding: 0, display: "flex", justifyItems: "center", justifyContent: "center" }}>
+            <div className="max-w-4xl w-full bg-white min-h-screen md:min-h-[auto] md:rounded-2xl md:shadow-sm md:overflow-hidden">
+                {/* Header met afbeelding */}
+                {hasImage ? (
+                    <div className="rounded-b-[16px] md:rounded-none" style={{
+                        position: "relative",
+                        width: "100%",
+                        height: "200px",
+                        overflow: "hidden",
+                    }}>
+                        <img
+                            src={`/${item.image}`}
+                            alt={item.title}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                            }}
+                        />
+                        <Link
+                            href={`/b/${bookingId}`}
+                            style={{
+                                position: "absolute",
+                                top: "12px",
+                                left: "12px",
+                                backgroundColor: "rgba(0,0,0,0.45)",
+                                color: "white",
+                                borderRadius: "50%",
+                                width: "36px",
+                                height: "36px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                textDecoration: "none",
+                                fontSize: "1.2rem",
+                                backdropFilter: "blur(4px)",
+                            }}
+                        >
+                            ←
+                        </Link>
+                    </div>
+                ) : (
+                    <div style={{ padding: "12px 12px 0" }}>
+                        <Link
+                            href={`/b/${bookingId}`}
+                            style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                color: "var(--primary-color)",
+                                textDecoration: "none",
+                                fontSize: "0.95rem",
+                                fontWeight: "bold",
+                            }}
+                        >
+                            ← Terug
+                        </Link>
+                    </div>
+                )}
 
-            {/* Content */}
-            <div style={{ padding: "20px" }}>
-                <div className="rich-content">
-                    <WidgetEmbed code={parseTemplateString(item.detailContent || "", booking)} />
+                {/* Content */}
+                <div style={{ padding: "20px" }}>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4" style={{ color: "var(--primary-color)" }}>
+                        {parseTemplateString(item.title || "", booking)}
+                    </h2>
+                    <div className="rich-content">
+                        <WidgetEmbed code={parseTemplateString(item.detailContent || "", booking)} />
+                    </div>
                 </div>
             </div>
         </div>

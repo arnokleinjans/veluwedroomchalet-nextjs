@@ -36,20 +36,13 @@
 }
 
 body {
-    background-color: #e5e5e5;
+    background-color: var(--bg-color);
     color: var(--foreground);
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
     min-height: 100vh;
     min-height: 100dvh;
     margin: 0;
-}
-
-@media (min-width: 415px) {
-    body {
-        align-items: center;
-    }
 }
 
 h1,
@@ -61,49 +54,43 @@ h3 {
 .app-container {
     background-color: var(--bg-color);
     width: 100%;
-    max-width: 414px;
-    height: 100dvh;
-    height: 100vh;
-    /* fallback for older browsers */
-    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
-    border-radius: 0;
-}
-
-@media (min-width: 415px) {
-    .app-container {
-        height: 90vh;
-        border-radius: 30px;
-        margin: 20px 0;
-    }
 }
 
 .app-header {
-    height: 250px;
+    height: 350px;
     background-size: cover;
     background-position: center;
     position: relative;
     flex-shrink: 0;
 }
 
+@media (min-width: 768px) {
+    .app-header {
+        height: 500px;
+    }
+}
+
 .app-header-compact {
-    height: 85px;
-    /* Fixed height to prevent flex squish */
-    padding-top: 35px;
-    /* Push the title down below the time/battery icons */
+    height: 56px !important;
+    max-height: 56px !important;
+    min-height: 56px !important;
+    padding-top: env(safe-area-inset-top, 0px);
     background-color: var(--primary-color);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
-    /* CRUCIAL: Do not let Chrome shrink this on small screens */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     z-index: 50;
     width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .app-header-compact h2 {
@@ -111,6 +98,11 @@ h3 {
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90vw;
 }
 
 .header-overlay {
@@ -145,20 +137,29 @@ h3 {
 
 .app-content {
     flex: 1;
-    overflow-y: auto;
     padding: 20px;
-    padding-bottom: 80px;
-    /* Space for nav */
+    padding-bottom: 90px;
     background-color: var(--bg-color);
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE/Edge */
 }
 
-.app-content::-webkit-scrollbar {
-    display: none;
-    /* Chrome/Safari */
+@media (min-width: 768px) {
+    .app-content {
+        padding: 0 20px 40px 20px;
+    }
+    .app-content.detail-page {
+        padding-top: 110px;
+        max-width: 1280px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+.desktop-nav-inner {
+    width: 100%;
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1rem 20px;
 }
 
 /* Tab contents */
@@ -372,8 +373,12 @@ h3 {
     justify-content: space-around;
     align-items: center;
     z-index: 100;
-    max-width: 414px;
-    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .bottom-nav {
+        display: none;
+    }
 }
 
 .nav-item {

@@ -11,7 +11,8 @@ export default function Home() {
 
   return (
     <div className="tab-content active" id="home-tab">
-      <div id="insights-container">
+      <div className="md:-mt-16 mt-[-2rem] relative z-30 space-y-8 md:space-y-12">
+        <div id="insights-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string, widgetCode?: string }, index: number) => {
           const isImage = insight.icon && insight.icon.includes('.');
           const rawDetail = (insight.detailContent || '').trim();
@@ -47,7 +48,7 @@ export default function Home() {
               <Link
                 key={index}
                 href={`/b/${booking?.id}/info/home/${index}`}
-                className="card clickable"
+                className="card clickable h-full m-0"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 {cardContent}
@@ -56,11 +57,12 @@ export default function Home() {
           }
 
           return (
-            <div key={index} className="card">
+            <div key={index} className="card h-full m-0">
               {cardContent}
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

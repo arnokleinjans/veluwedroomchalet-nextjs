@@ -14,34 +14,36 @@ export default async function Omgeving({ params }: { params: { bookingId: string
 
     return (
         <div className="tab-content active" id="omgeving-tab">
-            <div className="info-list" id="omgeving-container">
-                {items.map((tip: any, index: number) => (
-                    <Link
-                        key={index}
-                        href={`/b/${bookingId}/omgeving/${index}`}
-                        className="info-item"
-                        style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", cursor: "pointer", gap: "14px", padding: "12px" }}
-                    >
-                        {tip.image && (
-                            <img
-                                src={`/${tip.image}`}
-                                alt={tip.name}
-                                style={{
-                                    width: "80px",
-                                    height: "80px",
-                                    borderRadius: "10px",
-                                    objectFit: "cover",
-                                    flexShrink: 0,
-                                }}
-                            />
-                        )}
-                        <h4 style={{ color: "var(--primary-color)", flex: 1, margin: 0, marginLeft: tip.image ? 0 : "94px" }}>
-                            {parseTemplateString(tip.name, booking)}
-                        </h4>
-                        {/* @ts-ignore */}
-                        <ion-icon name="chevron-forward-outline" style={{ fontSize: "1.2rem", color: "var(--text-secondary)", flexShrink: 0 }}></ion-icon>
-                    </Link>
-                ))}
+            <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="omgeving-container">
+                    {items.map((tip: any, index: number) => (
+                        <Link
+                            key={index}
+                            href={`/b/${bookingId}/omgeving/${index}`}
+                            className="card clickable bg-white m-0 h-full"
+                            style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: "14px", padding: "12px" }}
+                        >
+                            {tip.image && (
+                                <img
+                                    src={`/${tip.image}`}
+                                    alt={tip.name}
+                                    style={{
+                                        width: "80px",
+                                        height: "80px",
+                                        borderRadius: "10px",
+                                        objectFit: "cover",
+                                        flexShrink: 0,
+                                    }}
+                                />
+                            )}
+                            <h4 style={{ color: "var(--primary-color)", flex: 1, margin: 0, marginLeft: tip.image ? 0 : "4px" }}>
+                                {parseTemplateString(tip.name, booking)}
+                            </h4>
+                            {/* @ts-ignore */}
+                            <ion-icon name="chevron-forward-outline" style={{ fontSize: "1.2rem", color: "var(--text-secondary)", flexShrink: 0 }}></ion-icon>
+                        </Link>
+                    ))}
+                </div>
             </div>
         </div>
     );

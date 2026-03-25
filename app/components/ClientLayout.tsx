@@ -65,38 +65,55 @@ export default function ClientLayout({ children, basePath = "", appData, booking
     let pageTitle = subtitle;
     const omgevingDetailMatch = pathname.match(/\/omgeving\/(\d+)/);
     const homeDetailMatch = pathname.match(/\/info\/home\/(\d+)/);
-    if (homeDetailMatch) {
-        const itemIndex = parseInt(homeDetailMatch[1], 10);
-        const insights = appData.insights || [];
-        pageTitle = (insights[itemIndex] as any)?.title || subtitle;
-    }
-    else if (pathname.includes("/info")) pageTitle = "Videoinstructies";
-    else if (omgevingDetailMatch) {
-        const tipIndex = parseInt(omgevingDetailMatch[1], 10);
-        const omgevingItems = (appData as any).omgeving || (appData as any).restaurants || [];
-        pageTitle = omgevingItems[tipIndex]?.name || "In de Omgeving";
-    }
+    
+    // For detail pages, we keep the main category title. The specific item title will be shown inside the card.
+    if (pathname.includes("/info")) pageTitle = "Videoinstructies";
     else if (pathname.includes("/omgeving")) pageTitle = "In de Omgeving";
     else if (pathname.includes("/chat")) pageTitle = "Digitale Conciërge";
+    else if (pathname === basePath || pathname === `${basePath}/` || homeDetailMatch) {
+        pageTitle = subtitle;
+    }
 
     return (
-        <div className="app-container" id="main-app-container">
+        <div className="font-sans text-[var(--text-primary)] antialiased min-h-screen app-container" id="main-app-container">
+            {/* Desktop Top Nav */}
+            <div className="hidden md:block fixed top-0 left-0 right-0 z-[60] w-full bg-[rgba(253,251,247,0.9)] backdrop-blur-md border-b border-[var(--border-color)]">
+                <div className="desktop-nav-inner flex items-center relative">
+                    <div className="flex-1 flex justify-start">
+                        <h1 className="text-xl font-bold" style={{ color: "var(--primary-color)" }}>{appData.property.name}</h1>
+                    </div>
+                    {!isHomePage && (
+                        <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 justify-center w-auto text-center pointer-events-none">
+                            <h2 className="text-xl font-bold" style={{ color: "var(--primary-color)" }}>{pageTitle}</h2>
+                        </div>
+                    )}
+                    <div className="flex-1 flex justify-end flex-shrink-0">
+                        <nav className="flex items-center gap-6 whitespace-nowrap">
+                            <Link href={`${basePath}/`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">Home</Link>
+                            <Link href={`${basePath}/info`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">Video's</Link>
+                            <Link href={`${basePath}/omgeving`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">Omgeving</Link>
+                            <Link href={`${basePath}/chat`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">Conciërge</Link>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
             {isHomePage ? (
-                <header className="app-header" style={{ backgroundImage: `url('/${appData.property.headerImage}')` }}>
-                    <div className="header-overlay">
-                        <div className="welcome-text">
+                <header className="app-header w-full flex-shrink-0" style={{ backgroundImage: `url('/${appData.property.headerImage}')` }}>
+                    <div className="header-overlay flex md:justify-center md:items-center">
+                        <div className="welcome-text max-w-[1280px] mx-auto w-full md:text-center">
                             <p className="greeting" id="greeting-text">{subtitle}</p>
-                            <h1 id="property-name">{appData.property.name}</h1>
+                            <h1 id="property-name" className="md:hidden">{appData.property.name}</h1>
                         </div>
                     </div>
                 </header>
             ) : (
-                <header className="app-header-compact">
+                <header className="app-header-compact md:!hidden">
                     <h2>{pageTitle}</h2>
                 </header>
             )}
 
-            <main className="app-content" id="main-content">
+            <main className={`app-content w-full ${!isHomePage ? 'detail-page' : ''}`} id="main-content">
                 {children}
             </main>
 

@@ -56,55 +56,59 @@ export default function ChatPage() {
     };
 
     return (
-        <div className="tab-content active" id="contact-tab" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-            <div id="chat-window" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "10px", backgroundColor: "var(--card-bg)", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                {messages.map((msg, idx) => (
-                    <div key={idx} style={{
-                        alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                        backgroundColor: msg.role === "user" ? "var(--primary-color)" : "#f1f1f1",
-                        color: msg.role === "user" ? "white" : "var(--text-primary)",
-                        padding: "10px 14px",
-                        borderRadius: "16px",
-                        maxWidth: "85%",
-                        borderBottomRightRadius: msg.role === "user" ? "4px" : "16px",
-                        borderBottomLeftRadius: msg.role === "bot" ? "4px" : "16px",
-                        fontSize: "0.95rem"
-                    }}>
-                        {msg.text}
-                    </div>
-                ))}
-                {isLoading && (
-                    <div style={{ alignSelf: "flex-start", backgroundColor: "#f1f1f1", padding: "10px 14px", borderRadius: "16px", fontSize: "0.9rem", color: "var(--text-secondary)" }}>
-                        Aan het typen...
-                    </div>
-                )}
-                <div ref={endOfMessagesRef} />
-            </div>
+        <div className="tab-content active" id="contact-tab">
+            <div style={{ display: "flex", justifyContent: "center" }}>
+            <div className="max-w-4xl w-full flex flex-col h-[calc(100vh-200px)] md:h-[calc(100vh-260px)]">
+                <div id="chat-window" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "10px", backgroundColor: "var(--card-bg)", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {messages.map((msg, idx) => (
+                        <div key={idx} style={{
+                            alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+                            backgroundColor: msg.role === "user" ? "var(--primary-color)" : "#f1f1f1",
+                            color: msg.role === "user" ? "white" : "var(--text-primary)",
+                            padding: "10px 14px",
+                            borderRadius: "16px",
+                            maxWidth: "85%",
+                            borderBottomRightRadius: msg.role === "user" ? "4px" : "16px",
+                            borderBottomLeftRadius: msg.role === "bot" ? "4px" : "16px",
+                            fontSize: "0.95rem"
+                        }}>
+                            {msg.text}
+                        </div>
+                    ))}
+                    {isLoading && (
+                        <div style={{ alignSelf: "flex-start", backgroundColor: "#f1f1f1", padding: "10px 14px", borderRadius: "16px", fontSize: "0.9rem", color: "var(--text-secondary)" }}>
+                            Aan het typen...
+                        </div>
+                    )}
+                    <div ref={endOfMessagesRef} />
+                </div>
 
-            <div style={{ display: "flex", gap: "10px" }}>
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                    placeholder="Stel je vraag..."
-                    style={{ flex: 1, padding: "12px", borderRadius: "24px", border: "1px solid var(--border-color)", outline: "none" }}
-                />
-                <button
-                    onClick={handleSend}
-                    disabled={isLoading}
-                    style={{ backgroundColor: "var(--primary-color)", color: "white", border: "none", borderRadius: "50%", width: "45px", height: "45px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer" }}>
-                    {/* @ts-ignore */}
-                    <ion-icon name="send-outline" style={{ fontSize: "1.2rem" }}></ion-icon>
-                </button>
-            </div>
+                <div style={{ display: "flex", gap: "10px" }}>
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                        placeholder="Stel je vraag..."
+                        style={{ flex: 1, padding: "12px", borderRadius: "24px", border: "1px solid var(--border-color)", outline: "none" }}
+                    />
+                    <button
+                        onClick={handleSend}
+                        disabled={isLoading}
+                        style={{ backgroundColor: "var(--primary-color)", color: "white", border: "none", borderRadius: "50%", width: "45px", height: "45px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", flexShrink: 0 }}>
+                        {/* @ts-ignore */}
+                        <ion-icon name="send-outline" style={{ fontSize: "1.2rem" }}></ion-icon>
+                    </button>
+                </div>
 
-            <div style={{ marginTop: "20px", textAlign: "center", borderTop: "1px solid var(--border-color)", paddingTop: "20px" }}>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "10px" }}>Komt de conciërge er niet uit?</p>
-                <a href={`https://wa.me/${appData.property.host.phone.replace('+', '')}?text=Hoi%20${appData.property.host.name},%20ik%20heb%20een%20vraag%20die%20de%20app%20niet%20kan%20beantwoorden.`} className="btn btn-whatsapp" style={{ textDecoration: "none", fontSize: "1rem", padding: "10px", display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                    {/* @ts-ignore */}
-                    <ion-icon name="logo-whatsapp"></ion-icon> App {appData.property.host.name}
-                </a>
+                <div style={{ marginTop: "20px", textAlign: "center", borderTop: "1px solid var(--border-color)", paddingTop: "20px" }}>
+                    <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "10px" }}>Komt de conciërge er niet uit?</p>
+                    <a href={`https://wa.me/${appData.property.host.phone.replace('+', '')}?text=Hoi%20${appData.property.host.name},%20ik%20heb%20een%20vraag%20die%20de%20app%20niet%20kan%20beantwoorden.`} className="btn btn-whatsapp" style={{ textDecoration: "none", fontSize: "1rem", padding: "10px", display: "inline-flex", alignItems: "center", gap: "5px", maxWidth: "250px", margin: "0 auto" }}>
+                        {/* @ts-ignore */}
+                        <ion-icon name="logo-whatsapp"></ion-icon> App {appData.property.host.name}
+                    </a>
+                </div>
+            </div>
             </div>
         </div>
     );
