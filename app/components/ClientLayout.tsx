@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { parseTemplateString } from "../utils/templateParser";
 
+import WeatherWidget from "./WeatherWidget";
+
 export default function ClientLayout({ children, basePath = "", appData, booking = null }: { children: React.ReactNode, basePath?: string, appData: any, booking?: any }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [accessCode, setAccessCode] = useState("");
@@ -115,11 +117,21 @@ export default function ClientLayout({ children, basePath = "", appData, booking
             </div>
 
             {isHomePage ? (
-                <header className="app-header w-full flex-shrink-0" style={{ backgroundImage: `url('/${appData.property.headerImage}')` }}>
-                    <div className="header-overlay flex md:justify-center md:items-center">
-                        <div className="welcome-text max-w-[1280px] mx-auto w-full md:text-center">
-                            <p className="greeting" id="greeting-text">{subtitle}</p>
-                            <h1 id="property-name" className="md:hidden">{appData.property.name}</h1>
+                <header className="app-header w-full flex-shrink-0 relative z-[2]" style={{ backgroundImage: `url('/${appData.property.headerImage}')` }}>
+                    <div className="header-overlay flex">
+                        <div className="welcome-text max-w-[1280px] mx-auto w-full relative h-full flex items-end">
+                            
+                            {/* Weather Widget (TopRight on mobile, TopLeft on desktop) */}
+                            <div className="absolute right-0 -top-[120px] md:right-auto md:left-4 xl:left-0 md:-top-[100px] xl:-top-[140px] scale-[0.65] md:scale-100 origin-top-right md:origin-top-left pointer-events-auto">
+                                <WeatherWidget />
+                            </div>
+
+                            {/* Welcome Text */}
+                            <div className="w-full">
+                                <p className="greeting" id="greeting-text">{subtitle}</p>
+                                <h1 id="property-name" className="md:hidden">{appData.property.name}</h1>
+                            </div>
+
                         </div>
                     </div>
                 </header>
