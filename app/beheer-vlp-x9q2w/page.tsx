@@ -53,7 +53,7 @@ export default function AdminPage() {
     // Dynamic Arrays
     const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string }[]>([]);
-    const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string }[]>([]);
+    const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
     const [aiPrompt, setAiPrompt] = useState(`Je bent een assistent die websites samenvat voor een vakantie-app. Maak een aantrekkelijke, beknopte samenvatting in HTML-opmaak geschikt voor vakantiegasten.
 
@@ -509,6 +509,25 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         </div>
                                                     </div>
 
+                                                    <div style={{ display: "flex", gap: "10px", marginBottom: "10px", flexWrap: "wrap" }}>
+                                                        <div style={{ flex: 1, minWidth: "120px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>🧭 Afstand (bijv: 1,3)</label>
+                                                            <input type="text" value={tip.distance || ""} onChange={e => { const n = [...omgeving]; n[idx].distance = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="1,3" />
+                                                        </div>
+                                                        <div style={{ flex: 1, minWidth: "120px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>🚶 Lopen (min)</label>
+                                                            <input type="text" value={tip.walkTime || ""} onChange={e => { const n = [...omgeving]; n[idx].walkTime = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="15" />
+                                                        </div>
+                                                        <div style={{ flex: 1, minWidth: "120px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>🚲 Fiets (min)</label>
+                                                            <input type="text" value={tip.bikeTime || ""} onChange={e => { const n = [...omgeving]; n[idx].bikeTime = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="6" />
+                                                        </div>
+                                                        <div style={{ flex: 1, minWidth: "120px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>🚗 Auto (min)</label>
+                                                            <input type="text" value={tip.carTime || ""} onChange={e => { const n = [...omgeving]; n[idx].carTime = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="4" />
+                                                        </div>
+                                                    </div>
+
                                                     <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Bodytekst / Omschrijving</label>
                                                     {tip.url && tip.url.length > 0 && (
                                                         <button
@@ -536,7 +555,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         </SortableContext>
                                     </DndContext>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <button onClick={() => setOmgeving([...omgeving, { name: "Nieuwe Tip", desc: "", image: "", url: "", adres: "", widgetCode: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
+                                        <button onClick={() => setOmgeving([...omgeving, { name: "Nieuwe Tip", desc: "", image: "", url: "", adres: "", widgetCode: "", distance: "", walkTime: "", bikeTime: "", carTime: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Tip Toevoegen</button>
                                         <button onClick={handleSaveOmgeving} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                                     </div>
                                 </div>
