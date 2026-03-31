@@ -91,6 +91,7 @@ export default function ChatPage() {
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
                         placeholder="Stel je vraag..."
                         style={{ flex: 1, padding: "12px", borderRadius: "24px", border: "1px solid var(--border-color)", outline: "none" }}
+                        className="md:text-white md:placeholder:text-white/70"
                     />
                     <button
                         onClick={handleSend}
@@ -102,7 +103,7 @@ export default function ChatPage() {
                 </div>
 
                 <div style={{ marginTop: "20px", textAlign: "center", borderTop: "1px solid var(--border-color)", paddingTop: "20px" }}>
-                    <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "10px" }}>Komt de conciërge er niet uit?</p>
+                    <p className="text-[var(--text-secondary)] md:text-white" style={{ fontSize: "0.85rem", marginBottom: "10px" }}>Komt de conciërge er niet uit?</p>
                     <a href={`https://wa.me/${appData.property.host.phone.replace('+', '')}?text=Hoi%20${appData.property.host.name},%20ik%20heb%20een%20vraag%20die%20de%20app%20niet%20kan%20beantwoorden.`} className="btn btn-whatsapp" style={{ textDecoration: "none", fontSize: "1rem", padding: "10px", display: "inline-flex", alignItems: "center", gap: "5px", maxWidth: "250px", margin: "0 auto" }}>
                         {/* @ts-ignore */}
                         <ion-icon name="logo-whatsapp"></ion-icon> App {appData.property.host.name}

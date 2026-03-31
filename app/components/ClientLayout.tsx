@@ -74,10 +74,26 @@ export default function ClientLayout({ children, basePath = "", appData, booking
         pageTitle = subtitle;
     }
 
+    const headerImage = appData.property?.headerImage;
+
     return (
         <div className="font-sans text-[var(--text-primary)] antialiased min-h-screen app-container" id="main-app-container">
+            {/* Watermark background — desktop only */}
+            {headerImage && (
+                <div
+                    className="hidden md:block fixed inset-0 pointer-events-none z-[1]"
+                    style={{
+                        backgroundImage: `url('/${headerImage}')`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        opacity: 0.6,
+                        filter: "blur(2px) grayscale(30%)",
+                    }}
+                />
+            )}
             {/* Desktop Top Nav */}
-            <div className="hidden md:block fixed top-0 left-0 right-0 z-[60] w-full bg-[rgba(253,251,247,0.9)] backdrop-blur-md border-b border-[var(--border-color)]">
+            <div className="hidden md:block fixed top-0 left-0 right-0 z-[60] w-full bg-[rgba(253,251,247,0.85)] backdrop-blur-md border-b border-[var(--border-color)]">
                 <div className="desktop-nav-inner flex items-center relative">
                     <div className="flex-1 flex justify-start">
                         <h1 className="text-xl font-bold" style={{ color: "var(--primary-color)" }}>{appData.property.name}</h1>
@@ -113,7 +129,7 @@ export default function ClientLayout({ children, basePath = "", appData, booking
                 </header>
             )}
 
-            <main className={`app-content w-full ${!isHomePage ? 'detail-page' : ''}`} id="main-content">
+            <main className={`app-content w-full relative z-[2] ${!isHomePage ? 'detail-page' : ''}`} id="main-content">
                 {children}
             </main>
 

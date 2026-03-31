@@ -21,7 +21,7 @@ export default function InfoClient({ appData, booking, basePath }: { appData: an
                                     </div>
                                 </div>
                             </Link>
-                            <h4 style={{ marginTop: "10px", fontFamily: "Nunito, sans-serif", fontSize: "1.1rem" }}>
+                            <h4 className="md:text-white text-center font-bold text-xl md:text-2xl" style={{ marginTop: "15px", fontFamily: "Nunito, sans-serif" }}>
                                 {parseTemplateString(video.title, booking)}
                             </h4>
                         </div>
@@ -31,3 +31,4 @@ export default function InfoClient({ appData, booking, basePath }: { appData: an
         </div>
     );
 }
+
