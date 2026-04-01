@@ -59,11 +59,11 @@ export default function ChatPage() {
         <div className="tab-content active" id="contact-tab">
             <div style={{ display: "flex", justifyContent: "center" }}>
             <div className="max-w-4xl w-full flex flex-col h-[calc(100vh-200px)] md:h-[calc(100vh-260px)]">
-                <div id="chat-window" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "10px", backgroundColor: "var(--card-bg)", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div id="chat-window" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "10px", background: "rgba(237, 232, 219, 0.70)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: "16px", border: "1px solid rgba(255, 255, 255, 0.5)", marginBottom: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
                     {messages.map((msg, idx) => (
                         <div key={idx} style={{
                             alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                            backgroundColor: msg.role === "user" ? "var(--primary-color)" : "#f1f1f1",
+                            backgroundColor: msg.role === "user" ? "var(--primary-color)" : "rgba(255, 255, 255, 0.6)",
                             color: msg.role === "user" ? "white" : "var(--text-primary)",
                             padding: "10px 14px",
                             borderRadius: "16px",
@@ -76,7 +76,7 @@ export default function ChatPage() {
                         </div>
                     ))}
                     {isLoading && (
-                        <div style={{ alignSelf: "flex-start", backgroundColor: "#f1f1f1", padding: "10px 14px", borderRadius: "16px", fontSize: "0.9rem", color: "var(--text-secondary)" }}>
+                        <div style={{ alignSelf: "flex-start", backgroundColor: "rgba(255, 255, 255, 0.6)", padding: "10px 14px", borderRadius: "16px", fontSize: "0.9rem", color: "var(--text-secondary)" }}>
                             Aan het typen...
                         </div>
                     )}
@@ -90,7 +90,7 @@ export default function ChatPage() {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
                         placeholder="Stel je vraag..."
-                        style={{ flex: 1, padding: "12px", borderRadius: "24px", border: "1px solid var(--border-color)", outline: "none" }}
+                        style={{ flex: 1, padding: "12px", borderRadius: "24px", border: "1px solid rgba(255, 255, 255, 0.5)", outline: "none", background: "rgba(237, 232, 219, 0.70)", backdropFilter: "blur(12px)" }}
                         className="md:text-white md:placeholder:text-white/70"
                     />
                     <button
@@ -102,7 +102,7 @@ export default function ChatPage() {
                     </button>
                 </div>
 
-                <div style={{ marginTop: "20px", textAlign: "center", borderTop: "1px solid var(--border-color)", paddingTop: "20px" }}>
+                <div style={{ marginTop: "20px", textAlign: "center", borderTop: "1px solid rgba(255, 255, 255, 0.4)", paddingTop: "20px" }}>
                     <p className="text-[var(--text-secondary)] md:text-white" style={{ fontSize: "0.85rem", marginBottom: "10px" }}>Komt de conciërge er niet uit?</p>
                     <a href={`https://wa.me/${appData.property.host.phone.replace('+', '')}?text=Hoi%20${appData.property.host.name},%20ik%20heb%20een%20vraag%20die%20de%20app%20niet%20kan%20beantwoorden.`} className="btn btn-whatsapp" style={{ textDecoration: "none", fontSize: "1rem", padding: "10px", display: "inline-flex", alignItems: "center", gap: "5px", maxWidth: "250px", margin: "0 auto" }}>
                         {/* @ts-ignore */}

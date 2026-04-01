@@ -83,13 +83,15 @@ h3 {
     max-height: 56px !important;
     min-height: 56px !important;
     padding-top: env(safe-area-inset-top, 0px);
-    background-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
-    box-shadow: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border-bottom: none !important;
     z-index: 50;
     width: 100%;
     overflow: hidden;
@@ -97,7 +99,7 @@ h3 {
 }
 
 .app-header-compact h2 {
-    color: white;
+    color: var(--primary-color) !important;
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
@@ -200,6 +202,14 @@ h3 {
     gap: 15px;
     border: 1px solid var(--border-color);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Glassmorphism variant for home page cards */
+.card.card-glass {
+    background: rgba(237, 232, 219, 0.70) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
 }
 
 .card:active {

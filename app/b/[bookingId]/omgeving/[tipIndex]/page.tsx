@@ -28,7 +28,7 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
 
     return (
         <div className="tab-content active" style={{ padding: 0, display: "flex", justifyItems: "center", justifyContent: "center" }}>
-            <div className="max-w-4xl w-full bg-white min-h-screen md:min-h-[auto] md:rounded-2xl md:shadow-sm md:overflow-hidden">
+            <div className="max-w-4xl w-full min-h-screen md:min-h-[auto] md:rounded-2xl md:shadow-sm md:overflow-hidden" style={{ background: "rgba(237, 232, 219, 0.70)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "none" }}>
                 {/* Header met afbeelding */}
                 {hasImage ? (
                     <div className="rounded-b-[16px] md:rounded-none" style={{

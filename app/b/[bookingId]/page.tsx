@@ -48,7 +48,7 @@ export default function Home() {
               <Link
                 key={index}
                 href={`/b/${booking?.id}/info/home/${index}`}
-                className="card clickable h-full m-0"
+                className="card card-glass clickable h-full m-0"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 {cardContent}
@@ -57,7 +57,7 @@ export default function Home() {
           }
 
           return (
-            <div key={index} className="card h-full m-0">
+            <div key={index} className="card card-glass h-full m-0">
               {cardContent}
             </div>
           );
