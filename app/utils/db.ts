@@ -118,7 +118,8 @@ const defaultAppData = {
             "image": ""
         }
     ],
-    "chatbotContext": ""
+    "chatbotContext": "",
+    "translations": {} as any
 };
 
 // Cached read for guest-facing pages (revalidates every 2 seconds)
