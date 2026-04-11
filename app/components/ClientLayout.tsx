@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { parseTemplateString } from "../utils/templateParser";
+import { t } from "../utils/translations";
 
 import WeatherWidget from "./WeatherWidget";
 
@@ -39,7 +40,7 @@ export default function ClientLayout({ children, basePath = "", appData, booking
         return (
             <div className="login-overlay active">
                 {/* ... login overlay JSX ... */}
-                <h2>Welkom bij<br />{appData.property.name}</h2>
+                <h2>{t('welcome', booking?.language)} bij<br />{appData.property.name}</h2>
                 <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
                     <p style={{ color: "#EEE" }}>Voer uw toegangscode in:</p>
                     <input
@@ -69,9 +70,9 @@ export default function ClientLayout({ children, basePath = "", appData, booking
     const homeDetailMatch = pathname.match(/\/info\/home\/(\d+)/);
     
     // For detail pages, we keep the main category title. The specific item title will be shown inside the card.
-    if (pathname.includes("/info")) pageTitle = "Videoinstructies";
-    else if (pathname.includes("/omgeving")) pageTitle = "In de Omgeving";
-    else if (pathname.includes("/chat")) pageTitle = "Digitale Conciërge";
+    if (pathname.includes("/info")) pageTitle = t('instructions', booking?.language);
+    else if (pathname.includes("/omgeving")) pageTitle = t('environment', booking?.language);
+    else if (pathname.includes("/chat")) pageTitle = t('chat_bot', booking?.language);
     else if (pathname === basePath || pathname === `${basePath}/` || homeDetailMatch) {
         pageTitle = subtitle;
     }
@@ -107,10 +108,10 @@ export default function ClientLayout({ children, basePath = "", appData, booking
                     )}
                     <div className="flex-1 flex justify-end flex-shrink-0">
                         <nav className="flex items-center gap-6 whitespace-nowrap">
-                            <Link href={`${basePath}/`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">Home</Link>
-                            <Link href={`${basePath}/info`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">Video's</Link>
-                            <Link href={`${basePath}/omgeving`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">Omgeving</Link>
-                            <Link href={`${basePath}/chat`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">Conciërge</Link>
+                            <Link href={`${basePath}/`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">{t('home', booking?.language)}</Link>
+                            <Link href={`${basePath}/info`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">{t('instructions', booking?.language)}</Link>
+                            <Link href={`${basePath}/omgeving`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">{t('environment', booking?.language)}</Link>
+                            <Link href={`${basePath}/chat`} className="text-gray-600 hover:text-gray-900 font-semibold transition-colors">{t('chat_bot', booking?.language)}</Link>
                         </nav>
                     </div>
                 </div>
@@ -149,22 +150,22 @@ export default function ClientLayout({ children, basePath = "", appData, booking
                 <Link href={`${basePath}/`} className={`nav-item ${pathname === `${basePath}/` || pathname === basePath ? "active" : ""}`} prefetch={false}>
                     {/* @ts-ignore */}
                     <ion-icon name="home-outline"></ion-icon>
-                    <span>Home</span>
+                    <span>{t('home', booking?.language)}</span>
                 </Link>
                 <Link href={`${basePath}/info`} className={`nav-item ${pathname === `${basePath}/info` ? "active" : ""}`} prefetch={false}>
                     {/* @ts-ignore */}
                     <ion-icon name="videocam-outline"></ion-icon>
-                    <span>Videoinstructies</span>
+                    <span>{t('instructions', booking?.language)}</span>
                 </Link>
                 <Link href={`${basePath}/omgeving`} className={`nav-item ${pathname === `${basePath}/omgeving` ? "active" : ""}`} prefetch={false}>
                     {/* @ts-ignore */}
                     <ion-icon name="map-outline"></ion-icon>
-                    <span>Omgeving</span>
+                    <span>{t('environment', booking?.language)}</span>
                 </Link>
                 <Link href={`${basePath}/chat`} className={`nav-item ${pathname === `${basePath}/chat` ? "active" : ""}`} prefetch={false}>
                     {/* @ts-ignore */}
                     <ion-icon name="chatbubbles-outline"></ion-icon>
-                    <span>Digitale Conciërge</span>
+                    <span>{t('chat_bot', booking?.language)}</span>
                 </Link>
             </nav>
         </div>

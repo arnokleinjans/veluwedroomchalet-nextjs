@@ -1,4 +1,4 @@
-import { getAppData } from "../../../../../utils/db";
+import { getTranslatedAppData } from "../../../../../utils/db";
 import { parseTemplateString } from "../../../../../utils/templateParser";
 import Link from "next/link";
 import WidgetEmbed from "../../../../../components/WidgetEmbed";
@@ -10,7 +10,7 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
     const bookingId = (resolvedParams.bookingId || "").toUpperCase();
     const itemIndex = parseInt(resolvedParams.index, 10);
 
-    const appData = await getAppData();
+    const appData = await getTranslatedAppData(bookingId);
     const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
     const insights = appData.insights || [];
     const item = insights[itemIndex] as any;

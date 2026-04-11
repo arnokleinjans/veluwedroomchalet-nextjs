@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
     updateGeneralInfo, addBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
-    updateChatbotContext
+    updateChatbotContext, updateTranslations
 } from "../actions/adminActions";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
@@ -73,8 +73,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [newGuestName, setNewGuestName] = useState("");
     const [newCheckIn, setNewCheckIn] = useState("");
     const [newCheckOut, setNewCheckOut] = useState("");
+    const [newLanguage, setNewLanguage] = useState("nl");
 
     const [isSaving, setIsSaving] = useState(false);
+    const [isTranslating, setIsTranslating] = useState(false);
     const [saveMessage, setSaveMessage] = useState("");
 
     useEffect(() => {
@@ -121,11 +123,53 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
     const runSaveAction = async (actionFn: () => Promise<any>, successMsg: string) => {
         setIsSaving(true);
-        setSaveMessage("");
+        setSaveMessage("⏳ Aan het opslaan...");
         const res = await actionFn();
         setIsSaving(false);
-        if (res.success) setSaveMessage("✅ " + successMsg);
-        else setSaveMessage("❌ " + res.error);
+        if (res.success) {
+            setSaveMessage("✅ " + successMsg);
+            setTimeout(() => setSaveMessage(""), 3500);
+        } else {
+            setSaveMessage("❌ " + res.error);
+            setTimeout(() => setSaveMessage(""), 5000);
+        }
+    };
+
+    const handleTranslateAll = async () => {
+        setIsTranslating(true);
+        setSaveMessage("⏳ Bezig met vertalen naar Engels en Duits... (Dit kan 10-30s duren)");
+        try {
+            const payload = {
+                property: { name: propName, subtitle, host: { name: hostName, phone } },
+                insights, videos, omgeving
+                // We omit chatgptContext or bookings
+            };
+            const res = await fetch('/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.error) {
+                setSaveMessage("❌ Vertaalfout: " + data.error);
+            } else if (data.en && data.de) {
+                const saveRes = await updateTranslations({ en: data.en, de: data.de });
+                if (saveRes.success) {
+                    setSaveMessage("✅ Succesvol vertaald en gereed voor EN/DE weergave!");
+                    setTimeout(() => setSaveMessage(""), 4000);
+                } else {
+                    setSaveMessage("❌ Opslaan van vertalingen mislukt.");
+                    setTimeout(() => setSaveMessage(""), 5000);
+                }
+            } else {
+                setSaveMessage("❌ Ongeldige response van vertaalservice.");
+                setTimeout(() => setSaveMessage(""), 5000);
+            }
+        } catch(e: any) {
+            setSaveMessage("❌ Fout: " + e.message);
+            setTimeout(() => setSaveMessage(""), 5000);
+        }
+        setIsTranslating(false);
     };
 
     const handleSaveGeneral = () => runSaveAction(
@@ -140,6 +184,26 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         "Omgeving succesvol opgeslagen!"
     );
     const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
+
+    const handleSaveAll = async () => {
+        setIsSaving(true);
+        setSaveMessage("⏳ Alles aan het opslaan...");
+        const results = await Promise.all([
+            updateGeneralInfo(propName, hostName, phone, subtitle, headerImage),
+            updateInsights(insights),
+            updateVideos(videos),
+            updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
+            updateChatbotContext(chatbotContext)
+        ]);
+        setIsSaving(false);
+        if (results.every(r => r.success)) {
+            setSaveMessage("✅ Alle wijzigingen zijn succesvol opgeslagen!");
+            setTimeout(() => setSaveMessage(""), 4000);
+        } else {
+            setSaveMessage("❌ Er is iets misgegaan bij het opslaan van één of meerdere velden.");
+            setTimeout(() => setSaveMessage(""), 5000);
+        }
+    };
 
     const handleAiSummary = async (idx: number) => {
         const tip = omgeving[idx];
@@ -187,24 +251,29 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             return;
         }
         setIsSaving(true);
-        setSaveMessage("");
-        const res = await addBooking(newGuestName, newCheckIn, newCheckOut);
+        setSaveMessage("⏳ Bezig met toevoegen...");
+        const res = await addBooking(newGuestName, newCheckIn, newCheckOut, newLanguage);
         setIsSaving(false);
         if (res.success) {
             setSaveMessage("✅ Boeking toegevoegd! Kopiëer de link hieronder.");
-            window.location.reload();
+            setTimeout(() => window.location.reload(), 1500);
         } else {
             setSaveMessage("❌ " + res.error);
+            setTimeout(() => setSaveMessage(""), 5000);
         }
     };
 
     const handleRemoveBooking = async (id: string) => {
         if (!confirm("Boeking definitief verwijderen?")) return;
         setIsSaving(true);
+        setSaveMessage("⏳ Aan het verwijderen...");
         const res = await removeBooking(id);
         setIsSaving(false);
         if (res.success) window.location.reload();
-        else setSaveMessage("❌ " + res.error);
+        else {
+            setSaveMessage("❌ " + res.error);
+            setTimeout(() => setSaveMessage(""), 5000);
+        }
     };
 
     const copyToClipboard = (text: string) => {
@@ -242,15 +311,45 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         <h1 style={{ margin: 0, fontSize: "2rem", fontFamily: "'Lora', serif" }}>Geheim Beheer</h1>
                         <p style={{ margin: "5px 0 0", opacity: 0.9 }}>Pas direct app-teksten aan. (Opgeslagen via Vercel KV)</p>
                     </div>
-                    <button onClick={handleLogout} style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: "6px", color: "white", padding: "8px 16px", cursor: "pointer", fontWeight: "bold", backdropFilter: "blur(4px)" }}>
-                        Uitloggen
-                    </button>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                        <button onClick={handleTranslateAll} disabled={isTranslating} style={{ backgroundColor: "#ffb400", border: "none", borderRadius: "6px", color: "#333", padding: "8px 16px", cursor: isTranslating ? "wait" : "pointer", fontWeight: "bold", opacity: isTranslating ? 0.7 : 1 }}>
+                            {isTranslating ? "⏳ Vertalen..." : "🌟 Vertaal"}
+                        </button>
+                        <button onClick={handleLogout} style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: "6px", color: "white", padding: "8px 16px", cursor: "pointer", fontWeight: "bold", backdropFilter: "blur(4px)" }}>
+                            Uitloggen
+                        </button>
+                    </div>
                 </div>
 
                 <div style={{ padding: "30px" }}>
+                    <style dangerouslySetInnerHTML={{__html: `
+                        @keyframes toastSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                        @keyframes toastFade { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+                    `}} />
                     {saveMessage && (
-                        <div style={{ padding: "15px", marginBottom: "20px", backgroundColor: saveMessage.includes("❌") ? "#fee" : "#efe", color: saveMessage.includes("❌") ? "#c00" : "#270", borderRadius: "8px", border: saveMessage.includes("❌") ? "1px solid #ecc" : "1px solid #cec", fontWeight: "bold" }}>
-                            {saveMessage}
+                        <div style={{ 
+                            position: "fixed", 
+                            bottom: "40px", 
+                            left: "50%", 
+                            transform: "translateX(-50%)", 
+                            zIndex: 99999, 
+                            backgroundColor: saveMessage.includes("❌") ? "rgba(220, 38, 38, 0.9)" : "rgba(40, 40, 40, 0.85)", 
+                            backdropFilter: "blur(12px)", 
+                            WebkitBackdropFilter: "blur(12px)", 
+                            color: "white", 
+                            padding: "14px 28px", 
+                            borderRadius: "50px", 
+                            fontWeight: "bold", 
+                            boxShadow: "0 10px 40px rgba(0,0,0,0.2)", 
+                            display: "flex", 
+                            alignItems: "center", 
+                            gap: "12px", 
+                            animation: "toastFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" 
+                        }}>
+                            {saveMessage.includes("⏳") && (
+                                <div style={{ width: "20px", height: "20px", border: "3px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "50%", animation: "toastSpin 1s linear infinite" }} />
+                            )}
+                            <span style={{ fontSize: "1rem", letterSpacing: "0.2px" }}>{saveMessage.replace("⏳ ", "")}</span>
                         </div>
                     )}
 
@@ -275,6 +374,14 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         <div style={{ flex: "1 1 120px" }}>
                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Vertrek</label>
                                             <input type="date" value={newCheckOut} onChange={e => setNewCheckOut(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                        </div>
+                                        <div style={{ flex: "1 1 120px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Weergavetaal</label>
+                                            <select value={newLanguage} onChange={e => setNewLanguage(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white" }}>
+                                                <option value="nl">🇳🇱 Nederlands</option>
+                                                <option value="en">🇬🇧 Engels</option>
+                                                <option value="de">🇩🇪 Duits</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
@@ -583,6 +690,36 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                     </div>
                 </div>
             </div>
+
+            {/* Zwevende Alle Wijzigingen Opslaan Knop */}
+            <button 
+                onClick={handleSaveAll} 
+                disabled={isSaving}
+                className="hover:scale-105 transition-transform"
+                style={{ 
+                    position: "fixed", 
+                    bottom: "40px", 
+                    right: "30px", 
+                    backgroundColor: "#4A5D23", 
+                    color: "white", 
+                    padding: "16px 28px", 
+                    borderRadius: "50px", 
+                    border: "3px solid rgba(255,255,255,0.2)", 
+                    cursor: isSaving ? "wait" : "pointer", 
+                    fontWeight: "bold",
+                    fontSize: "1.1rem",
+                    boxShadow: "0 10px 25px rgba(74, 93, 35, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    zIndex: 9998,
+                    opacity: isSaving ? 0.7 : 1
+                }}
+            >
+                {/* @ts-ignore */}
+                <ion-icon name="save-outline" style={{ fontSize: "1.4rem" }}></ion-icon>
+                Alles Opslaan
+            </button>
         </div>
     );
 }

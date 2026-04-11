@@ -7,6 +7,7 @@ export type BookingInfo = {
     guestName: string;
     checkIn: string;
     checkOut: string;
+    language: string;
 };
 
 const BookingContext = createContext<{ booking: BookingInfo, appData: any } | null>(null);

@@ -122,10 +122,10 @@ export async function updateAiSettings(aiPrompt: string, aiMaxChars: number) {
     return await saveToKV(updatedData);
 }
 
-export async function addBooking(guestName: string, checkIn: string, checkOut: string) {
+export async function addBooking(guestName: string, checkIn: string, checkOut: string, language: string = "nl") {
     noStore();
     const appData = await getAppDataFresh();
-    const updatedData = { ...appData };
+    const updatedData = { ...appData } as any;
 
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const safeNamePart = guestName.split(' ')[0].replace(/[^a-zA-Z]/g, '').toUpperCase();
@@ -139,7 +139,8 @@ export async function addBooking(guestName: string, checkIn: string, checkOut: s
         id: newId,
         guestName,
         checkIn,
-        checkOut
+        checkOut,
+        language
     });
 
     return await saveToKV(updatedData);
@@ -152,7 +153,16 @@ export async function removeBooking(id: string) {
 
     if (!updatedData.bookings) return { success: false, error: "Geen boekingen gevonden." };
 
-    updatedData.bookings = updatedData.bookings.filter(b => b.id !== id);
+    updatedData.bookings = updatedData.bookings.filter((b: any) => b.id !== id);
 
+    return await saveToKV(updatedData);
+}
+
+export async function updateTranslations(translations: { en: any, de: any }) {
+    noStore();
+    const appData = await getAppDataFresh();
+    const updatedData = { ...appData } as any;
+
+    updatedData.translations = translations;
     return await saveToKV(updatedData);
 }

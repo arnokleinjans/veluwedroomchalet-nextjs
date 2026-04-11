@@ -1,4 +1,4 @@
-import { getAppData } from "../../../utils/db";
+import { getTranslatedAppData } from "../../../utils/db";
 import { parseTemplateString } from "../../../utils/templateParser";
 import Link from "next/link";
 
@@ -8,7 +8,7 @@ export default async function Omgeving({ params }: { params: { bookingId: string
     const resolvedParams = await Promise.resolve(params);
     const bookingId = (resolvedParams.bookingId || "").toUpperCase();
 
-    const appData = await getAppData();
+    const appData = await getTranslatedAppData(bookingId);
     const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
     const items = (appData as any).omgeving || (appData as any).restaurants || [];
 

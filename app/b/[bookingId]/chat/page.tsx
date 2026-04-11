@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useBooking } from "../../../context/BookingContext";
+import { t } from "../../../utils/translations";
 
 export default function ChatPage() {
     const { booking, appData } = useBooking();
     const [messages, setMessages] = useState<{ role: "user" | "bot", text: string }[]>(
-        [{ role: "bot", text: `Hoi ${booking.guestName}! Ik ben de digitale conciërge van ${appData.property.name}. Hoe kan ik je vandaag helpen?` }]
+        [{ role: "bot", text: `${t('bot_greeting_1', booking?.language)} ${booking.guestName}! ${t('bot_greeting_2', booking?.language)} ${appData.property.name}. ${t('bot_greeting_3', booking?.language)}` }]
     );
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +36,8 @@ export default function ChatPage() {
                     guestContext: {
                         name: booking.guestName,
                         checkIn: booking.checkIn,
-                        checkOut: booking.checkOut
+                        checkOut: booking.checkOut,
+                        bookingId: booking.id
                     }
                 }),
             });
@@ -89,7 +91,7 @@ export default function ChatPage() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                        placeholder="Stel je vraag..."
+                        placeholder={t('ask_question', booking?.language)}
                         style={{ flex: 1, padding: "12px", borderRadius: "24px", border: "1px solid rgba(255, 255, 255, 0.5)", outline: "none", background: "rgba(237, 232, 219, 0.70)", backdropFilter: "blur(12px)" }}
                         className="md:text-white md:placeholder:text-white/70"
                     />
@@ -103,10 +105,10 @@ export default function ChatPage() {
                 </div>
 
                 <div style={{ marginTop: "20px", textAlign: "center", borderTop: "1px solid rgba(255, 255, 255, 0.4)", paddingTop: "20px" }}>
-                    <p className="text-[var(--text-secondary)] md:text-white" style={{ fontSize: "0.85rem", marginBottom: "10px" }}>Komt de conciërge er niet uit?</p>
+                    <p className="text-[var(--text-secondary)] md:text-white" style={{ fontSize: "0.85rem", marginBottom: "10px" }}>{t('ask_host', booking?.language)}</p>
                     <a href={`https://wa.me/${appData.property.host.phone.replace('+', '')}?text=Hoi%20${appData.property.host.name},%20ik%20heb%20een%20vraag%20die%20de%20app%20niet%20kan%20beantwoorden.`} className="btn btn-whatsapp" style={{ textDecoration: "none", fontSize: "1rem", padding: "10px", display: "inline-flex", alignItems: "center", gap: "5px", maxWidth: "250px", margin: "0 auto" }}>
                         {/* @ts-ignore */}
-                        <ion-icon name="logo-whatsapp"></ion-icon> App {appData.property.host.name}
+                        <ion-icon name="logo-whatsapp"></ion-icon> {t('whatsapp_host', booking?.language)} {appData.property.host.name}
                     </a>
                 </div>
             </div>

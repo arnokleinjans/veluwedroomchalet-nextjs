@@ -1,5 +1,6 @@
-import { getAppData } from "../../../../utils/db";
+import { getTranslatedAppData } from "../../../../utils/db";
 import { parseTemplateString } from "../../../../utils/templateParser";
+import { t } from "../../../../utils/translations";
 import Link from "next/link";
 import WidgetEmbed from "../../../../components/WidgetEmbed";
 
@@ -10,7 +11,7 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
     const bookingId = (resolvedParams.bookingId || "").toUpperCase();
     const tipIndex = parseInt(resolvedParams.tipIndex, 10);
 
-    const appData = await getAppData();
+    const appData = await getTranslatedAppData(bookingId);
     const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
     const items = (appData as any).omgeving || (appData as any).restaurants || [];
     const tip = items[tipIndex];
@@ -18,8 +19,8 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
     if (!tip) {
         return (
             <div className="tab-content active" style={{ padding: "20px", textAlign: "center" }}>
-                <p>Tip niet gevonden.</p>
-                <Link href={`/b/${bookingId}/omgeving`} style={{ color: "var(--primary-color)" }}>← Terug naar Omgeving</Link>
+                <p>Item not found.</p>
+                <Link href={`/b/${bookingId}/omgeving`} style={{ color: "var(--primary-color)" }}>← {t('back', booking?.language)}</Link>
             </div>
         );
     }
@@ -82,7 +83,7 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
                                 fontWeight: "bold",
                             }}
                         >
-                            ← Terug
+                            ← {t('back', booking?.language)}
                         </Link>
                     </div>
                 )}
@@ -115,7 +116,7 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
                                     fontSize: "0.95rem",
                                 }}
                             >
-                                🌐 Bekijk website
+                                🌐 {t('visit_website', booking?.language) || "Website"}
                             </a>
                         )}
                         {tip.adres && tip.adres.length > 0 && (
@@ -136,7 +137,7 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
                                     fontSize: "0.95rem",
                                 }}
                             >
-                                📍 Route
+                                📍 {t('route', booking?.language)}
                             </a>
                         )}
                     </div>

@@ -1,28 +1,40 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useBooking } from "../context/BookingContext";
 
 // WMO Weather interpretation codes
-const getWeatherDetails = (code: number, isDay: boolean = true) => {
-  if (code === 0) return { text: "Onbewolkt", icon: isDay ? "sunny-outline" : "moon-outline" };
-  if (code === 1 || code === 2) return { text: "Licht bewolkt", icon: isDay ? "partly-sunny-outline" : "cloudy-night-outline" };
-  if (code === 3) return { text: "Bewolkt", icon: "cloud-outline" };
-  if (code === 45 || code === 48) return { text: "Mist", icon: "cloud-outline" };
-  if (code >= 51 && code <= 55) return { text: "Motregen", icon: "rainy-outline" };
-  if (code >= 61 && code <= 65) return { text: "Regen", icon: "rainy-outline" };
-  if (code >= 71 && code <= 77) return { text: "Sneeuw", icon: "snow-outline" };
-  if (code >= 80 && code <= 82) return { text: "Buien", icon: "rainy-outline" };
-  if (code >= 95) return { text: "Onweer", icon: "thunderstorm-outline" };
-  return { text: "Onbekend", icon: "cloud-outline" };
+const getWeatherDetails = (code: number, isDay: boolean = true, lang: string = 'nl') => {
+  const t = (nl: string, en: string, de: string) => {
+    if (lang === 'en') return en;
+    if (lang === 'de') return de;
+    return nl;
+  };
+
+  if (code === 0) return { text: t("Onbewolkt", "Clear", "Klar"), icon: isDay ? "sunny-outline" : "moon-outline" };
+  if (code === 1 || code === 2) return { text: t("Licht bewolkt", "Partly cloudy", "Leicht bewölkt"), icon: isDay ? "partly-sunny-outline" : "cloudy-night-outline" };
+  if (code === 3) return { text: t("Bewolkt", "Cloudy", "Bewölkt"), icon: "cloud-outline" };
+  if (code === 45 || code === 48) return { text: t("Mist", "Fog", "Nebel"), icon: "cloud-outline" };
+  if (code >= 51 && code <= 55) return { text: t("Motregen", "Drizzle", "Niesel"), icon: "rainy-outline" };
+  if (code >= 61 && code <= 65) return { text: t("Regen", "Rain", "Regen"), icon: "rainy-outline" };
+  if (code >= 71 && code <= 77) return { text: t("Sneeuw", "Snow", "Schnee"), icon: "snow-outline" };
+  if (code >= 80 && code <= 82) return { text: t("Buien", "Showers", "Schauer"), icon: "rainy-outline" };
+  if (code >= 95) return { text: t("Onweer", "Thunder", "Gewitter"), icon: "thunderstorm-outline" };
+  return { text: t("Onbekend", "Unknown", "Unbekannt"), icon: "cloud-outline" };
 };
 
-const getDayName = (dateString: string) => {
+const getDayName = (dateString: string, lang: string = 'nl') => {
   const date = new Date(dateString);
-  const days = ["Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"];
-  return days[date.getDay()];
+  const dayIndex = date.getDay();
+  if (lang === 'en') return ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dayIndex];
+  if (lang === 'de') return ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][dayIndex];
+  return ["Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"][dayIndex];
 };
 
 export default function WeatherWidget() {
+  const bookingCtx = useBooking();
+  const lang = bookingCtx?.booking?.language || 'nl';
+
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +62,7 @@ export default function WeatherWidget() {
     );
   }
 
-  const currentDetail = getWeatherDetails(data.current.weather_code, data.current.is_day === 1);
+  const currentDetail = getWeatherDetails(data.current.weather_code, data.current.is_day === 1, lang);
   const currentTemp = Math.round(data.current.temperature_2m);
 
   return (
@@ -80,13 +92,13 @@ export default function WeatherWidget() {
       {/* Forecast */}
       <div className="flex justify-between px-2">
         {data.daily.time.slice(0, 3).map((time: string, index: number) => {
-          const detail = getWeatherDetails(data.daily.weather_code[index], true);
+          const detail = getWeatherDetails(data.daily.weather_code[index], true, lang);
           const maxT = Math.round(data.daily.temperature_2m_max[index]);
           const minT = Math.round(data.daily.temperature_2m_min[index]);
 
           return (
             <div key={time} className="flex flex-col items-center gap-1.5 flex-1">
-              <span className="text-xs font-medium opacity-90">{getDayName(time)}</span>
+              <span className="text-xs font-medium opacity-90">{getDayName(time, lang)}</span>
               {/* @ts-ignore */}
               <ion-icon name={detail.icon} style={{ fontSize: "20px", color: index === 0 ? "#FBBF24" : "white" }}></ion-icon>
               <div className="text-xs font-semibold tracking-wide">

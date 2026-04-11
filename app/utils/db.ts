@@ -119,11 +119,11 @@ const defaultAppData = {
     "chatbotContext": ""
 };
 
-// Cached read for guest-facing pages (revalidates every 60 seconds)
+// Cached read for guest-facing pages (revalidates every 2 seconds)
 // This prevents every single page view from hitting Upstash Redis
 let cachedData: typeof defaultAppData | null = null;
 let cacheTimestamp = 0;
-const CACHE_TTL_MS = 60_000; // 60 seconds
+const CACHE_TTL_MS = 2_000; // 2 seconds
 
 export async function getAppData() {
     const now = Date.now();
@@ -148,6 +148,37 @@ export async function getAppData() {
         return cachedData || defaultAppData;
     }
 }
+
+export async function getTranslatedAppData(bookingId: string) {
+    const appData = await getAppData();
+    const booking = appData.bookings?.find((b: any) => b.id === bookingId);
+    if (!booking || !booking.language || booking.language === 'nl') return appData;
+
+    const mergeTranslations = (data: any, translation: any): any => {
+        if (!translation) return data;
+        if (Array.isArray(data)) {
+            return data.map((item, i) => mergeTranslations(item, translation[i]));
+        } else if (data !== null && typeof data === 'object') {
+            const result = { ...data };
+            for (const key in translation) {
+                if (key in result) {
+                    result[key] = mergeTranslations(result[key], translation[key]);
+                } else {
+                    result[key] = translation[key];
+                }
+            }
+            return result;
+        }
+        return translation;
+    };
+
+    let finalAppData = appData;
+    if (appData.translations && appData.translations[booking.language]) {
+        finalAppData = mergeTranslations(appData, appData.translations[booking.language]);
+    }
+    return finalAppData;
+}
+
 
 // Uncached read for admin panel — always gets fresh data
 export async function getAppDataFresh() {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { getAppData } from '../../utils/db';
+import { getTranslatedAppData } from '../../utils/db';
 import { checkRateLimit } from '../../utils/rateLimit';
 
 export async function POST(req: Request) {
@@ -21,8 +21,8 @@ export async function POST(req: Request) {
         const checkIn = guestContext?.checkIn || "onbekend";
         const checkOut = guestContext?.checkOut || "onbekend";
 
-        // Fetch live Database context
-        const appData = await getAppData();
+        // Fetch live Database context, specifically translated for the guest
+        const appData = await getTranslatedAppData(guestContext?.bookingId || "");
 
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json(
@@ -33,29 +33,34 @@ export async function POST(req: Request) {
 
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+        const booking = appData.bookings?.find((b: any) => b.id === guestContext?.bookingId);
+        const languageMap: Record<string, string> = { nl: "Nederlands", en: "Engels", de: "Duits" };
+        const guestLanguage = languageMap[booking?.language] || "Nederlands";
+
         // Build the system context instructing the AI on how to behave
         const systemInstruction = `
 Je bent de digitale conciërge van "${appData.property.name}".
+Je spreekt uitsluitend en vloeiend in het ${guestLanguage}.
 Je spreekt rechtstreeks met de gast(en): ${guestName}. 
 Ze verblijven hier van ${checkIn} t/m ${checkOut}.
 
 Hier zijn de regels en gegevens van het huisje waar je ze mee kunt helpen:
-- Wifi netwerk: ${appData.property.wifi.network}
-- Wifi wachtwoord: ${appData.property.wifi.password}
+- Wifi netwerk: ${appData.property.wifi?.network || ""}
+- Wifi wachtwoord: ${appData.property.wifi?.password || ""}
 
 Huisregels:
-${appData.rules.map(r => `- ${r.title}: ${r.desc}`).join('\n')}
+${appData.rules ? appData.rules.map((r: any) => `- ${r.title}: ${r.desc}`).join('\n') : ''}
 
 Informatie over het chalet en park (Home pagina):
-${appData.insights.map(i => `- ${i.title}: ${i.subtitle}`).join('\n')}
+${appData.insights ? appData.insights.map((i: any) => `- ${i.title}: ${i.subtitle}`).join('\n') : ''}
 
 Tips in de omgeving:
 ${((appData as any).omgeving || (appData as any).restaurants || []).map((r: any) => `- ${r.name}: ${r.desc}`).join('\n')}
 
 Instructies voor jou:
-1. Reageer super vriendelijk, kort en bondig (alsof je via WhatsApp praat).
+1. Reageer super vriendelijk, kort en bondig (alsof je via WhatsApp praat) ALTIJD in het ${guestLanguage}.
 2. Geef uitsluitend informatie die in de regels hierboven staat. Verzin geen dingen over het huisje.
-3. Als de gast vraagt om te bellen of iets vraagt waar je geen antwoord op weet in de context, zeg dan dat ze contact op kunnen nemen met de host: ${appData.property.host.name} (Tel: ${appData.property.host.phone}).
+3. Als de gast vraagt om te bellen of iets vraagt waar je geen antwoord op weet in de context, zeg dan dat ze contact op kunnen nemen met de host: ${appData.property.host?.name || "de host"} (Tel: ${appData.property.host?.phone || ""}).
 
 Extra kennis en context over het huisje:
 ${appData.chatbotContext || "Geen extra context beschikbaar."}
