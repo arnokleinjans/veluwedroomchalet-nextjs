@@ -22,7 +22,9 @@ export default function CinemaPlayer({ embedUrl, title, bookingId, backText = "T
         <div style={{
             position: "fixed",
             inset: 0,
-            backgroundColor: "#000",
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
             zIndex: 9999,
             display: "flex",
             flexDirection: "column",
@@ -90,18 +92,6 @@ export default function CinemaPlayer({ embedUrl, title, bookingId, backText = "T
                     </div>
                 </div>
 
-                {/* Title Below Video */}
-                <h2 style={{
-                    marginTop: "4px",
-                    color: "rgba(255,255,255,0.95)",
-                    fontSize: "1.4rem",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    width: "100%",
-                    letterSpacing: "0.5px"
-                }}>
-                    {title}
-                </h2>
             </div>
         </div>
     );

@@ -52,7 +52,7 @@ export default function AdminPage() {
 
     // Dynamic Arrays
     const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string }[]>([]);
-    const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string }[]>([]);
+    const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
     const [aiPrompt, setAiPrompt] = useState(`Je bent een assistent die websites samenvat voor een vakantie-app. Maak een aantrekkelijke, beknopte samenvatting in HTML-opmaak geschikt voor vakantiegasten.
@@ -543,6 +543,48 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         </select>
                                                     </div>
                                                 </div>
+
+                                                <details style={{ marginBottom: "10px", backgroundColor: "#f9f9f9", padding: "10px", border: "1px solid #ddd", borderRadius: "6px" }}>
+                                                    <summary style={{ fontSize: "0.85rem", color: "#555", cursor: "pointer", fontWeight: "bold", outline: "none" }}>🎛️ Blad Positie (Geavanceerd)</summary>
+                                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "10px" }}>
+                                                        {(() => {
+                                                            const s = vid.leafStyle || ['leaf-oak', 'leaf-maple', 'leaf-monstera', 'leaf-birch', 'leaf-chestnut', 'leaf-beech'][idx % 6];
+                                                            const defs = s === 'leaf-oak' ? { r: 200, s: 1, tx: -30, ty: 15 } 
+                                                                       : s === 'leaf-birch' ? { r: 290, s: 1.2, tx: 0, ty: 15 }
+                                                                       : s === 'leaf-beech' ? { r: 290, s: 1.2, tx: 0, ty: 15 }
+                                                                       : { r: 0, s: 1, tx: 0, ty: 0 };
+                                                            return (
+                                                                <>
+                                                                    <div>
+                                                                        <label style={{ display: "block", fontSize: "0.75rem", color: "#666" }}>Rotatie: {vid.leafRotate ?? defs.r}°</label>
+                                                                        <input type="range" min="0" max="360" value={vid.leafRotate ?? defs.r} onChange={e => { const n = [...videos]; n[idx].leafRotate = parseInt(e.target.value); setVideos(n); }} style={{ width: "100%", margin: "0" }} />
+                                                                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.65rem", color: "#999" }}><span>↶ Links</span><span>Rechts ↷</span></div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label style={{ display: "block", fontSize: "0.75rem", color: "#666" }}>Grootte: {vid.leafScale ?? defs.s}</label>
+                                                                        <input type="range" min="0.5" max="2.5" step="0.1" value={vid.leafScale ?? defs.s} onChange={e => { const n = [...videos]; n[idx].leafScale = parseFloat(e.target.value); setVideos(n); }} style={{ width: "100%", margin: "0" }} />
+                                                                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.65rem", color: "#999" }}><span>Klein</span><span>Groot</span></div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label style={{ display: "block", fontSize: "0.75rem", color: "#666" }}>Horizontaal: {vid.leafTranslateX ?? defs.tx}%</label>
+                                                                        <input type="range" min="-100" max="100" value={vid.leafTranslateX ?? defs.tx} onChange={e => { const n = [...videos]; n[idx].leafTranslateX = parseInt(e.target.value); setVideos(n); }} style={{ width: "100%", margin: "0" }} />
+                                                                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.65rem", color: "#999" }}><span>← Links</span><span>Rechts →</span></div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label style={{ display: "block", fontSize: "0.75rem", color: "#666" }}>Verticaal: {vid.leafTranslateY ?? defs.ty}%</label>
+                                                                        <input type="range" min="-100" max="100" value={vid.leafTranslateY ?? defs.ty} onChange={e => { const n = [...videos]; n[idx].leafTranslateY = parseInt(e.target.value); setVideos(n); }} style={{ width: "100%", margin: "0" }} />
+                                                                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.65rem", color: "#999" }}><span>↑ Boven</span><span>Onder ↓</span></div>
+                                                                    </div>
+                                                                    <div style={{ gridColumn: "1 / -1", textAlign: "right" }}>
+                                                                        { (vid.leafRotate !== undefined || vid.leafScale !== undefined || vid.leafTranslateX !== undefined || vid.leafTranslateY !== undefined) && 
+                                                                            <button onClick={() => { const n = [...videos]; delete n[idx].leafRotate; delete n[idx].leafScale; delete n[idx].leafTranslateX; delete n[idx].leafTranslateY; setVideos(n); }} style={{ fontSize: "0.7rem", backgroundColor: "#fff", border: "1px solid #ccc", padding: "4px 8px", borderRadius: "4px", cursor: "pointer" }}>↺ Reset naar standaard</button>
+                                                                        }
+                                                                    </div>
+                                                                </>
+                                                            )
+                                                        })()}
+                                                    </div>
+                                                </details>
 
                                                 <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>YouTube URL</label>
                                                 <input type="text" value={vid.url} onChange={e => { const n = [...videos]; n[idx].url = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", marginBottom: "10px" }} placeholder="https://youtube.com/..." />

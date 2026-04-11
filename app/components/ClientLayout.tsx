@@ -68,9 +68,19 @@ export default function ClientLayout({ children, basePath = "", appData, booking
     let pageTitle = subtitle;
     const omgevingDetailMatch = pathname.match(/\/omgeving\/(\d+)/);
     const homeDetailMatch = pathname.match(/\/info\/home\/(\d+)/);
+    const videoMatch = pathname.match(/\/video\/(\d+)/);
     
+    let videoTitle = null;
+    if (videoMatch && appData.videos) {
+        const idx = parseInt(videoMatch[1], 10);
+        if (appData.videos[idx]) {
+            videoTitle = parseTemplateString(appData.videos[idx].title, booking);
+        }
+    }
+
     // For detail pages, we keep the main category title. The specific item title will be shown inside the card.
-    if (pathname.includes("/info")) pageTitle = t('instructions', booking?.language);
+    if (videoTitle) pageTitle = videoTitle;
+    else if (pathname.includes("/info")) pageTitle = t('instructions', booking?.language);
     else if (pathname.includes("/omgeving")) pageTitle = t('environment', booking?.language);
     else if (pathname.includes("/chat")) pageTitle = t('chat_bot', booking?.language);
     else if (pathname === basePath || pathname === `${basePath}/` || homeDetailMatch) {
