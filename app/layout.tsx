@@ -15,6 +15,9 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "Veluwe Droomchalet",
   description: "Digitale Conciërge voor uw verblijf.",
+  icons: {
+    icon: "/images/Logo Veluwe Droom Chalet rond zonder tekst.webp",
+  },
 };
 
 export default function RootLayout({

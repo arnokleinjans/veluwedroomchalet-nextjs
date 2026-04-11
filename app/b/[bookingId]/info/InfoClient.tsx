@@ -90,7 +90,7 @@ export default function InfoClient({ appData, booking, basePath }: { appData: an
                                             height: '130%',
                                             width: '80%',
                                             alignItems: 'center',
-                                            backgroundImage: `url('/images/${leafStyle}.webp')`,
+                                            backgroundImage: `url('/images/leaves/${leafStyle}.webp')`,
                                             backgroundSize: 'contain',
                                             backgroundRepeat: 'no-repeat',
                                             backgroundPosition: 'center right',
