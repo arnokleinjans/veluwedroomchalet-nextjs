@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
         const booking = appData.bookings?.find((b: any) => b.id === guestContext?.bookingId);
         const languageMap: Record<string, string> = { nl: "Nederlands", en: "Engels", de: "Duits" };
-        const guestLanguage = languageMap[booking?.language] || "Nederlands";
+        const guestLanguage = languageMap[booking?.language || "nl"] || "Nederlands";
 
         // Build the system context instructing the AI on how to behave
         const systemInstruction = `
