@@ -1,5 +1,7 @@
 import { getAppData } from "./utils/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function RootLanding() {
     const appData = await getAppData();
     return (
