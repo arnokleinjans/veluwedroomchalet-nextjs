@@ -528,31 +528,47 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <input type="text" value={vid.title} onChange={e => { const n = [...videos]; n[idx].title = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
                                                     </div>
                                                     <div style={{ flex: 1 }}>
-                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Thumbnail (uit `/public/images`)</label>
-                                                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                                                            {vid.thumb && (
-                                                                <img src={`/${vid.thumb}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
-                                                            )}
-                                                            <select value={vid.thumb} onChange={e => { const n = [...videos]; n[idx].thumb = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
-                                                                <option value="">-- Geen thumbnail --</option>
-                                                                {availableImages.map((img, i) => {
-                                                                    const name = img.split('/').pop() || '';
-                                                                    const nameWithoutExt = name.replace(/\.[^/.]+$/, "");
-                                                                    return <option key={i} value={img}>{nameWithoutExt}</option>;
-                                                                })}
-                                                            </select>
-                                                        </div>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Korte Beschrijving (Optioneel)</label>
+                                                        <input type="text" value={vid.subtitle || ""} onChange={e => { const n = [...videos]; n[idx].subtitle = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Verdere uitleg over de video" />
+                                                    </div>
+                                                    <div style={{ flex: 0.8 }}>
+                                                        <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Blad Decoratie</label>
+                                                        <select value={vid.leafStyle || ['leaf-oak', 'leaf-maple', 'leaf-monstera', 'leaf-birch', 'leaf-chestnut', 'leaf-beech'][idx % 6]} onChange={e => { const n = [...videos]; n[idx].leafStyle = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                                            <option value="leaf-oak">🍂 Eikenblad (Herfst Bruin)</option>
+                                                            <option value="leaf-maple">🍁 Esdoornblad (Warm Oranje)</option>
+                                                            <option value="leaf-monstera">🌿 Monstera (Diepgroen)</option>
+                                                            <option value="leaf-birch">🍃 Berkenblad (Zomer Groen)</option>
+                                                            <option value="leaf-chestnut">🌰 Kastanjeblad (Zomer Groen)</option>
+                                                            <option value="leaf-beech">🍁 Beukenblad (Diep Rood/Paars)</option>
+                                                        </select>
                                                     </div>
                                                 </div>
 
                                                 <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>YouTube URL</label>
-                                                <input type="text" value={vid.url} onChange={e => { const n = [...videos]; n[idx].url = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="https://youtube.com/..." />
+                                                <input type="text" value={vid.url} onChange={e => { const n = [...videos]; n[idx].url = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", marginBottom: "10px" }} placeholder="https://youtube.com/..." />
+                                                
+                                                <div style={{ flex: 1 }}>
+                                                    <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Thumbnail (uit `/public/images`)</label>
+                                                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                                        {vid.thumb && (
+                                                            <img src={`/${vid.thumb}`} alt="Preview" style={{ width: "80px", height: "80px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
+                                                        )}
+                                                        <select value={vid.thumb} onChange={e => { const n = [...videos]; n[idx].thumb = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
+                                                            <option value="">-- Geen thumbnail --</option>
+                                                            {availableImages.map((img, i) => {
+                                                                const name = img.split('/').pop() || '';
+                                                                const nameWithoutExt = name.replace(/\.[^/.]+$/, "");
+                                                                return <option key={i} value={img}>{nameWithoutExt}</option>;
+                                                            })}
+                                                        </select>
+                                                    </div>
+                                                </div>
                                             </SortableItem>
                                         ))}
                                     </SortableContext>
                                 </DndContext>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <button onClick={() => setVideos([...videos, { title: "Nieuwe Video", thumb: "images/default.jpg", url: "" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Video Toevoegen</button>
+                                    <button onClick={() => setVideos([...videos, { title: "Nieuwe Video", subtitle: "", thumb: "images/default.jpg", url: "", leafStyle: "leaf-oak" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Video Toevoegen</button>
                                     <button onClick={handleSaveVideos} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                                 </div>
                             </div>

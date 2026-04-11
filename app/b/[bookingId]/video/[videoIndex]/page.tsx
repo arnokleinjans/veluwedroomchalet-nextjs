@@ -1,5 +1,6 @@
-import { getAppData } from "../../../../utils/db";
+import { getTranslatedAppData } from "../../../../utils/db";
 import { parseTemplateString } from "../../../../utils/templateParser";
+import { t } from "../../../../utils/translations";
 import CinemaPlayer from "./CinemaPlayer";
 
 export const dynamic = "force-dynamic";
@@ -9,9 +10,9 @@ export default async function VideoPage({ params }: { params: { bookingId: strin
     const bookingId = (resolvedParams.bookingId || "").toUpperCase();
     const videoIndex = parseInt(resolvedParams.videoIndex, 10);
 
-    const appData = await getAppData();
+    const appData = await getTranslatedAppData(bookingId);
     const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
-    const videos = appData.videos || [];
+    const videos = (appData as any).videos || [];
     const video = videos[videoIndex];
 
     if (!video) {
@@ -31,6 +32,7 @@ export default async function VideoPage({ params }: { params: { bookingId: strin
     embedUrl += (embedUrl.includes("?") ? "&" : "?") + "autoplay=1&mute=1&playsinline=1&rel=0";
 
     const title = parseTemplateString(video.title, booking);
+    const backText = t('back', booking?.language) || "Terug";
 
-    return <CinemaPlayer embedUrl={embedUrl} title={title} bookingId={bookingId} />;
+    return <CinemaPlayer embedUrl={embedUrl} title={title} bookingId={bookingId} backText={backText} />;
 }
