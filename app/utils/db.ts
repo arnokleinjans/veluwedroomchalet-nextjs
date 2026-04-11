@@ -19,13 +19,15 @@ const defaultAppData = {
             "id": "FAMILIE-L1JD",
             "guestName": "Familie van der Horst",
             "checkIn": "2026-02-27",
-            "checkOut": "2026-03-02"
+            "checkOut": "2026-03-02",
+            "language": "nl"
         },
         {
             "id": "KITTY-7R9X",
             "guestName": "Kitty van der Pijll",
             "checkIn": "2026-02-27",
-            "checkOut": "2026-05-03"
+            "checkOut": "2026-05-03",
+            "language": "nl"
         }
     ],
     "property": {
