@@ -28,8 +28,10 @@ export default async function VideoPage({ params }: { params: { bookingId: strin
     if (embedUrl.includes("youtube.com/watch?v=")) {
         embedUrl = embedUrl.replace("watch?v=", "embed/");
     }
-    // Add autoplay parameter
-    embedUrl += (embedUrl.includes("?") ? "&" : "?") + "autoplay=1&mute=1&playsinline=1&rel=0";
+
+    // Build query params
+    const lang = booking?.language || "nl";
+    embedUrl += (embedUrl.includes("?") ? "&" : "?") + `autoplay=1&mute=1&playsinline=1&rel=0&cc_load_policy=1&cc_lang_pref=${lang}&hl=${lang}`;
 
     const title = parseTemplateString(video.title, booking);
     const backText = t('back', booking?.language) || "Terug";

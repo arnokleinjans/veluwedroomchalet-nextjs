@@ -165,7 +165,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 setSaveMessage("❌ Ongeldige response van vertaalservice.");
                 setTimeout(() => setSaveMessage(""), 5000);
             }
-        } catch(e: any) {
+        } catch (e: any) {
             setSaveMessage("❌ Fout: " + e.message);
             setTimeout(() => setSaveMessage(""), 5000);
         }
@@ -322,29 +322,30 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 </div>
 
                 <div style={{ padding: "30px" }}>
-                    <style dangerouslySetInnerHTML={{__html: `
+                    <style dangerouslySetInnerHTML={{
+                        __html: `
                         @keyframes toastSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
                         @keyframes toastFade { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
                     `}} />
                     {saveMessage && (
-                        <div style={{ 
-                            position: "fixed", 
-                            bottom: "40px", 
-                            left: "50%", 
-                            transform: "translateX(-50%)", 
-                            zIndex: 99999, 
-                            backgroundColor: saveMessage.includes("❌") ? "rgba(220, 38, 38, 0.9)" : "rgba(40, 40, 40, 0.85)", 
-                            backdropFilter: "blur(12px)", 
-                            WebkitBackdropFilter: "blur(12px)", 
-                            color: "white", 
-                            padding: "14px 28px", 
-                            borderRadius: "50px", 
-                            fontWeight: "bold", 
-                            boxShadow: "0 10px 40px rgba(0,0,0,0.2)", 
-                            display: "flex", 
-                            alignItems: "center", 
-                            gap: "12px", 
-                            animation: "toastFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" 
+                        <div style={{
+                            position: "fixed",
+                            bottom: "40px",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            zIndex: 99999,
+                            backgroundColor: saveMessage.includes("❌") ? "rgba(220, 38, 38, 0.9)" : "rgba(40, 40, 40, 0.85)",
+                            backdropFilter: "blur(12px)",
+                            WebkitBackdropFilter: "blur(12px)",
+                            color: "white",
+                            padding: "14px 28px",
+                            borderRadius: "50px",
+                            fontWeight: "bold",
+                            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            animation: "toastFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards"
                         }}>
                             {saveMessage.includes("⏳") && (
                                 <div style={{ width: "20px", height: "20px", border: "3px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "50%", animation: "toastSpin 1s linear infinite" }} />
@@ -549,10 +550,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "10px" }}>
                                                         {(() => {
                                                             const s = vid.leafStyle || ['leaf-oak', 'leaf-maple', 'leaf-monstera', 'leaf-birch', 'leaf-chestnut', 'leaf-beech'][idx % 6];
-                                                            const defs = s === 'leaf-oak' ? { r: 200, s: 1, tx: -30, ty: 15 } 
-                                                                       : s === 'leaf-birch' ? { r: 290, s: 1.2, tx: 0, ty: 15 }
-                                                                       : s === 'leaf-beech' ? { r: 290, s: 1.2, tx: 0, ty: 15 }
-                                                                       : { r: 0, s: 1, tx: 0, ty: 0 };
+                                                            const defs = s === 'leaf-oak' ? { r: 200, s: 1, tx: -30, ty: 15 }
+                                                                : s === 'leaf-birch' ? { r: 290, s: 1.2, tx: 0, ty: 15 }
+                                                                    : s === 'leaf-beech' ? { r: 290, s: 1.2, tx: 0, ty: 15 }
+                                                                        : { r: 0, s: 1, tx: 0, ty: 0 };
                                                             return (
                                                                 <>
                                                                     <div>
@@ -576,7 +577,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.65rem", color: "#999" }}><span>↑ Boven</span><span>Onder ↓</span></div>
                                                                     </div>
                                                                     <div style={{ gridColumn: "1 / -1", textAlign: "right" }}>
-                                                                        { (vid.leafRotate !== undefined || vid.leafScale !== undefined || vid.leafTranslateX !== undefined || vid.leafTranslateY !== undefined) && 
+                                                                        {(vid.leafRotate !== undefined || vid.leafScale !== undefined || vid.leafTranslateX !== undefined || vid.leafTranslateY !== undefined) &&
                                                                             <button onClick={() => { const n = [...videos]; delete n[idx].leafRotate; delete n[idx].leafScale; delete n[idx].leafTranslateX; delete n[idx].leafTranslateY; setVideos(n); }} style={{ fontSize: "0.7rem", backgroundColor: "#fff", border: "1px solid #ccc", padding: "4px 8px", borderRadius: "4px", cursor: "pointer" }}>↺ Reset naar standaard</button>
                                                                         }
                                                                     </div>
@@ -588,7 +589,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                                                 <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>YouTube URL</label>
                                                 <input type="text" value={vid.url} onChange={e => { const n = [...videos]; n[idx].url = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", marginBottom: "10px" }} placeholder="https://youtube.com/..." />
-                                                
+
                                                 <div style={{ flex: 1 }}>
                                                     <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Thumbnail (uit `/public/images`)</label>
                                                     <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -750,20 +751,20 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             </div>
 
             {/* Zwevende Alle Wijzigingen Opslaan Knop */}
-            <button 
-                onClick={handleSaveAll} 
+            <button
+                onClick={handleSaveAll}
                 disabled={isSaving}
                 className="hover:scale-105 transition-transform"
-                style={{ 
-                    position: "fixed", 
-                    bottom: "40px", 
-                    right: "30px", 
-                    backgroundColor: "#4A5D23", 
-                    color: "white", 
-                    padding: "16px 28px", 
-                    borderRadius: "50px", 
-                    border: "3px solid rgba(255,255,255,0.2)", 
-                    cursor: isSaving ? "wait" : "pointer", 
+                style={{
+                    position: "fixed",
+                    bottom: "40px",
+                    right: "30px",
+                    backgroundColor: "#4A5D23",
+                    color: "white",
+                    padding: "16px 28px",
+                    borderRadius: "50px",
+                    border: "3px solid rgba(255,255,255,0.2)",
+                    cursor: isSaving ? "wait" : "pointer",
                     fontWeight: "bold",
                     fontSize: "1.1rem",
                     boxShadow: "0 10px 25px rgba(74, 93, 35, 0.5)",
