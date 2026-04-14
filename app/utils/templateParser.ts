@@ -6,6 +6,7 @@ export function parseTemplateString(text: string, booking: any | null): string {
         '@naamgast': booking?.guestName || 'Beste gast',
         '@aankomst': formatDutchDate(booking?.checkIn),
         '@vertrek': formatDutchDate(booking?.checkOut),
+        '@bookingid': booking?.id || '',
     };
 
     let result = text;

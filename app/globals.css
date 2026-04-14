@@ -588,6 +588,7 @@ h3 {
 .rich-content a {
     color: var(--primary-color) !important;
     text-decoration: underline !important;
+    cursor: pointer !important;
 }
 
 .rich-content table {

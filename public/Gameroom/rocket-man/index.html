@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Rocket Man</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        canvas {
+            display: block;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(255,107,53,0.15);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+    // ===== SETUP =====
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = 480;
+    const H = 720;
+    canvas.width = W;
+    canvas.height = H;
+
+    // ===== RESPONSIVE SCALING =====
+    function resizeCanvas() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const ratio = W / H;
+        const screenRatio = vw / vh;
+        let displayW, displayH;
+        if (screenRatio > ratio) {
+            displayH = vh;
+            displayW = vh * ratio;
+        } else {
+            displayW = vw;
+            displayH = vw / ratio;
+        }
+        canvas.style.width = displayW + 'px';
+        canvas.style.height = displayH + 'px';
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // ===== IMAGE LOADER =====
+    const images = {};
+    const imagePaths = {
+        rocket: 'resources/rocket.png',
+        maan: 'resources/maan01.png',
+        onderkant: 'resources/onderkant3.png',
+        gamecentre: 'resources/gamecentre.png',
+        scoreBg: 'resources/score.png',
+        restart: 'resources/restart.png',
+        musicicon: 'resources/musicicon.png',
+        sfx: 'resources/sfx.png',
+        slider: 'resources/slider.png',
+        medalB: 'resources/medalB.png',
+        medalG: 'resources/medalG.png',
+        medalZ: 'resources/medalZ.png',
+        papa1: 'resources/papa1.png', papa2: 'resources/papa2.png', papa3: 'resources/papa3.png',
+        mama1: 'resources/mama1.png', mama2: 'resources/mama2.png', mama3: 'resources/mama3.png',
+        meisje1: 'resources/meisje1.png', meisje2: 'resources/meisje2.png', meisje3: 'resources/meisje3.png', meisje4: 'resources/meisje4.png',
+        neef1: 'resources/neef1.png', neef2: 'resources/neef2.png', neef3: 'resources/neef3.png',
+        zoon1: 'resources/zoon1.png', zoon2: 'resources/zoon2.png', zoon3: 'resources/zoon3.png',
+        coin1: 'resources/coin1.png', coin2: 'resources/coin2.png', coin3: 'resources/coin3.png',
+        coin4: 'resources/coin4.png', coin5: 'resources/coin5.png', coin6: 'resources/coin6.png',
+        coin7: 'resources/coin7.png', coin8: 'resources/coin8.png', coin9: 'resources/coin9.png'
+    };
+
+    let imagesLoaded = 0;
+    let totalImages = Object.keys(imagePaths).length;
+
+    function loadImages(callback) {
+        for (const [key, path] of Object.entries(imagePaths)) {
+            const img = new Image();
+            img.onload = () => {
+                imagesLoaded++;
+                if (imagesLoaded >= totalImages) callback();
+            };
+            img.onerror = () => {
+                console.warn('Could not load: ' + path);
+                imagesLoaded++;
+                if (imagesLoaded >= totalImages) callback();
+            };
+            img.src = path;
+            images[key] = img;
+        }
+    }
+
+    // ===== SOUND (Web Audio API) =====
+    let audioCtx = null;
+    let musicEnabled = true;
+    let sfxEnabled = true;
+    let musicVolume = 0.3;
+    let sfxVolume = 0.5;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playTone(freq, duration, type = 'square', vol = 0.3) {
+        if (!audioCtx || !sfxEnabled) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol * sfxVolume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playBoost() {
+        playTone(300, 0.08, 'sine', 0.2);
+        setTimeout(() => playTone(450, 0.06, 'sine', 0.15), 30);
+    }
+
+    function playCoin() {
+        playTone(880, 0.08, 'sine', 0.3);
+        setTimeout(() => playTone(1100, 0.12, 'sine', 0.25), 60);
+    }
+
+    function playScore() {
+        playTone(660, 0.1, 'sine', 0.25);
+        setTimeout(() => playTone(880, 0.15, 'sine', 0.2), 80);
+    }
+
+    function playDie() {
+        playTone(200, 0.3, 'sawtooth', 0.3);
+        setTimeout(() => playTone(120, 0.4, 'sawtooth', 0.25), 150);
+        setTimeout(() => playTone(80, 0.5, 'sawtooth', 0.2), 350);
+    }
+
+    // Background music - simple looping melody
+    let musicOscillators = [];
+    let musicPlaying = false;
+
+    function startMusic() {
+        if (!audioCtx || !musicEnabled || musicPlaying) return;
+        musicPlaying = true;
+        playMusicLoop();
+    }
+
+    function stopMusic() {
+        musicPlaying = false;
+        musicOscillators.forEach(o => { try { o.stop(); } catch(e) {} });
+        musicOscillators = [];
+    }
+
+    function playMusicLoop() {
+        if (!musicPlaying || !musicEnabled || !audioCtx) return;
+        const notes = [262, 330, 392, 523, 392, 330, 262, 196, 262, 330, 392, 440, 523, 440, 392, 330];
+        const noteLen = 0.25;
+        notes.forEach((freq, i) => {
+            if (!musicPlaying) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * noteLen);
+            gain.gain.setValueAtTime(musicVolume * 0.15, audioCtx.currentTime + i * noteLen);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * noteLen + noteLen * 0.9);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + i * noteLen);
+            osc.stop(audioCtx.currentTime + i * noteLen + noteLen);
+            musicOscillators.push(osc);
+        });
+        setTimeout(() => {
+            if (musicPlaying) playMusicLoop();
+        }, notes.length * noteLen * 1000);
+    }
+
+    // ===== GAME CONSTANTS =====
+    const GRAVITY = 0.42;
+    const BOOST = -7.2;
+    const BASE_SPEED = 3;
+    const ROCKET_W = 80;
+    const ROCKET_H = 50;
+    const GROUND_H = 80;
+    const COMET_SIZE = 60;
+    const COIN_SIZE = 36;
+
+    // Comet types with their sprite frames
+    const COMET_TYPES = [
+        { name: 'papa', frames: ['papa1','papa2','papa3'], frameCount: 3 },
+        { name: 'mama', frames: ['mama1','mama2','mama3'], frameCount: 3 },
+        { name: 'meisje', frames: ['meisje1','meisje2','meisje3','meisje4'], frameCount: 4 },
+        { name: 'neef', frames: ['neef1','neef2','neef3'], frameCount: 3 },
+        { name: 'zoon', frames: ['zoon1','zoon2','zoon3'], frameCount: 3 }
+    ];
+
+    const COIN_FRAMES = ['coin1','coin2','coin3','coin4','coin5','coin6','coin7','coin8','coin9'];
+
+    // ===== GAME STATE =====
+    let state = 'loading'; // loading, menu, playing, dead, leaderboard
+    let rocket = { x: 100, y: H / 2, vy: 0, angle: 0 };
+    let comets = [];
+    let coins = [];
+    let particles = [];
+    let stars = [];
+    let score = 0;
+    let coinScore = 0;
+    let bestScore = parseInt(localStorage.getItem('rocketManBest') || '0');
+    let leaderboard = JSON.parse(localStorage.getItem('rocketManLeaderboard') || '[]');
+    let frameCount = 0;
+    let speed = BASE_SPEED;
+    let spawnTimer = 0;
+    let spawnInterval = 120;
+    let shakeTimer = 0;
+    let flashTimer = 0;
+    let groundX = 0;
+    let moonX = W + 100;
+    let animFrame = 0;
+    let animTimer = 0;
+    let deathTimer = 0;
+    let settingsOpen = false;
+    let playerName = '';
+    let nameInputActive = false;
+
+    // ===== STARS =====
+    function createStars() {
+        stars = [];
+        for (let i = 0; i < 100; i++) {
+            stars.push({
+                x: Math.random() * W,
+                y: Math.random() * (H - GROUND_H),
+                size: Math.random() * 2 + 0.5,
+                speed: Math.random() * 1.5 + 0.3,
+                brightness: Math.random()
+            });
+        }
+    }
+
+    // ===== PARTICLES =====
+    function spawnExhaust() {
+        for (let i = 0; i < 2; i++) {
+            particles.push({
+                x: rocket.x - 5 + (Math.random() - 0.5) * 6,
+                y: rocket.y + ROCKET_H / 2 + (Math.random() - 0.5) * 8,
+                vx: -(Math.random() * 2 + 1),
+                vy: (Math.random() - 0.5) * 1.5,
+                life: 15 + Math.random() * 10,
+                maxLife: 25,
+                size: Math.random() * 4 + 2,
+                color: Math.random() > 0.5 ? '#ff6b35' : '#ffcc00'
+            });
+        }
+    }
+
+    function spawnBoostParticles() {
+        for (let i = 0; i < 6; i++) {
+            particles.push({
+                x: rocket.x - 5 + (Math.random() - 0.5) * 8,
+                y: rocket.y + ROCKET_H / 2 + (Math.random() - 0.5) * 12,
+                vx: -(Math.random() * 4 + 2),
+                vy: (Math.random() - 0.5) * 3,
+                life: 20 + Math.random() * 15,
+                maxLife: 35,
+                size: Math.random() * 5 + 2,
+                color: Math.random() > 0.5 ? '#ff6b35' : '#ffcc00'
+            });
+        }
+    }
+
+    function spawnExplosion(x, y) {
+        for (let i = 0; i < 50; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const spd = Math.random() * 7 + 1;
+            particles.push({
+                x, y,
+                vx: Math.cos(angle) * spd,
+                vy: Math.sin(angle) * spd,
+                life: 30 + Math.random() * 30,
+                maxLife: 60,
+                size: Math.random() * 6 + 2,
+                color: ['#ff6b35','#ffcc00','#ff3300','#fff'][Math.floor(Math.random()*4)]
+            });
+        }
+    }
+
+    function spawnCoinParticles(x, y) {
+        for (let i = 0; i < 12; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const spd = Math.random() * 3 + 1;
+            particles.push({
+                x, y,
+                vx: Math.cos(angle) * spd,
+                vy: Math.sin(angle) * spd,
+                life: 15 + Math.random() * 10,
+                maxLife: 25,
+                size: Math.random() * 3 + 1,
+                color: '#ffd700'
+            });
+        }
+    }
+
+    // ===== SPAWN OBSTACLES =====
+    function spawnComet() {
+        const type = COMET_TYPES[Math.floor(Math.random() * COMET_TYPES.length)];
+        const minY = 60;
+        const maxY = H - GROUND_H - COMET_SIZE - 60;
+        const y = minY + Math.random() * (maxY - minY);
+        const floatAmplitude = 20 + Math.random() * 30;
+        const floatSpeed = 0.02 + Math.random() * 0.02;
+        comets.push({
+            x: W + 20,
+            y: y,
+            baseY: y,
+            type: type,
+            frame: 0,
+            floatAmplitude,
+            floatSpeed,
+            floatOffset: Math.random() * Math.PI * 2,
+            scored: false
+        });
+    }
+
+    function spawnCoin() {
+        const minY = 80;
+        const maxY = H - GROUND_H - COIN_SIZE - 80;
+        const y = minY + Math.random() * (maxY - minY);
+        coins.push({
+            x: W + 20,
+            y: y,
+            frame: 0,
+            collected: false
+        });
+    }
+
+    // ===== COLLISION =====
+    function checkCollisions() {
+        const margin = 10;
+        const rx = rocket.x + margin;
+        const ry = rocket.y + margin;
+        const rw = ROCKET_W - margin * 2;
+        const rh = ROCKET_H - margin * 2;
+
+        // Ground
+        if (rocket.y + ROCKET_H > H - GROUND_H) {
+            rocket.y = H - GROUND_H - ROCKET_H;
+            die();
+            return;
+        }
+        // Ceiling
+        if (rocket.y < 0) {
+            rocket.y = 0;
+            rocket.vy = 0;
+        }
+
+        // Comets
+        for (const comet of comets) {
+            const cx = comet.x + 8;
+            const cy = comet.y + 8;
+            const cw = COMET_SIZE - 16;
+            const ch = COMET_SIZE - 16;
+            if (rx < cx + cw && rx + rw > cx && ry < cy + ch && ry + rh > cy) {
+                die();
+                return;
+            }
+            // Score
+            if (!comet.scored && comet.x + COMET_SIZE < rocket.x) {
+                comet.scored = true;
+                score++;
+                playScore();
+            }
+        }
+
+        // Coins
+        for (const coin of coins) {
+            if (coin.collected) continue;
+            const cx = coin.x + 4;
+            const cy = coin.y + 4;
+            const cs = COIN_SIZE - 8;
+            if (rx < cx + cs && rx + rw > cx && ry < cy + cs && ry + rh > cy) {
+                coin.collected = true;
+                coinScore += 5;
+                playCoin();
+                spawnCoinParticles(coin.x + COIN_SIZE/2, coin.y + COIN_SIZE/2);
+            }
+        }
+    }
+
+    // ===== GAME FLOW =====
+    function die() {
+        if (state !== 'playing') return;
+        state = 'dead';
+        shakeTimer = 15;
+        flashTimer = 8;
+        deathTimer = 0;
+        playDie();
+        stopMusic();
+        spawnExplosion(rocket.x + ROCKET_W / 2, rocket.y + ROCKET_H / 2);
+
+        const totalScore = score + coinScore;
+        if (totalScore > bestScore) {
+            bestScore = totalScore;
+            localStorage.setItem('rocketManBest', bestScore);
+        }
+    }
+
+    function startGame() {
+        initAudio();
+        rocket = { x: 100, y: H / 2, vy: 0, angle: 0 };
+        comets = [];
+        coins = [];
+        particles = [];
+        score = 0;
+        coinScore = 0;
+        frameCount = 0;
+        speed = BASE_SPEED;
+        spawnTimer = 0;
+        spawnInterval = 120;
+        shakeTimer = 0;
+        flashTimer = 0;
+        state = 'playing';
+        settingsOpen = false;
+        startMusic();
+    }
+
+    function addToLeaderboard(name, sc) {
+        leaderboard.push({ name: name || 'Anoniem', score: sc, date: new Date().toLocaleDateString('nl-NL') });
+        leaderboard.sort((a, b) => b.score - a.score);
+        leaderboard = leaderboard.slice(0, 10);
+        localStorage.setItem('rocketManLeaderboard', JSON.stringify(leaderboard));
+    }
+
+    // ===== DRAWING =====
+    function drawBackground() {
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+        bgGrad.addColorStop(0, '#0a0a2e');
+        bgGrad.addColorStop(0.5, '#0d0d3a');
+        bgGrad.addColorStop(1, '#1a0a2e');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawStars() {
+        for (const star of stars) {
+            star.x -= star.speed * (speed / BASE_SPEED);
+            star.brightness += (Math.random() - 0.5) * 0.1;
+            star.brightness = Math.max(0.3, Math.min(1, star.brightness));
+            if (star.x < 0) { star.x = W; star.y = Math.random() * (H - GROUND_H); }
+            ctx.fillStyle = `rgba(255,255,255,${star.brightness * 0.7})`;
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function drawMoon() {
+        if (images.maan && images.maan.complete && images.maan.naturalWidth > 0) {
+            moonX -= 0.3 * (speed / BASE_SPEED);
+            if (moonX < -200) moonX = W + 100;
+            ctx.globalAlpha = 0.6;
+            ctx.drawImage(images.maan, moonX, 60, 160, 160);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    function drawGround() {
+        if (images.onderkant && images.onderkant.complete && images.onderkant.naturalWidth > 0) {
+            groundX -= speed;
+            const imgW = images.onderkant.naturalWidth;
+            if (Math.abs(groundX) >= imgW) groundX += imgW;
+            for (let x = groundX; x < W + imgW; x += imgW) {
+                ctx.drawImage(images.onderkant, x, H - GROUND_H, imgW, GROUND_H);
+            }
+        } else {
+            ctx.fillStyle = '#3a2a1a';
+            ctx.fillRect(0, H - GROUND_H, W, GROUND_H);
+        }
+    }
+
+    function drawRocket() {
+        if (state === 'dead' && deathTimer > 10) return;
+        ctx.save();
+        ctx.translate(rocket.x + ROCKET_W / 2, rocket.y + ROCKET_H / 2);
+        ctx.rotate(rocket.angle * Math.PI / 180);
+
+        // Draw exhaust flame from the back (left side) of the rocket
+        if (state === 'playing') {
+            const flameLen = 20 + Math.random() * 25;
+            const flameW = 12 + Math.random() * 8;
+            // Outer flame - going left from the back of the rocket
+            const flameGrad = ctx.createLinearGradient(-ROCKET_W/2, 0, -ROCKET_W/2 - flameLen, 0);
+            flameGrad.addColorStop(0, '#ff6b35');
+            flameGrad.addColorStop(0.4, '#ff4500');
+            flameGrad.addColorStop(1, 'rgba(255,69,0,0)');
+            ctx.fillStyle = flameGrad;
+            ctx.beginPath();
+            ctx.moveTo(-ROCKET_W/2, -flameW/2);
+            ctx.quadraticCurveTo(-ROCKET_W/2 - flameLen*0.6, -flameW/3, -ROCKET_W/2 - flameLen, 0);
+            ctx.quadraticCurveTo(-ROCKET_W/2 - flameLen*0.6, flameW/3, -ROCKET_W/2, flameW/2);
+            ctx.fill();
+
+            // Inner flame
+            const innerLen = flameLen * 0.55;
+            const innerW = flameW * 0.45;
+            const innerGrad = ctx.createLinearGradient(-ROCKET_W/2, 0, -ROCKET_W/2 - innerLen, 0);
+            innerGrad.addColorStop(0, '#fff7a0');
+            innerGrad.addColorStop(0.5, '#ffcc00');
+            innerGrad.addColorStop(1, 'rgba(255,204,0,0)');
+            ctx.fillStyle = innerGrad;
+            ctx.beginPath();
+            ctx.moveTo(-ROCKET_W/2, -innerW/2);
+            ctx.quadraticCurveTo(-ROCKET_W/2 - innerLen*0.6, -innerW/3, -ROCKET_W/2 - innerLen, 0);
+            ctx.quadraticCurveTo(-ROCKET_W/2 - innerLen*0.6, innerW/3, -ROCKET_W/2, innerW/2);
+            ctx.fill();
+        }
+
+        // Draw rocket sprite
+        if (images.rocket && images.rocket.complete && images.rocket.naturalWidth > 0) {
+            ctx.drawImage(images.rocket, -ROCKET_W/2, -ROCKET_H/2, ROCKET_W, ROCKET_H);
+        } else {
+            // Fallback
+            ctx.fillStyle = '#ccc';
+            ctx.fillRect(-ROCKET_W/2, -ROCKET_H/2, ROCKET_W, ROCKET_H);
+        }
+        ctx.restore();
+    }
+
+    function drawComets() {
+        for (const comet of comets) {
+            const type = comet.type;
+            const frameKey = type.frames[comet.frame % type.frameCount];
+            const img = images[frameKey];
+            if (img && img.complete && img.naturalWidth > 0) {
+                // Draw comet tail
+                ctx.save();
+                const tailGrad = ctx.createLinearGradient(comet.x + COMET_SIZE, comet.y + COMET_SIZE/2, comet.x + COMET_SIZE + 40, comet.y + COMET_SIZE/2);
+                tailGrad.addColorStop(0, 'rgba(255,150,50,0.5)');
+                tailGrad.addColorStop(1, 'rgba(255,150,50,0)');
+                ctx.fillStyle = tailGrad;
+                ctx.beginPath();
+                ctx.moveTo(comet.x + COMET_SIZE, comet.y + 10);
+                ctx.lineTo(comet.x + COMET_SIZE + 30 + Math.random()*15, comet.y + COMET_SIZE/2);
+                ctx.lineTo(comet.x + COMET_SIZE, comet.y + COMET_SIZE - 10);
+                ctx.fill();
+                ctx.restore();
+
+                ctx.drawImage(img, comet.x, comet.y, COMET_SIZE, COMET_SIZE);
+            }
+        }
+    }
+
+    function drawCoins() {
+        for (const coin of coins) {
+            if (coin.collected) continue;
+            const frameKey = COIN_FRAMES[coin.frame % 9];
+            const img = images[frameKey];
+            if (img && img.complete && img.naturalWidth > 0) {
+                ctx.drawImage(img, coin.x, coin.y, COIN_SIZE, COIN_SIZE);
+            }
+        }
+    }
+
+    function drawParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+            if (p.life <= 0) { particles.splice(i, 1); continue; }
+            const alpha = p.life / p.maxLife;
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    function drawScore() {
+        // Score background
+        if (images.scoreBg && images.scoreBg.complete && images.scoreBg.naturalWidth > 0) {
+            ctx.drawImage(images.scoreBg, W/2 - 60, 10, 120, 50);
+        } else {
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(W/2 - 50, 15, 100, 40);
+        }
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 26px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(score + coinScore, W/2, 36);
+
+        // Coin indicator
+        if (coinScore > 0) {
+            ctx.font = '14px "Segoe UI", sans-serif';
+            ctx.fillStyle = '#ffd700';
+            ctx.fillText('🪙 +' + coinScore, W/2, 56);
+        }
+    }
+
+    function getMedal() {
+        const total = score + coinScore;
+        if (total >= 30) return images.medalG;
+        if (total >= 15) return images.medalZ;
+        if (total >= 5) return images.medalB;
+        return null;
+    }
+
+    function drawMenu() {
+        drawBackground();
+        drawStars();
+        drawMoon();
+        drawGround();
+
+        // Title
+        ctx.fillStyle = '#ff6b35';
+        ctx.font = 'bold 48px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(255,107,53,0.5)';
+        ctx.shadowBlur = 20;
+        ctx.fillText('ROCKET MAN', W/2, H/3 - 40);
+        ctx.shadowBlur = 0;
+
+        // Rocket preview
+        if (images.rocket && images.rocket.complete && images.rocket.naturalWidth > 0) {
+            ctx.drawImage(images.rocket, W/2 - 40, H/3 + 10, 80, 100);
+        }
+
+        // Start button
+        ctx.fillStyle = '#ff6b35';
+        ctx.fillRect(W/2 - 90, H/2 + 60, 180, 55);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px "Segoe UI", sans-serif';
+        ctx.fillText('START', W/2, H/2 + 88);
+
+        // Leaderboard button
+        ctx.fillStyle = '#0f3460';
+        ctx.fillRect(W/2 - 90, H/2 + 130, 180, 50);
+        ctx.strokeStyle = '#ff6b35';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(W/2 - 90, H/2 + 130, 180, 50);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 18px "Segoe UI", sans-serif';
+        ctx.fillText('LEADERBOARD', W/2, H/2 + 156);
+
+        // Settings button
+        if (images.musicicon && images.musicicon.complete && images.musicicon.naturalWidth > 0) {
+            ctx.drawImage(images.musicicon, 20, H - 60, 40, 40);
+        }
+        if (images.sfx && images.sfx.complete && images.sfx.naturalWidth > 0) {
+            ctx.drawImage(images.sfx, 70, H - 60, 40, 40);
+        }
+
+        // Best score
+        ctx.fillStyle = '#888';
+        ctx.font = '16px "Segoe UI", sans-serif';
+        ctx.fillText('Beste: ' + bestScore, W/2, H/2 + 210);
+
+        // Hint
+        ctx.fillStyle = '#555';
+        ctx.font = '14px "Segoe UI", sans-serif';
+        ctx.fillText('Spatie / Klik om te vliegen', W/2, H - 30);
+    }
+
+    function drawDead() {
+        // Darken
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(0, 0, W, H);
+
+        // Game Over text
+        ctx.fillStyle = '#ff6b35';
+        ctx.font = 'bold 42px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(255,107,53,0.5)';
+        ctx.shadowBlur = 15;
+        ctx.fillText('CRASH!', W/2, H/3 - 20);
+        ctx.shadowBlur = 0;
+
+        // Score
+        const total = score + coinScore;
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 28px "Segoe UI", sans-serif';
+        ctx.fillText('Score: ' + total, W/2, H/3 + 40);
+
+        // Medal
+        const medal = getMedal();
+        if (medal && medal.complete && medal.naturalWidth > 0) {
+            ctx.drawImage(medal, W/2 - 30, H/3 + 60, 60, 60);
+        }
+
+        // New best
+        if (total >= bestScore && total > 0) {
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 20px "Segoe UI", sans-serif';
+            ctx.fillText('🏆 Nieuw record!', W/2, H/3 + 135);
+        }
+
+        // Name input
+        ctx.fillStyle = '#aaa';
+        ctx.font = '16px "Segoe UI", sans-serif';
+        ctx.fillText('Naam:', W/2 - 80, H/2 + 40);
+        ctx.fillStyle = nameInputActive ? '#1a3a5c' : '#0f2040';
+        ctx.fillRect(W/2 - 40, H/2 + 25, 160, 35);
+        ctx.strokeStyle = nameInputActive ? '#ff6b35' : '#555';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(W/2 - 40, H/2 + 25, 160, 35);
+        ctx.fillStyle = '#fff';
+        ctx.font = '18px "Segoe UI", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(playerName + (nameInputActive && frameCount % 60 < 30 ? '|' : ''), W/2 - 32, H/2 + 47);
+        ctx.textAlign = 'center';
+
+        // Save & Leaderboard button
+        ctx.fillStyle = '#0f3460';
+        ctx.fillRect(W/2 - 110, H/2 + 80, 220, 45);
+        ctx.strokeStyle = '#ff6b35';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(W/2 - 110, H/2 + 80, 220, 45);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 18px "Segoe UI", sans-serif';
+        ctx.fillText('OPSLAAN & LEADERBOARD', W/2, H/2 + 103);
+
+        // Restart button
+        if (images.restart && images.restart.complete && images.restart.naturalWidth > 0) {
+            ctx.drawImage(images.restart, W/2 - 40, H/2 + 145, 80, 50);
+        } else {
+            ctx.fillStyle = '#ff6b35';
+            ctx.fillRect(W/2 - 70, H/2 + 145, 140, 45);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px "Segoe UI", sans-serif';
+            ctx.fillText('OPNIEUW', W/2, H/2 + 168);
+        }
+    }
+
+    function drawLeaderboard() {
+        // Background
+        if (images.gamecentre && images.gamecentre.complete && images.gamecentre.naturalWidth > 0) {
+            ctx.drawImage(images.gamecentre, 0, 0, W, H);
+        } else {
+            drawBackground();
+        }
+
+        // Overlay
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 0, W, H);
+
+        // Title
+        ctx.fillStyle = '#ff6b35';
+        ctx.font = 'bold 36px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('LEADERBOARD', W/2, 60);
+
+        // Entries
+        ctx.font = '18px "Segoe UI", sans-serif';
+        const startY = 110;
+        for (let i = 0; i < Math.min(leaderboard.length, 10); i++) {
+            const entry = leaderboard[i];
+            const y = startY + i * 45;
+            // Row bg
+            ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)';
+            ctx.fillRect(40, y - 15, W - 80, 40);
+            // Rank
+            ctx.fillStyle = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#aaa';
+            ctx.textAlign = 'left';
+            ctx.fillText((i + 1) + '.', 55, y + 5);
+            // Name
+            ctx.fillStyle = '#fff';
+            ctx.fillText(entry.name, 90, y + 5);
+            // Score
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#ff6b35';
+            ctx.fillText(entry.score + '', W - 100, y + 5);
+            // Date
+            ctx.fillStyle = '#666';
+            ctx.font = '12px "Segoe UI", sans-serif';
+            ctx.fillText(entry.date, W - 50, y + 5);
+            ctx.font = '18px "Segoe UI", sans-serif';
+        }
+
+        if (leaderboard.length === 0) {
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('Nog geen scores!', W/2, H/2);
+        }
+
+        // Back button
+        ctx.fillStyle = '#ff6b35';
+        ctx.fillRect(W/2 - 70, H - 80, 140, 45);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 18px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('TERUG', W/2, H - 57);
+    }
+
+    function drawSettings() {
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.fillStyle = '#ff6b35';
+        ctx.font = 'bold 28px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('INSTELLINGEN', W/2, 80);
+
+        // Music toggle
+        const musicY = 160;
+        if (images.musicicon && images.musicicon.complete && images.musicicon.naturalWidth > 0) {
+            ctx.globalAlpha = musicEnabled ? 1 : 0.4;
+            ctx.drawImage(images.musicicon, W/2 - 80, musicY, 50, 50);
+            ctx.globalAlpha = 1;
+        }
+        ctx.fillStyle = '#fff';
+        ctx.font = '20px "Segoe UI", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Muziek: ' + (musicEnabled ? 'AAN' : 'UIT'), W/2 - 15, musicY + 30);
+
+        // SFX toggle
+        const sfxY = 240;
+        if (images.sfx && images.sfx.complete && images.sfx.naturalWidth > 0) {
+            ctx.globalAlpha = sfxEnabled ? 1 : 0.4;
+            ctx.drawImage(images.sfx, W/2 - 80, sfxY, 50, 50);
+            ctx.globalAlpha = 1;
+        }
+        ctx.fillStyle = '#fff';
+        ctx.fillText('Geluid: ' + (sfxEnabled ? 'AAN' : 'UIT'), W/2 - 15, sfxY + 30);
+
+        // Volume slider
+        const sliderY = 330;
+        ctx.fillStyle = '#aaa';
+        ctx.textAlign = 'center';
+        ctx.font = '16px "Segoe UI", sans-serif';
+        ctx.fillText('Volume', W/2, sliderY);
+        if (images.slider && images.slider.complete && images.slider.naturalWidth > 0) {
+            ctx.drawImage(images.slider, W/2 - 80, sliderY + 10, 160, 30);
+        } else {
+            ctx.fillStyle = '#333';
+            ctx.fillRect(W/2 - 80, sliderY + 15, 160, 10);
+        }
+        // Slider knob
+        const knobX = W/2 - 80 + sfxVolume * 160;
+        ctx.fillStyle = '#ff6b35';
+        ctx.beginPath();
+        ctx.arc(knobX, sliderY + 20, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Back
+        ctx.fillStyle = '#ff6b35';
+        ctx.fillRect(W/2 - 70, H - 100, 140, 45);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 18px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('TERUG', W/2, H - 77);
+    }
+
+    // ===== UPDATE =====
+    function update() {
+        if (state !== 'playing') return;
+
+        frameCount++;
+
+        // Increase difficulty
+        speed = BASE_SPEED + Math.floor(frameCount / 600) * 0.5;
+        spawnInterval = Math.max(60, 120 - Math.floor(frameCount / 500) * 5);
+
+        // Rocket physics
+        rocket.vy += GRAVITY;
+        rocket.y += rocket.vy;
+        const targetAngle = rocket.vy * 3;
+        rocket.angle += (targetAngle - rocket.angle) * 0.1;
+        rocket.angle = Math.max(-30, Math.min(50, rocket.angle));
+
+        // Exhaust
+        if (frameCount % 3 === 0) spawnExhaust();
+
+        // Spawn
+        spawnTimer++;
+        if (spawnTimer >= spawnInterval) {
+            spawnTimer = 0;
+            spawnComet();
+            // Chance to spawn coin
+            if (Math.random() < 0.4) {
+                setTimeout(() => { if (state === 'playing') spawnCoin(); }, 300);
+            }
+        }
+
+        // Update comets
+        for (let i = comets.length - 1; i >= 0; i--) {
+            const c = comets[i];
+            c.x -= speed;
+            c.y = c.baseY + Math.sin(frameCount * c.floatSpeed + c.floatOffset) * c.floatAmplitude;
+            if (c.x + COMET_SIZE < -20) { comets.splice(i, 1); continue; }
+        }
+
+        // Update coins
+        for (let i = coins.length - 1; i >= 0; i--) {
+            const c = coins[i];
+            c.x -= speed;
+            if (c.x + COIN_SIZE < -20 || c.collected) {
+                if (c.collected || c.x + COIN_SIZE < -20) { coins.splice(i, 1); continue; }
+            }
+        }
+
+        // Animation frames
+        animTimer++;
+        if (animTimer >= 8) {
+            animTimer = 0;
+            animFrame++;
+            for (const c of comets) c.frame = animFrame % c.type.frameCount;
+            for (const c of coins) c.frame = animFrame % 9;
+        }
+
+        checkCollisions();
+    }
+
+    // ===== MAIN LOOP =====
+    function gameLoop() {
+        ctx.save();
+
+        // Screen shake
+        if (shakeTimer > 0) {
+            ctx.translate((Math.random()-0.5)*shakeTimer, (Math.random()-0.5)*shakeTimer);
+            shakeTimer--;
+        }
+
+        if (state === 'menu') {
+            drawMenu();
+        } else if (state === 'leaderboard') {
+            drawLeaderboard();
+        } else if (state === 'settings') {
+            drawSettings();
+        } else if (state === 'playing' || state === 'dead') {
+            update();
+
+            drawBackground();
+            drawStars();
+            drawMoon();
+            drawCoins();
+            drawComets();
+            drawParticles();
+            drawRocket();
+            drawGround();
+            drawScore();
+
+            // Flash
+            if (flashTimer > 0) {
+                ctx.fillStyle = `rgba(255,100,50,${flashTimer*0.04})`;
+                ctx.fillRect(0, 0, W, H);
+                flashTimer--;
+            }
+
+            if (state === 'dead') {
+                deathTimer++;
+                if (deathTimer > 30) drawDead();
+            }
+        }
+
+        ctx.restore();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ===== INPUT =====
+    function handleBoost() {
+        if (state === 'playing') {
+            rocket.vy = BOOST;
+            spawnBoostParticles();
+            playBoost();
+        }
+    }
+
+    canvas.addEventListener('click', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = W / rect.width;
+        const scaleY = H / rect.height;
+        const mx = (e.clientX - rect.left) * scaleX;
+        const my = (e.clientY - rect.top) * scaleY;
+
+        if (state === 'menu') {
+            // Start button
+            if (mx > W/2-90 && mx < W/2+90 && my > H/2+60 && my < H/2+115) {
+                startGame();
+                return;
+            }
+            // Leaderboard button
+            if (mx > W/2-90 && mx < W/2+90 && my > H/2+130 && my < H/2+180) {
+                state = 'leaderboard';
+                return;
+            }
+            // Music toggle
+            if (mx > 20 && mx < 60 && my > H-60 && my < H-20) {
+                musicEnabled = !musicEnabled;
+                return;
+            }
+            // SFX toggle
+            if (mx > 70 && mx < 110 && my > H-60 && my < H-20) {
+                sfxEnabled = !sfxEnabled;
+                return;
+            }
+        } else if (state === 'playing') {
+            handleBoost();
+        } else if (state === 'dead' && deathTimer > 30) {
+            // Name input area
+            if (mx > W/2-40 && mx < W/2+120 && my > H/2+25 && my < H/2+60) {
+                nameInputActive = true;
+                return;
+            }
+            // Save & Leaderboard
+            if (mx > W/2-110 && mx < W/2+110 && my > H/2+80 && my < H/2+125) {
+                const total = score + coinScore;
+                addToLeaderboard(playerName, total);
+                playerName = '';
+                nameInputActive = false;
+                state = 'leaderboard';
+                return;
+            }
+            // Restart
+            if (mx > W/2-40 && mx < W/2+40 && my > H/2+145 && my < H/2+195) {
+                startGame();
+                return;
+            }
+        } else if (state === 'leaderboard') {
+            // Back button
+            if (mx > W/2-70 && mx < W/2+70 && my > H-80 && my < H-35) {
+                state = 'menu';
+                return;
+            }
+        } else if (state === 'settings') {
+            // Music toggle
+            if (mx > W/2-80 && mx < W/2-30 && my > 160 && my < 210) {
+                musicEnabled = !musicEnabled;
+                return;
+            }
+            // SFX toggle
+            if (mx > W/2-80 && mx < W/2-30 && my > 240 && my < 290) {
+                sfxEnabled = !sfxEnabled;
+                return;
+            }
+            // Volume slider
+            if (my > 330 && my < 370) {
+                sfxVolume = Math.max(0, Math.min(1, (mx - (W/2-80)) / 160));
+                musicVolume = sfxVolume * 0.6;
+                return;
+            }
+            // Back
+            if (mx > W/2-70 && mx < W/2+70 && my > H-100 && my < H-55) {
+                settingsOpen = false;
+                state = 'menu';
+                return;
+            }
+        }
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (state === 'playing') {
+            handleBoost();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (state === 'dead' && nameInputActive) {
+            if (e.key === 'Backspace') {
+                playerName = playerName.slice(0, -1);
+                return;
+            }
+            if (e.key === 'Enter') {
+                nameInputActive = false;
+                return;
+            }
+            if (e.key.length === 1 && playerName.length < 12) {
+                playerName += e.key;
+                return;
+            }
+            return;
+        }
+
+        if (e.key === ' ' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (state === 'playing') {
+                handleBoost();
+            } else if (state === 'dead' && deathTimer > 30) {
+                startGame();
+            }
+        }
+    });
+
+    // ===== INIT =====
+    createStars();
+
+    // Show loading, then menu
+    function showLoading() {
+        drawBackground();
+        ctx.fillStyle = '#ff6b35';
+        ctx.font = 'bold 28px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Laden...', W/2, H/2);
+    }
+
+    showLoading();
+    loadImages(() => {
+        state = 'menu';
+        gameLoop();
+    });
+    </script>
+</body>
+</html>
+</task_progress>- [x] Vorige Tetris en Rocket Man basis gebouwd
+- [x] Resources analyseren en PRD opstellen
+- [x] Index.html herbouwen met resources
+- [ ] Testen</task_progress>
+</write_to_file>

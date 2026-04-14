@@ -61,6 +61,9 @@ export default function ClientLayout({ children, basePath = "", appData, booking
 
     // Determine if we are on the home page of the current booking
     const isHomePage = pathname === basePath || pathname === `${basePath}/`;
+    const isGameroom = pathname.includes("/gameroom/");
+
+    if (isGameroom) return <>{children}</>;
 
     const subtitle = parseTemplateString(appData.property.subtitle || "Welkom terug", booking);
 
