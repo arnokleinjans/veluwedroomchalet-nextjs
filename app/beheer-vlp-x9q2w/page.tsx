@@ -71,7 +71,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [aiMaxChars, setAiMaxChars] = useState(4000);
 
     // Bookings states
-    const [bookings, setBookings] = useState<{ id: string, guestName: string, checkIn: string, checkOut: string }[]>([]);
+    const [bookings, setBookings] = useState<{ id: string, guestName: string, checkIn: string, checkOut: string, language?: string }[]>([]);
     const [newGuestName, setNewGuestName] = useState("");
     const [newCheckIn, setNewCheckIn] = useState("");
     const [newCheckOut, setNewCheckOut] = useState("");
