@@ -13,7 +13,7 @@ export default function Home() {
     <div className="tab-content active" id="home-tab">
       <div className="md:-mt-16 mt-[-2rem] relative z-30 space-y-8 md:space-y-12">
         <div id="insights-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string, widgetCode?: string }, index: number) => {
+        {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string, widgetCode?: string, hideOnMobile?: boolean }, index: number) => {
           const isImage = insight.icon && insight.icon.includes('.');
           const rawDetail = (insight.detailContent || '').trim();
           const hasWidgetCode = (insight.widgetCode || '').trim().length > 0;
@@ -48,7 +48,7 @@ export default function Home() {
               <Link
                 key={index}
                 href={`/b/${booking?.id}/info/home/${index}`}
-                className="card card-glass clickable h-full m-0"
+                className={`card card-glass clickable h-full m-0${insight.hideOnMobile ? ' hidden md:flex' : ''}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 {cardContent}
@@ -57,7 +57,7 @@ export default function Home() {
           }
 
           return (
-            <div key={index} className="card card-glass h-full m-0">
+            <div key={index} className={`card card-glass h-full m-0${insight.hideOnMobile ? ' hidden md:flex' : ''}`}>
               {cardContent}
             </div>
           );

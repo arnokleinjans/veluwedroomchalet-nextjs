@@ -11,9 +11,13 @@ export default function WidgetEmbed({ code }: { code?: string }) {
         const container = containerRef.current;
         container.innerHTML = "";
 
+        // Convert plain-text newlines to <br> if no block-level HTML tags are present
+        const hasBlockTags = /<(p|h[1-6]|div|ul|ol|li|table|blockquote|hr|br)\b/i.test(code);
+        const processedCode = hasBlockTags ? code : code.replace(/\n/g, '<br>');
+
         // 1. Parse the HTML snippet
         const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = code;
+        tempDiv.innerHTML = processedCode;
 
         // 2. Extract scripts and normal DOM nodes
         const scripts: HTMLScriptElement[] = [];

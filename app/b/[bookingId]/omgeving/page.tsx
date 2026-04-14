@@ -9,7 +9,8 @@ export default async function Omgeving({ params }: { params: { bookingId: string
     const bookingId = (resolvedParams.bookingId || "").toUpperCase();
 
     const appData = await getTranslatedAppData(bookingId);
-    const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const rawBooking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const booking = rawBooking ? { ...rawBooking, keyCode: (appData?.property as any)?.keyCode || '' } : null;
     const items = (appData as any).omgeving || (appData as any).restaurants || [];
 
     return (

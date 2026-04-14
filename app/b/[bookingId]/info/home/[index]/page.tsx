@@ -11,7 +11,8 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
     const itemIndex = parseInt(resolvedParams.index, 10);
 
     const appData = await getTranslatedAppData(bookingId);
-    const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const rawBooking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const booking = rawBooking ? { ...rawBooking, keyCode: (appData?.property as any)?.keyCode || '' } : null;
     const insights = appData.insights || [];
     const item = insights[itemIndex] as any;
     const hasContent = (item?.detailContent && item.detailContent.trim() !== '' && item.detailContent.trim() !== '<p></p>' && item.detailContent.trim() !== '<p><br></p>') || (item?.widgetCode && item.widgetCode.trim() !== '');

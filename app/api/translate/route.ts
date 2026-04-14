@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     try {
         const payload = await req.json();
-        const { property, rules, videos, omgeving, insights } = payload;
+        const { property, rules, videos, omgeving, insights, expiredPageContent } = payload;
 
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json({ error: 'AI API sleutel ontbreekt' }, { status: 500 });
@@ -24,7 +24,8 @@ export async function POST(req: Request) {
             rules,
             videos,
             omgeving,
-            insights
+            insights,
+            expiredPageContent
         };
 
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -39,7 +40,8 @@ CRITICAL RULES:
 3. Do NOT translate URLs, image paths, widget codes, or standard identifiers/classes.
 4. Keep HTML tags exactly as they are.
 5. Keep placeholder variables like '@aankomst', '@vertrek', and '@naamgast' EXACTLY as is. Do not translate these tags.
-6. Make sure to return strictly valid JSON without any markdown formatting wrappers (like \`\`\`json).
+6. Do NOT use gender-ambiguous constructs like "Liebe/r" or "Sehr geehrte/r". Always pick one natural, friendly form (e.g. use "Liebe" or "Lieber" but never "Liebe/r").
+7. Make sure to return strictly valid JSON without any markdown formatting wrappers (like \`\`\`json).
 
 Here is the JSON to translate:
 ${JSON.stringify(dataToTranslate, null, 2)}`;

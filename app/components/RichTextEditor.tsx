@@ -1,7 +1,7 @@
 "use client";
 
 import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
-import { Node, mergeAttributes } from "@tiptap/core";
+import { Node, mergeAttributes, Extension } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -14,6 +14,43 @@ import { Highlight } from "@tiptap/extension-highlight";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Image } from "@tiptap/extension-image";
 import { useEffect, useState } from "react";
+
+// Custom extension to add fontSize attribute to TextStyle
+const FontSize = Extension.create({
+    name: 'fontSize',
+    addGlobalAttributes() {
+        return [{
+            types: ['textStyle'],
+            attributes: {
+                fontSize: {
+                    default: null,
+                    parseHTML: element => element.style.fontSize || null,
+                    renderHTML: attributes => {
+                        if (!attributes.fontSize) return {};
+                        return { style: `font-size: ${attributes.fontSize}` };
+                    },
+                },
+            },
+        }];
+    },
+});
+
+// Extended Image with width support
+const ResizableImage = Image.extend({
+    addAttributes() {
+        return {
+            ...this.parent?.(),
+            width: {
+                default: null,
+                parseHTML: element => element.getAttribute('width') || element.style.width || null,
+                renderHTML: attributes => {
+                    if (!attributes.width) return {};
+                    return { width: attributes.width, style: `width: ${attributes.width}` };
+                },
+            },
+        };
+    },
+});
 
 export const RawScriptNode = Node.create({
     name: "script",
@@ -150,6 +187,22 @@ const HIGHLIGHTS = [
     { label: "Roze", value: "#fce7f3" },
 ];
 
+const FONT_SIZES = [
+    { label: "Klein", value: "0.8rem" },
+    { label: "Normaal", value: "1rem" },
+    { label: "Medium", value: "1.15rem" },
+    { label: "Groot", value: "1.35rem" },
+    { label: "XL", value: "1.6rem" },
+    { label: "XXL", value: "2rem" },
+];
+
+const IMAGE_WIDTHS = [
+    { label: "25%", value: "25%" },
+    { label: "50%", value: "50%" },
+    { label: "75%", value: "75%" },
+    { label: "100%", value: "100%" },
+];
+
 function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
     const [snippetCode, setSnippetCode] = useState("");
 
@@ -220,6 +273,24 @@ function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
                     <option value="reset">✕ Geen markering</option>
                 </select>
 
+                {/* Tekstgrootte */}
+                <select
+                    onChange={e => {
+                        if (e.target.value === "reset") {
+                            editor.chain().focus().unsetMark('textStyle').run();
+                        } else {
+                            editor.chain().focus().setMark('textStyle', { fontSize: e.target.value }).run();
+                        }
+                        e.target.value = "";
+                    }}
+                    style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", cursor: "pointer" }}
+                    defaultValue=""
+                >
+                    <option value="" disabled>Aa Grootte</option>
+                    {FONT_SIZES.map(s => <option key={s.value} value={s.value}>{s.label} ({s.value})</option>)}
+                    <option value="reset">✕ Standaard</option>
+                </select>
+
                 <div style={sep} />
 
                 {/* Link */}
@@ -256,6 +327,24 @@ function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
                             <option value="" disabled>📷 Afbeelding</option>
                             {images.map(img => <option key={img} value={img}>{img.split('/').pop()}</option>)}
                         </select>
+                    </>
+                )}
+
+                {/* Afbeelding schalen - toont alleen als een afbeelding geselecteerd is */}
+                {editor.isActive("image") && (
+                    <>
+                        <div style={sep} />
+                        <span style={{ fontSize: "0.75rem", color: "#888", marginRight: "2px" }}>📐</span>
+                        {IMAGE_WIDTHS.map(w => (
+                            <button
+                                key={w.value}
+                                type="button"
+                                onClick={() => editor.chain().focus().updateAttributes('image', { width: w.value }).run()}
+                                style={btn(false)}
+                            >
+                                {w.label}
+                            </button>
+                        ))}
                     </>
                 )}
             </div>
@@ -299,7 +388,8 @@ export default function RichTextEditor({ content, onChange, images }: { content:
             Color,
             Highlight.configure({ multicolor: true }),
             TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
-            Image.configure({ inline: false, allowBase64: false }),
+            ResizableImage.configure({ inline: false, allowBase64: false }),
+            FontSize,
             RawScriptNode,
             WidgetDivNode,
             IframeNode,

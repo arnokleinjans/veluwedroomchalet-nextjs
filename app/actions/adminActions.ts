@@ -26,7 +26,7 @@ export async function fetchAdminData() {
 }
 
 // Batched save: General info + header image in ONE write instead of TWO
-export async function updateGeneralInfo(name: string, hostName: string, phone: string, subtitle: string, headerImage: string) {
+export async function updateGeneralInfo(name: string, hostName: string, phone: string, subtitle: string, headerImage: string, keyCode: string = "") {
     noStore();
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
@@ -36,7 +36,17 @@ export async function updateGeneralInfo(name: string, hostName: string, phone: s
     updatedData.property.host.name = hostName;
     updatedData.property.host.phone = phone;
     updatedData.property.headerImage = headerImage;
+    (updatedData.property as any).keyCode = keyCode;
 
+    return await saveToKV(updatedData);
+}
+
+export async function updateExpiredPageContent(content: string) {
+    noStore();
+    const appData = await getAppDataFresh();
+    const updatedData = { ...appData } as any;
+
+    updatedData.expiredPageContent = content;
     return await saveToKV(updatedData);
 }
 
@@ -140,8 +150,22 @@ export async function addBooking(guestName: string, checkIn: string, checkOut: s
         guestName,
         checkIn,
         checkOut,
-        language
+        language,
     });
+
+    return await saveToKV(updatedData);
+}
+
+export async function updateBooking(id: string, checkIn: string, checkOut: string, language: string) {
+    noStore();
+    const appData = await getAppDataFresh();
+    const updatedData = { ...appData } as any;
+
+    if (!updatedData.bookings) return { success: false, error: "Geen boekingen gevonden." };
+
+    updatedData.bookings = updatedData.bookings.map((b: any) =>
+        b.id === id ? { ...b, checkIn, checkOut, language } : b
+    );
 
     return await saveToKV(updatedData);
 }

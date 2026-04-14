@@ -11,7 +11,8 @@ export default async function VideoPage({ params }: { params: { bookingId: strin
     const videoIndex = parseInt(resolvedParams.videoIndex, 10);
 
     const appData = await getTranslatedAppData(bookingId);
-    const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const rawBooking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const booking = rawBooking ? { ...rawBooking, keyCode: (appData?.property as any)?.keyCode || '' } : null;
     const videos = (appData as any).videos || [];
     const video = videos[videoIndex];
 

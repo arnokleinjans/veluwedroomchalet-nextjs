@@ -7,6 +7,7 @@ export function parseTemplateString(text: string, booking: any | null): string {
         '@aankomst': formatDutchDate(booking?.checkIn),
         '@vertrek': formatDutchDate(booking?.checkOut),
         '@bookingid': booking?.id || '',
+        '@sleutelcode': booking?.keyCode || '',
     };
 
     let result = text;

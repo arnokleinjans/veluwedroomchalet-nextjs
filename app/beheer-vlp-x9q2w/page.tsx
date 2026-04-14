@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import {
-    updateGeneralInfo, addBooking, removeBooking, fetchAdminData,
+    updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
-    updateChatbotContext, updateTranslations
+    updateChatbotContext, updateTranslations, updateExpiredPageContent
 } from "../actions/adminActions";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
@@ -49,12 +49,14 @@ export default function AdminPage() {
     const [phone, setPhone] = useState("");
     const [headerImage, setHeaderImage] = useState("");
     const [subtitle, setSubtitle] = useState("");
+    const [keyCode, setKeyCode] = useState("");
 
     // Dynamic Arrays
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
+    const [expiredPageContent, setExpiredPageContent] = useState("");
     const [aiPrompt, setAiPrompt] = useState(`Je bent een assistent die websites samenvat voor een vakantie-app. Maak een aantrekkelijke, beknopte samenvatting in HTML-opmaak geschikt voor vakantiegasten.
 
 Gebruik deze HTML-elementen:
@@ -74,6 +76,12 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [newCheckIn, setNewCheckIn] = useState("");
     const [newCheckOut, setNewCheckOut] = useState("");
     const [newLanguage, setNewLanguage] = useState("nl");
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editValues, setEditValues] = useState<{ checkIn: string, checkOut: string, language: string }>({ checkIn: "", checkOut: "", language: "nl" });
+
+    // CSV import
+    const [csvRows, setCsvRows] = useState<{ name: string, checkIn: string, checkOut: string, language: string }[]>([]);
+    const [importProgress, setImportProgress] = useState<{ done: number, total: number } | null>(null);
 
     const [isSaving, setIsSaving] = useState(false);
     const [isTranslating, setIsTranslating] = useState(false);
@@ -93,6 +101,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setPhone(data.property.host.phone);
             setHeaderImage(data.property.headerImage || "");
             setSubtitle(data.property.subtitle || "Welkom terug");
+            setKeyCode((data.property as any).keyCode || "");
 
             setInsights((data.insights || []).map((item: any) => ({ ...item, detailContent: item.detailContent || "", widgetCode: item.widgetCode || "" })));
 
@@ -100,6 +109,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setOmgeving(((data as any).omgeving || (data as any).restaurants || []).map((tip: any) => ({ ...tip, widgetCode: tip.widgetCode || "" })));
             setBookings(data.bookings || []);
             setChatbotContext(data.chatbotContext || "");
+            setExpiredPageContent((data as any).expiredPageContent || "");
             if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
             if ((data as any).aiMaxChars) setAiMaxChars((data as any).aiMaxChars);
         });
@@ -141,7 +151,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         try {
             const payload = {
                 property: { name: propName, subtitle, host: { name: hostName, phone } },
-                insights, videos, omgeving
+                insights, videos, omgeving, expiredPageContent
                 // We omit chatgptContext or bookings
             };
             const res = await fetch('/api/translate', {
@@ -173,7 +183,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     };
 
     const handleSaveGeneral = () => runSaveAction(
-        () => updateGeneralInfo(propName, hostName, phone, subtitle, headerImage),
+        () => updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode),
         "Algemene info succesvol opgeslagen!"
     );
 
@@ -184,16 +194,18 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         "Omgeving succesvol opgeslagen!"
     );
     const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
+    const handleSaveExpiredPage = () => runSaveAction(() => updateExpiredPageContent(expiredPageContent), "Verlopen pagina succesvol opgeslagen!");
 
     const handleSaveAll = async () => {
         setIsSaving(true);
         setSaveMessage("⏳ Alles aan het opslaan...");
         const results = await Promise.all([
-            updateGeneralInfo(propName, hostName, phone, subtitle, headerImage),
+            updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode),
             updateInsights(insights),
             updateVideos(videos),
             updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
-            updateChatbotContext(chatbotContext)
+            updateChatbotContext(chatbotContext),
+            updateExpiredPageContent(expiredPageContent)
         ]);
         setIsSaving(false);
         if (results.every(r => r.success)) {
@@ -245,6 +257,78 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         };
     }
 
+    const parseDutchDate = (raw: string): string => {
+        const s = raw.trim().replace(/\//g, '-');
+        const parts = s.split('-');
+        if (parts.length !== 3) return '';
+        const [a, b, c] = parts;
+        // If first part is 4 digits: yyyy-mm-dd already
+        if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
+        // Otherwise: d-m-yyyy
+        return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+    };
+
+    const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const text = ev.target?.result as string;
+            const lines = text.split(/\r?\n/).filter(l => l.trim());
+            const parsed: typeof csvRows = [];
+            for (const line of lines) {
+                const cols = line.split(';').map(c => c.trim().replace(/^"|"$/g, ''));
+                const name = cols[0];
+                if (!name) continue;
+
+                let checkIn = '', checkOut = '';
+                const dateCol = cols[1] || '';
+
+                if (dateCol.includes(' - ')) {
+                    // Format: "8-5-2026 - 10-5-2026"
+                    const [from, to] = dateCol.split(' - ');
+                    checkIn = parseDutchDate(from);
+                    checkOut = parseDutchDate(to);
+                } else {
+                    // Separate columns: cols[1] = checkIn, cols[2] = checkOut
+                    checkIn = parseDutchDate(dateCol);
+                    checkOut = parseDutchDate(cols[2] || '');
+                }
+
+                if (!checkIn || !checkOut) continue;
+                parsed.push({
+                    name,
+                    checkIn,
+                    checkOut,
+                    language: cols[3]?.trim() || 'nl',
+                });
+            }
+            setCsvRows(parsed);
+        };
+        reader.readAsText(file, 'UTF-8');
+        e.target.value = '';
+    };
+
+    const handleImportAll = async () => {
+        if (!csvRows.length) return;
+        setImportProgress({ done: 0, total: csvRows.length });
+        for (let i = 0; i < csvRows.length; i++) {
+            const row = csvRows[i];
+            await addBooking(row.name, row.checkIn, row.checkOut, row.language);
+            setImportProgress({ done: i + 1, total: csvRows.length });
+        }
+        setCsvRows([]);
+        setImportProgress(null);
+        await refreshBookings();
+        setSaveMessage(`✅ ${csvRows.length} boekingen geïmporteerd!`);
+        setTimeout(() => setSaveMessage(""), 4000);
+    };
+
+    const refreshBookings = async () => {
+        const data = await fetchAdminData();
+        setBookings(data.bookings || []);
+    };
+
     const handleAddBooking = async () => {
         if (!newGuestName || !newCheckIn || !newCheckOut) {
             setSaveMessage("❌ Vul alle verplichte boeking velden in.");
@@ -255,8 +339,27 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         const res = await addBooking(newGuestName, newCheckIn, newCheckOut, newLanguage);
         setIsSaving(false);
         if (res.success) {
-            setSaveMessage("✅ Boeking toegevoegd! Kopiëer de link hieronder.");
-            setTimeout(() => window.location.reload(), 1500);
+            setSaveMessage("✅ Boeking toegevoegd!");
+            setNewGuestName(""); setNewCheckIn(""); setNewCheckOut("");
+            await refreshBookings();
+            setTimeout(() => setSaveMessage(""), 3000);
+        } else {
+            setSaveMessage("❌ " + res.error);
+            setTimeout(() => setSaveMessage(""), 5000);
+        }
+    };
+
+    const handleSaveBooking = async () => {
+        if (!editingId) return;
+        setIsSaving(true);
+        setSaveMessage("⏳ Opslaan...");
+        const res = await updateBooking(editingId, editValues.checkIn, editValues.checkOut, editValues.language);
+        setIsSaving(false);
+        if (res.success) {
+            setSaveMessage("✅ Opgeslagen!");
+            setEditingId(null);
+            await refreshBookings();
+            setTimeout(() => setSaveMessage(""), 3000);
         } else {
             setSaveMessage("❌ " + res.error);
             setTimeout(() => setSaveMessage(""), 5000);
@@ -269,16 +372,21 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         setSaveMessage("⏳ Aan het verwijderen...");
         const res = await removeBooking(id);
         setIsSaving(false);
-        if (res.success) window.location.reload();
-        else {
+        if (res.success) {
+            await refreshBookings();
+            setTimeout(() => setSaveMessage(""), 2000);
+        } else {
             setSaveMessage("❌ " + res.error);
             setTimeout(() => setSaveMessage(""), 5000);
         }
     };
 
-    const copyToClipboard = (text: string) => {
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
-        alert("Link gekopieerd: " + text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
     if (!isAuthenticated) {
@@ -388,20 +496,116 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
                                 </div>
 
+                                {/* CSV Import */}
+                                <div style={{ marginBottom: "20px", backgroundColor: "white", padding: "15px", borderRadius: "8px", border: "1px dashed #bbb" }}>
+                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+                                        <div>
+                                            <strong style={{ fontSize: "0.95rem", color: "#333" }}>📂 Importeer uit CSV</strong>
+                                            <p style={{ fontSize: "0.78rem", color: "#888", marginTop: "2px" }}>Kolommen (puntkomma): <strong>Naam;d-m-jjjj - d-m-jjjj</strong> · ook los per kolom ondersteund · optioneel: taal</p>
+                                        </div>
+                                        <label style={{ backgroundColor: "#f0f0f0", color: "#333", padding: "8px 16px", borderRadius: "6px", border: "1px solid #ccc", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            Kies CSV-bestand
+                                            <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} style={{ display: "none" }} />
+                                        </label>
+                                    </div>
+
+                                    {csvRows.length > 0 && (
+                                        <div style={{ marginTop: "12px" }}>
+                                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+                                                <thead>
+                                                    <tr style={{ backgroundColor: "#f5f5f5" }}>
+                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Naam</th>
+                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Aankomst</th>
+                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Vertrek</th>
+                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Taal</th>
+                                                        <th style={{ padding: "6px 8px", borderBottom: "1px solid #ddd" }}></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {csvRows.map((row, i) => (
+                                                        <tr key={i} style={{ borderBottom: "1px solid #eee" }}>
+                                                            <td style={{ padding: "5px 8px" }}>{row.name}</td>
+                                                            <td style={{ padding: "5px 8px", color: "#555" }}>{row.checkIn}</td>
+                                                            <td style={{ padding: "5px 8px", color: "#555" }}>{row.checkOut}</td>
+                                                            <td style={{ padding: "5px 8px", color: "#555" }}>{row.language}</td>
+                                                            <td style={{ padding: "5px 8px" }}>
+                                                                <button onClick={() => setCsvRows(r => r.filter((_, j) => j !== i))} style={{ background: "none", border: "none", color: "#c00", cursor: "pointer", fontSize: "0.85rem" }}>✕</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                            <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "12px" }}>
+                                                {importProgress ? (
+                                                    <span style={{ fontSize: "0.85rem", color: "#4A5D23" }}>⏳ {importProgress.done} / {importProgress.total} aangemaakt…</span>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={handleImportAll} style={{ backgroundColor: "#4A5D23", color: "white", padding: "8px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem" }}>
+                                                            + Genereer {csvRows.length} links
+                                                        </button>
+                                                        <button onClick={() => setCsvRows([])} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: "0.85rem" }}>Annuleer</button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                                     {bookings.map((booking) => {
                                         const shareUrl = `${window.location.origin}/b/${booking.id}`;
+                                        const isEditing = editingId === booking.id;
+                                        const isExpired = new Date(booking.checkOut + "T23:59:59") < new Date();
                                         return (
-                                            <div key={booking.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", backgroundColor: "white", borderRadius: "8px", border: "1px solid #eee" }}>
-                                                <div>
-                                                    <strong style={{ color: "#333", display: "block" }}>{booking.guestName}</strong>
-                                                    <span style={{ fontSize: "0.85rem", color: "#777" }}>{booking.checkIn} t/m {booking.checkOut}</span>
-                                                    <div style={{ fontSize: "0.85rem", color: "#4A5D23", marginTop: "4px", wordBreak: "break-all" }}>{shareUrl}</div>
+                                            <div key={booking.id} style={{ padding: "12px", backgroundColor: isExpired && !isEditing ? "#fafafa" : "white", borderRadius: "8px", border: isEditing ? "1px solid #4A5D23" : isExpired ? "1px solid #e0e0e0" : "1px solid #eee", opacity: isExpired && !isEditing ? 0.75 : 1, transition: "opacity 0.2s" }}>
+                                                {/* Header: naam + actieknoppen */}
+                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: isEditing ? "12px" : "4px" }}>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                                        <strong style={{ color: isExpired ? "#999" : "#333" }}>{booking.guestName}</strong>
+                                                        {isExpired && !isEditing && <span style={{ fontSize: "0.7rem", backgroundColor: "#f0f0f0", color: "#999", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>Verlopen</span>}
+                                                    </div>
+                                                    <div style={{ display: "flex", gap: "8px", flexShrink: 0, marginLeft: "10px" }}>
+                                                        {isEditing ? (
+                                                            <>
+                                                                <button onClick={handleSaveBooking} disabled={isSaving} style={{ backgroundColor: "#4A5D23", color: "white", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }}>Opslaan</button>
+                                                                <button onClick={() => setEditingId(null)} style={{ backgroundColor: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Annuleer</button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl" }); }} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Bewerk</button>
+                                                                <button onClick={() => !isExpired && copyToClipboard(shareUrl, booking.id)} disabled={isExpired} style={{ backgroundColor: isExpired ? "#f0f0f0" : copiedId === booking.id ? "#4A5D23" : "#e0e0e0", color: isExpired ? "#bbb" : copiedId === booking.id ? "white" : "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: isExpired ? "not-allowed" : "pointer", fontSize: "0.85rem", fontWeight: "bold", transition: "all 0.2s" }}>{copiedId === booking.id ? "✓ Gekopieerd" : "Kopieer"}</button>
+                                                                <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div style={{ display: "flex", gap: "10px" }}>
-                                                    <button onClick={() => copyToClipboard(shareUrl)} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }}>Kopieer</button>
-                                                    <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "8px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>
-                                                </div>
+
+                                                {isEditing ? (
+                                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                                        <div style={{ flex: "1 1 130px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Aankomst</label>
+                                                            <input type="date" value={editValues.checkIn} onChange={e => setEditValues(v => ({ ...v, checkIn: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
+                                                        </div>
+                                                        <div style={{ flex: "1 1 130px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Vertrek</label>
+                                                            <input type="date" value={editValues.checkOut} onChange={e => setEditValues(v => ({ ...v, checkOut: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
+                                                        </div>
+                                                        <div style={{ flex: "1 1 130px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Taal</label>
+                                                            <select value={editValues.language} onChange={e => setEditValues(v => ({ ...v, language: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white", fontSize: "0.85rem" }}>
+                                                                <option value="nl">🇳🇱 Nederlands</option>
+                                                                <option value="en">🇬🇧 Engels</option>
+                                                                <option value="de">🇩🇪 Duits</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <span style={{ fontSize: "0.85rem", color: isExpired ? "#aaa" : "#777" }}>{booking.checkIn} t/m {booking.checkOut}</span>
+                                                        {booking.language && booking.language !== "nl" && <span style={{ fontSize: "0.8rem", color: "#888", marginLeft: "10px" }}>{booking.language === "en" ? "🇬🇧" : "🇩🇪"}</span>}
+                                                        <div style={{ fontSize: "0.85rem", color: isExpired ? "#bbb" : "#4A5D23", marginTop: "4px", wordBreak: "break-all", textDecoration: isExpired ? "line-through" : "none" }}>{shareUrl}</div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )
                                     })}
@@ -446,6 +650,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Subtitel (boven de naam, bijv. "Welkom terug")</label>
                                     <input type="text" value={subtitle} onChange={e => setSubtitle(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
                                 </div>
+                                <div>
+                                    <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Sleutelcode <span style={{ fontSize: "0.8rem", color: "#888", fontWeight: "normal" }}>(beschikbaar als <code>@sleutelcode</code>)</span></label>
+                                    <input type="text" value={keyCode} onChange={e => setKeyCode(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: 1234#" />
+                                </div>
                                 <button onClick={handleSaveGeneral} disabled={isSaving} style={{ alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                             </div>
                         </details>
@@ -454,7 +662,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
                             <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📱 Home Pagina Items (Uw verblijf)</summary>
                             <div style={{ marginTop: "15px" }}>
-                                <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>.</p>
+                                <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>, <code>@sleutelcode</code>.</p>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
                                         <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
@@ -462,13 +670,18 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                 <SortableItem key={`insight-${idx}`} id={`item-${idx}`}>
                                                     <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
+                                                    <label style={{ position: "absolute", top: "12px", right: "110px", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.75rem", color: item.hideOnMobile ? "#c0392b" : "#999", cursor: "pointer", userSelect: "none" }}>
+                                                        <input type="checkbox" checked={!!item.hideOnMobile} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], hideOnMobile: e.target.checked }; setInsights(n); }} style={{ accentColor: "#c0392b" }} />
+                                                        Verberg op mobiel
+                                                    </label>
+
                                                     <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
                                                         <div style={{ flex: 1 }}>
                                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Titel</label>
                                                             <input type="text" value={item.title} onChange={e => { const n = [...insights]; n[idx].title = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
                                                         </div>
                                                         <div style={{ flex: 1 }}>
-                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Icoon (uit map `/public/icons`)</label>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Icoon</label>
                                                             <select value={item.icon} onChange={e => { const n = [...insights]; n[idx].icon = e.target.value; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
                                                                 <option value={item.icon}>{item.icon} (huidig)</option>
                                                                 {availableIcons.map((ic, i) => <option key={i} value={ic}>{ic}</option>)}
@@ -729,7 +942,17 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
 
-                        {/* Sectie: Chatbot Context */}
+                        {/* Sectie: Verlopen Boeking Pagina */}
+                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>⏰ Verlopen Boeking Pagina</summary>
+                            <div style={{ marginTop: "15px" }}>
+                                <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Deze pagina wordt getoond wanneer een gast zijn/haar link opent nadat de vertrekdatum is verstreken. Gebruik de editor om een persoonlijke boodschap samen te stellen.</p>
+                                <RichTextEditor content={expiredPageContent} onChange={setExpiredPageContent} images={availableImages} />
+                                <button onClick={handleSaveExpiredPage} disabled={isSaving} style={{ marginTop: "10px", alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                            </div>
+                        </details>
+
+
                         <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
                             <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>
                             <div style={{ marginTop: "15px" }}>

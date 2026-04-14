@@ -249,6 +249,7 @@ h3 {
 .card-content p {
     color: var(--text-secondary);
     font-size: 0.9rem;
+    white-space: pre-line;
 }
 
 /* Video Section */
@@ -561,6 +562,8 @@ h3 {
 
 .rich-content p {
     margin: 6px 0 !important;
+    min-height: 1em !important;
+    display: block !important;
 }
 
 .rich-content ul {

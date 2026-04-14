@@ -2,6 +2,7 @@ import { getAppData } from "../../utils/db";
 import { BookingProvider, BookingInfo } from "../../context/BookingContext";
 import { notFound } from "next/navigation";
 import ClientLayout from "../../components/ClientLayout";
+import ExpiredBookingPage from "../../components/ExpiredBookingPage";
 
 export const revalidate = 60; // Cache guest pages for 60 seconds (ISR)
 
@@ -24,14 +25,6 @@ export default async function BookingLayout({
         notFound();
     }
 
-    const rawBookingInfo = {
-        id: booking.id,
-        guestName: booking.guestName,
-        checkIn: booking.checkIn,
-        checkOut: booking.checkOut,
-        language: booking.language || 'nl'
-    };
-
     // Deep merge function to replace text values seamlessly if translation exists
     const mergeTranslations = (data: any, translation: any): any => {
         if (!translation) return data;
@@ -51,10 +44,43 @@ export default async function BookingLayout({
         return translation;
     };
 
-    let finalAppData = appData;
-    if (rawBookingInfo.language && rawBookingInfo.language !== 'nl' && appData.translations && appData.translations[rawBookingInfo.language]) {
-        finalAppData = mergeTranslations(appData, appData.translations[rawBookingInfo.language]);
+    const language = booking.language || 'nl';
+    let translatedAppData = appData;
+    if (language !== 'nl' && appData.translations && appData.translations[language]) {
+        translatedAppData = mergeTranslations(appData, appData.translations[language]);
     }
+
+    // Check if the booking has expired (checkOut date has passed)
+    const checkOutDate = new Date(booking.checkOut + "T23:59:59");
+    const isExpired = checkOutDate < new Date();
+
+    if (isExpired) {
+        return (
+            <ExpiredBookingPage
+                guestName={booking.guestName}
+                propertyName={translatedAppData.property?.name || "Veluwe Droom Chalet"}
+                content={(translatedAppData as any).expiredPageContent || ""}
+                booking={{
+                    id: booking.id,
+                    guestName: booking.guestName,
+                    checkIn: booking.checkIn,
+                    checkOut: booking.checkOut,
+                    keyCode: (translatedAppData?.property as any)?.keyCode || '',
+                }}
+            />
+        );
+    }
+
+    const rawBookingInfo = {
+        id: booking.id,
+        guestName: booking.guestName,
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut,
+        language: language,
+        keyCode: (translatedAppData?.property as any)?.keyCode || ''
+    };
+
+    const finalAppData = translatedAppData;
 
     const bookingInfo: BookingInfo = rawBookingInfo;
 

@@ -12,7 +12,8 @@ export default async function OmgevingDetail({ params }: { params: { bookingId: 
     const tipIndex = parseInt(resolvedParams.tipIndex, 10);
 
     const appData = await getTranslatedAppData(bookingId);
-    const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const rawBooking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const booking = rawBooking ? { ...rawBooking, keyCode: (appData?.property as any)?.keyCode || '' } : null;
     const items = (appData as any).omgeving || (appData as any).restaurants || [];
     const tip = items[tipIndex];
 
