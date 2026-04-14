@@ -11,6 +11,13 @@ export default function Home() {
 
   return (
     <div className="tab-content active" id="home-tab">
+      <style>{`
+        @media (max-width: 767px) {
+          [data-hide-mobile="true"] {
+            display: none !important;
+          }
+        }
+      `}</style>
       <div className="md:-mt-16 mt-[-2rem] relative z-30 space-y-8 md:space-y-12">
         <div id="insights-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string, widgetCode?: string, hideOnMobile?: boolean }, index: number) => {
@@ -48,7 +55,8 @@ export default function Home() {
               <Link
                 key={index}
                 href={`/b/${booking?.id}/info/home/${index}`}
-                className={`card card-glass clickable h-full m-0${insight.hideOnMobile ? ' hidden md:flex' : ''}`}
+                className="card card-glass clickable h-full m-0"
+                data-hide-mobile={insight.hideOnMobile ? "true" : undefined}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 {cardContent}
@@ -57,7 +65,7 @@ export default function Home() {
           }
 
           return (
-            <div key={index} className={`card card-glass h-full m-0${insight.hideOnMobile ? ' hidden md:flex' : ''}`}>
+            <div key={index} className="card card-glass h-full m-0" data-hide-mobile={insight.hideOnMobile ? "true" : undefined}>
               {cardContent}
             </div>
           );
