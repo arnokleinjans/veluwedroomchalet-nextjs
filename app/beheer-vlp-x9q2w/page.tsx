@@ -12,20 +12,38 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, v
 import { CSS } from "@dnd-kit/utilities";
 import RichTextEditor from "../components/RichTextEditor";
 
-function SortableItem({ id, children }: { id: string, children: React.ReactNode }) {
+const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: string }> = {
+    checkin:  { bg: "#eff8ff", border: "#3b82f6", label: "🏠 T/m aankomstdag" },
+    checkout: { bg: "#fff7ed", border: "#f97316", label: "🧳 Vertrekdag" },
+};
+
+function SortableItem({ id, children, accent }: { id: string, children: React.ReactNode, accent?: string }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
     };
+    const accentStyle = accent && VISIBILITY_ACCENT[accent];
     return (
         <div ref={setNodeRef} style={style}>
-            <div style={{ padding: "15px", backgroundColor: "#f4f4f4", borderRadius: "8px", position: "relative" as const }}>
-                <div {...attributes} {...listeners} style={{ position: "absolute" as const, top: "12px", left: "10px", cursor: "grab", fontSize: "1.2rem", color: "#999", touchAction: "none", userSelect: "none" }} title="Sleep om te herordenen">
+            <div style={{
+                padding: "15px",
+                backgroundColor: accentStyle ? accentStyle.bg : "#f4f4f4",
+                borderRadius: "8px",
+                position: "relative" as const,
+                borderLeft: accentStyle ? `4px solid ${accentStyle.border}` : "4px solid transparent",
+                boxShadow: accentStyle ? `0 2px 8px ${accentStyle.border}22` : undefined,
+            }}>
+                {accentStyle && (
+                    <span style={{ position: "absolute", top: "10px", left: "22px", fontSize: "0.68rem", fontWeight: "bold", color: accentStyle.border, letterSpacing: "0.3px", pointerEvents: "none" }}>
+                        {accentStyle.label}
+                    </span>
+                )}
+                <div {...attributes} {...listeners} style={{ position: "absolute" as const, top: accentStyle ? "28px" : "12px", left: "10px", cursor: "grab", fontSize: "1.2rem", color: "#999", touchAction: "none", userSelect: "none" }} title="Sleep om te herordenen">
                     ☰
                 </div>
-                <div style={{ marginLeft: "30px" }}>
+                <div style={{ marginLeft: "30px", marginTop: accentStyle ? "18px" : "0" }}>
                     {children}
                 </div>
             </div>
@@ -53,7 +71,7 @@ export default function AdminPage() {
 
     // Dynamic Arrays
     const [games, setGames] = useState<{ id: string, title: string, src: string }[]>([]);
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
@@ -577,7 +595,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     {[...bookings].sort((a, b) => a.checkOut.localeCompare(b.checkOut)).map((booking) => {
                                         const shareUrl = `${window.location.origin}/b/${booking.id}`;
                                         const isEditing = editingId === booking.id;
-                                        const isExpired = new Date(booking.checkOut + "T23:59:59") < new Date();
+                                        const isExpired = new Date(booking.checkOut + "T12:00:00") < new Date();
                                         return (
                                             <div key={booking.id} style={{ padding: "12px", backgroundColor: isExpired && !isEditing ? "#fafafa" : "white", borderRadius: "8px", border: isEditing ? "1px solid #4A5D23" : isExpired ? "1px solid #e0e0e0" : "1px solid #eee", opacity: isExpired && !isEditing ? 0.75 : 1, transition: "opacity 0.2s" }}>
                                                 {/* Header: naam + actieknoppen */}
@@ -689,13 +707,25 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
                                         <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                             {insights.map((item, idx) => (
-                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`}>
+                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={item.visibility && item.visibility !== "always" ? item.visibility : undefined}>
                                                     <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
-                                                    <label style={{ position: "absolute", top: "12px", right: "110px", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.75rem", color: item.hideOnMobile ? "#c0392b" : "#999", cursor: "pointer", userSelect: "none" }}>
-                                                        <input type="checkbox" checked={!!item.hideOnMobile} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], hideOnMobile: e.target.checked }; setInsights(n); }} style={{ accentColor: "#c0392b" }} />
-                                                        Verberg op mobiel
-                                                    </label>
+                                                    <div style={{ position: "absolute", top: "10px", right: "115px", display: "flex", alignItems: "center", gap: "10px" }}>
+                                                        <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.75rem", color: item.hideOnMobile ? "#c0392b" : "#999", cursor: "pointer", userSelect: "none" }}>
+                                                            <input type="checkbox" checked={!!item.hideOnMobile} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], hideOnMobile: e.target.checked }; setInsights(n); }} style={{ accentColor: "#c0392b" }} />
+                                                            Verberg op mobiel
+                                                        </label>
+                                                        <select
+                                                            value={item.visibility || "always"}
+                                                            onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], visibility: e.target.value }; setInsights(n); }}
+                                                            style={{ padding: "3px 6px", borderRadius: "4px", border: `1px solid ${item.visibility && item.visibility !== "always" ? "#4A5D23" : "#ccc"}`, fontSize: "0.75rem", color: item.visibility && item.visibility !== "always" ? "#4A5D23" : "#888", backgroundColor: item.visibility && item.visibility !== "always" ? "#f6faf0" : "white", cursor: "pointer" }}
+                                                            title="Wanneer zichtbaar?"
+                                                        >
+                                                            <option value="always">👁 Altijd</option>
+                                                            <option value="checkin">🏠 T/m aankomstdag</option>
+                                                            <option value="checkout">🧳 Vertrekdag (+ avond ervoor)</option>
+                                                        </select>
+                                                    </div>
 
                                                     <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
                                                         <div style={{ flex: 1 }}>

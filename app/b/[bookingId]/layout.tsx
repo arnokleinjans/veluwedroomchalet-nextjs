@@ -51,7 +51,7 @@ export default async function BookingLayout({
     }
 
     // Check if the booking has expired (checkOut date has passed)
-    const checkOutDate = new Date(booking.checkOut + "T23:59:59");
+    const checkOutDate = new Date(booking.checkOut + "T12:00:00");
     const isExpired = checkOutDate < new Date();
 
     if (isExpired) {

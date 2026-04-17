@@ -6,8 +6,35 @@ import { parseTemplateString } from "../../utils/templateParser";
 
 export const dynamic = "force-dynamic";
 
+
+function isInsightVisible(insight: any, booking: any): boolean {
+  const visibility = insight.visibility || "always";
+  if (visibility === "always") return true;
+  if (!booking?.checkIn || !booking?.checkOut) return true;
+
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10); // YYYY-MM-DD
+
+  if (visibility === "checkin") {
+    // Visible from link receipt until end of check-in day
+    return today <= booking.checkIn;
+  }
+
+  if (visibility === "checkout") {
+    // Visible from noon the day before checkout onwards
+    const checkoutMidnight = new Date(booking.checkOut + "T00:00:00");
+    const showFrom = new Date(checkoutMidnight.getTime() - 12 * 60 * 60 * 1000);
+    return now >= showFrom;
+  }
+
+  return true;
+}
+
 export default function Home() {
   const { booking, appData } = useBooking();
+  const visibleInsights = (appData.insights || [])
+    .map((insight: any, originalIndex: number) => ({ ...insight, originalIndex }))
+    .filter((insight: any) => isInsightVisible(insight, booking));
 
   return (
     <div className="tab-content active" id="home-tab">
@@ -17,10 +44,20 @@ export default function Home() {
             display: none !important;
           }
         }
+        .card-glass[data-visibility="checkin"] {
+          background: rgba(210, 225, 190, 0.82) !important;
+          border: 1px solid rgba(74, 93, 35, 0.25) !important;
+          box-shadow: 0 4px 18px rgba(74, 93, 35, 0.12) !important;
+        }
+        .card-glass[data-visibility="checkout"] {
+          background: rgba(210, 225, 190, 0.82) !important;
+          border: 1px solid rgba(74, 93, 35, 0.25) !important;
+          box-shadow: 0 4px 18px rgba(74, 93, 35, 0.12) !important;
+        }
       `}</style>
       <div className="md:-mt-16 mt-[-2rem] relative z-30 space-y-8 md:space-y-12">
         <div id="insights-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {appData.insights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string, widgetCode?: string, hideOnMobile?: boolean }, index: number) => {
+        {visibleInsights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string, widgetCode?: string, hideOnMobile?: boolean, originalIndex: number }, index: number) => {
           const isImage = insight.icon && insight.icon.includes('.');
           const rawDetail = (insight.detailContent || '').trim();
           const hasWidgetCode = (insight.widgetCode || '').trim().length > 0;
@@ -54,9 +91,10 @@ export default function Home() {
             return (
               <Link
                 key={index}
-                href={`/b/${booking?.id}/info/home/${index}`}
+                href={`/b/${booking?.id}/info/home/${insight.originalIndex}`}
                 className="card card-glass clickable h-full m-0"
                 data-hide-mobile={insight.hideOnMobile ? "true" : undefined}
+                data-visibility={(insight as any).visibility || undefined}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 {cardContent}
@@ -65,7 +103,7 @@ export default function Home() {
           }
 
           return (
-            <div key={index} className="card card-glass h-full m-0" data-hide-mobile={insight.hideOnMobile ? "true" : undefined}>
+            <div key={index} className="card card-glass h-full m-0" data-hide-mobile={insight.hideOnMobile ? "true" : undefined} data-visibility={(insight as any).visibility || undefined}>
               {cardContent}
             </div>
           );

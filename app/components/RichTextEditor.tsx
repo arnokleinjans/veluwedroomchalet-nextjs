@@ -209,10 +209,15 @@ function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
     if (!editor) return null;
 
     const addLink = () => {
-        const url = window.prompt("URL invoeren:");
-        if (url) {
-            editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+        const current = editor.getAttributes("link").href || "";
+        const url = window.prompt("URL invoeren:", current);
+        if (url === null) return; // cancelled
+        if (url === "") {
+            editor.chain().focus().extendMarkRange("link").unsetLink().run();
+            return;
         }
+        const href = /^(https?:\/\/|\/|#|mailto:|tel:)/i.test(url) ? url : `https://${url}`;
+        editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
     };
 
     return (
