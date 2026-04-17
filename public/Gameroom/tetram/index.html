@@ -547,20 +547,38 @@
                     ['_', 'R', 'L', '_']
                 ]
             },
-            SML_TRI_MAG: {
+            CORNER_TRI_PURPLE: {
                 color: '#FF00FF',
                 shape: [
-                    ['R', 'F', 'F', 'L'],
-                    ['_', 'R', 'L', '_']
+                    ['D', '_', '_', '_'],
+                    ['F', 'D', '_', '_'],
+                    ['F', 'F', 'D', '_'],
+                    ['F', 'F', 'F', 'D']
                 ]
             },
             PARAL_ORANGE: {
-                color: '#FF8800',
+                color: '#FFA500',
                 shape: [
                     ['_', '_', '_', 'B', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'L'],
                     ['_', '_', 'B', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'L', '_'],
                     ['_', 'B', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'L', '_', '_'],
                     ['B', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'L', '_', '_', '_']
+                ]
+            },
+            SML_PARAL_PINK: {
+                color: '#FF69B4',
+                shape: [
+                    ['_', 'B', 'F', 'F', 'F', 'L'],
+                    ['B', 'F', 'F', 'F', 'L', '_']
+                ]
+            },
+            SML_SQUARE_WHITE: {
+                color: '#FFFFFF',
+                shape: [
+                    ['_', 'B', 'D', '_'],
+                    ['B', 'F', 'F', 'D'],
+                    ['R', 'F', 'F', 'L'],
+                    ['_', 'R', 'L', '_']
                 ]
             }
         };
@@ -589,7 +607,6 @@
         let lastDrop = 0;
         let animationId = null;
         let fillerNeed = 0;
-        let isFirstPiece = true;
 
         // Scoreboard
         let highScore = parseInt(localStorage.getItem('tetram_hs') || '0');
@@ -684,7 +701,7 @@
             }
         }
 
-        const isFine = (name) => name.startsWith('SML_');
+        const isFine = (name) => name.startsWith('SML_') || name.startsWith('MED_') || name.startsWith('CORNER_');
 
         function createPieceFromName(name) {
             const data = RAW_PIECES[name];
@@ -719,15 +736,11 @@
 
         function randomPieceName() {
             let selectedName;
-            if (isFirstPiece) {
-                selectedName = Math.random() < 0.5 ? 'LARGE_TRI_RED' : 'LARGE_TRI_BLUE';
-                isFirstPiece = false;
-            } else {
-                let pLarge = 3;     // Grote Driehoeken (Godzilla)
-                let pComplex = 8;   // Vierkant & Parallellogram (Lastig!)
-                let pHelpful = 45;  // Kleine & Middelgrote Driehoeken (Lijm)
+            let pLarge = 3;     // Grote Driehoeken (Godzilla)
+            let pComplex = 8;   // Vierkant & Parallellogram (Lastig!)
+            let pHelpful = 45;  // Kleine & Middelgrote Driehoeken (Lijm)
 
-                if (fillerNeed > 0) {
+            if (fillerNeed > 0) {
                     pLarge = 0;     // ABSOLUUT geen grote blokken
                     pComplex = 4;   // Zeer weinig complexe blokken
                     pHelpful = 90;  // Regen van kleine driehoekjes
@@ -746,7 +759,8 @@
                 const weights = {
                     'LARGE_TRI_RED': pLarge, 'LARGE_TRI_BLUE': pLarge,
                     'SQUARE_CYAN': pComplex, 'PARAL_ORANGE': pComplex,
-                    'MED_TRI_GREEN': pHelpful, 'SML_TRI_YELL': pHelpful, 'SML_TRI_MAG': pHelpful
+                    'SML_PARAL_PINK': pHelpful, 'SML_SQUARE_WHITE': pHelpful,
+                    'MED_TRI_GREEN': pHelpful, 'SML_TRI_YELL': pHelpful, 'CORNER_TRI_PURPLE': pHelpful
                 };
 
                 let totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
@@ -758,7 +772,6 @@
                         break;
                     }
                 }
-            }
 
             // Weegschaal dynamiek
             if (selectedName.startsWith('LARGE')) fillerNeed += 6;
@@ -999,11 +1012,11 @@
         function rotate() {
             let nextIndex = (currentPiece.rotIndex !== undefined) ? (currentPiece.rotIndex + 1) % 4 : 0;
             let rotated;
-            if (currentPiece.name === 'PARAL_ORANGE') {
-                if (nextIndex === 0) rotated = RAW_PIECES['PARAL_ORANGE'].shape.map(r => [...r]);
-                else if (nextIndex === 1) rotated = rotatePiece(RAW_PIECES['PARAL_ORANGE'].shape);
-                else if (nextIndex === 2) rotated = flipPiece(RAW_PIECES['PARAL_ORANGE'].shape);
-                else rotated = rotatePiece(flipPiece(RAW_PIECES['PARAL_ORANGE'].shape));
+            if (currentPiece.name === 'PARAL_ORANGE' || currentPiece.name === 'SML_PARAL_PINK') {
+                if (nextIndex === 0) rotated = RAW_PIECES[currentPiece.name].shape.map(r => [...r]);
+                else if (nextIndex === 1) rotated = rotatePiece(RAW_PIECES[currentPiece.name].shape);
+                else if (nextIndex === 2) rotated = flipPiece(RAW_PIECES[currentPiece.name].shape);
+                else rotated = rotatePiece(flipPiece(RAW_PIECES[currentPiece.name].shape));
             } else {
                 rotated = rotatePiece(currentPiece.shape);
             }
@@ -1070,7 +1083,7 @@
         function startGame() {
             board = createBoard(); score = 0; level = 1; linesCleared = 0; fillerNeed = 0;
             gameOver = false; paused = false; gameStarted = true;
-            isFirstPiece = true; nextPiece = null; holdPieceName = null; canHold = true;
+            nextPiece = null; holdPieceName = null; canHold = true;
             drawHoldPiece();
             dropInterval = 1000; lastDrop = performance.now();
             document.getElementById('score').textContent = '0';
