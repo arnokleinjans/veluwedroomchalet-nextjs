@@ -13,7 +13,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Highlight } from "@tiptap/extension-highlight";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Image } from "@tiptap/extension-image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 // Custom extension to add fontSize attribute to TextStyle
 const FontSize = Extension.create({
@@ -296,7 +296,12 @@ function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
                 {/* Link */}
                 <button type="button" onClick={addLink} style={btn(editor.isActive("link"))}>🔗 Link</button>
                 {editor.isActive("link") && (
-                    <button type="button" onClick={() => editor.chain().focus().unsetLink().run()} style={btn(false)}>❌</button>
+                    <>
+                        <button type="button" onClick={() => editor.chain().focus().unsetLink().run()} style={btn(false)}>❌</button>
+                        <span style={{ fontSize: "0.75rem", color: "#4A5D23", fontFamily: "monospace", maxWidth: "220px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", border: "1px solid #c5d9a0", borderRadius: "4px", padding: "3px 6px", backgroundColor: "#f6faf0", cursor: "pointer" }} title={editor.getAttributes("link").href} onClick={addLink}>
+                            {editor.getAttributes("link").href}
+                        </span>
+                    </>
                 )}
 
                 {/* Horizontale lijn */}
@@ -375,6 +380,16 @@ function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
 }
 
 export default function RichTextEditor({ content, onChange, images }: { content: string, onChange: (html: string) => void, images?: string[] }) {
+    const contentLinks = useMemo(() => {
+        if (!content) return [];
+        const regex = /<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
+        const matches = [...content.matchAll(regex)];
+        return matches.map(m => ({
+            href: m[1],
+            text: m[2].replace(/<[^>]+>/g, '').trim() || m[1],
+        }));
+    }, [content]);
+
     const editor = useEditor({
         immediatelyRender: false,
         extensions: [
@@ -414,6 +429,17 @@ export default function RichTextEditor({ content, onChange, images }: { content:
                 editor={editor}
                 style={{ padding: "12px", minHeight: "150px" }}
             />
+            {contentLinks.length > 0 && (
+                <div style={{ padding: "8px 12px", borderTop: "1px solid #eee", backgroundColor: "#f9faf6", fontSize: "0.78rem" }}>
+                    <strong style={{ color: "#666", display: "block", marginBottom: "4px" }}>🔗 Links in dit document:</strong>
+                    {contentLinks.map((link, i) => (
+                        <div key={i} style={{ display: "flex", gap: "8px", alignItems: "baseline", marginBottom: "2px", flexWrap: "wrap" }}>
+                            <span style={{ color: "#333", flexShrink: 0 }}>{link.text}</span>
+                            <span style={{ color: "#4A5D23", fontFamily: "monospace", wordBreak: "break-all" }}>{link.href}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
             <style>{`
                 .tiptap { outline: none; }
                 .tiptap h3 { font-size: 1.1rem !important; color: #4A5D23 !important; margin: 8px 0 4px !important; font-weight: bold !important; }

@@ -119,7 +119,14 @@ const defaultAppData = {
         }
     ],
     "chatbotContext": "",
-    "translations": {} as any
+    "translations": {} as any,
+    "games": [
+        { "id": "tetris", "title": "Tetris", "src": "/Gameroom/tetris/index.html" },
+        { "id": "tetram", "title": "Tetram", "src": "/Gameroom/tetram/index.html" },
+        { "id": "rocketman", "title": "Rocket Man", "src": "/Gameroom/rocketman/index.html" },
+        { "id": "yahtzee", "title": "Yahtzee", "src": "/Gameroom/yahtzee/index.html" },
+        { "id": "pacman", "title": "Pac-Man", "src": "/Gameroom/pacman/index.html" }
+    ]
 };
 
 // Cached read for guest-facing pages (revalidates every 2 seconds)
@@ -143,7 +150,8 @@ export async function getAppData() {
             cacheTimestamp = now;
             return defaultAppData;
         }
-        cachedData = data as typeof defaultAppData;
+        // Merge with defaultAppData so new fields added to the schema are always present
+        cachedData = { ...defaultAppData, ...(data as any) } as typeof defaultAppData;
         cacheTimestamp = now;
         return cachedData;
     } catch (error) {
@@ -194,7 +202,7 @@ export async function getAppDataFresh() {
             return defaultAppData;
         }
         // Also update cache so guest pages get the latest after admin saves
-        cachedData = data as typeof defaultAppData;
+        cachedData = { ...defaultAppData, ...(data as any) } as typeof defaultAppData;
         cacheTimestamp = Date.now();
         return data as typeof defaultAppData;
     } catch (error) {

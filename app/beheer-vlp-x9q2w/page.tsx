@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
-    updateChatbotContext, updateTranslations, updateExpiredPageContent
+    updateChatbotContext, updateTranslations, updateExpiredPageContent, updateGames
 } from "../actions/adminActions";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
@@ -52,6 +52,7 @@ export default function AdminPage() {
     const [keyCode, setKeyCode] = useState("");
 
     // Dynamic Arrays
+    const [games, setGames] = useState<{ id: string, title: string, src: string }[]>([]);
     const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
@@ -103,6 +104,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setSubtitle(data.property.subtitle || "Welkom terug");
             setKeyCode((data.property as any).keyCode || "");
 
+            setGames((data as any).games || []);
             setInsights((data.insights || []).map((item: any) => ({ ...item, detailContent: item.detailContent || "", widgetCode: item.widgetCode || "" })));
 
             setVideos(data.videos || []);
@@ -187,6 +189,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         "Algemene info succesvol opgeslagen!"
     );
 
+    const handleSaveGames = () => runSaveAction(() => updateGames(games), "Gameroom succesvol opgeslagen!");
     const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!");
     const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!");
     const handleSaveOmgeving = () => runSaveAction(
@@ -201,6 +204,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         setSaveMessage("⏳ Alles aan het opslaan...");
         const results = await Promise.all([
             updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode),
+            updateGames(games),
             updateInsights(insights),
             updateVideos(videos),
             updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
@@ -970,6 +974,43 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             </div>
                         </details>
 
+
+                        {/* Sectie: Gameroom */}
+                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎮 Gameroom</summary>
+                            <div style={{ marginTop: "15px" }}>
+                                <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Beheer de spellen in de gameroom. De ID wordt gebruikt in de URL (bijv. <code>tetris</code> → <code>/gameroom/tetris</code>). Het pad verwijst naar het HTML-bestand in <code>/public</code>.</p>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(games, setGames)}>
+                                        <SortableContext items={games.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
+                                            {games.map((game, idx) => (
+                                                <SortableItem key={`game-${idx}`} id={`item-${idx}`}>
+                                                    <button onClick={() => setGames(games.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+                                                    <div style={{ display: "flex", gap: "10px", marginTop: "5px", flexWrap: "wrap" }}>
+                                                        <div style={{ flex: "1 1 120px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>ID (URL-slug)</label>
+                                                            <input type="text" value={game.id} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], id: e.target.value.toLowerCase().replace(/\s+/g, '-') }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "monospace" }} placeholder="bijv: tetris" />
+                                                        </div>
+                                                        <div style={{ flex: "1 1 150px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam</label>
+                                                            <input type="text" value={game.title} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], title: e.target.value }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="bijv: Tetris" />
+                                                        </div>
+                                                        <div style={{ flex: "2 1 250px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Pad naar HTML-bestand</label>
+                                                            <input type="text" value={game.src} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], src: e.target.value }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "monospace" }} placeholder="/Gameroom/tetris/index.html" />
+                                                        </div>
+                                                    </div>
+                                                </SortableItem>
+                                            ))}
+                                        </SortableContext>
+                                    </DndContext>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <button onClick={() => setGames([...games, { id: "", title: "Nieuw Spel", src: "/Gameroom//index.html" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Spel Toevoegen</button>
+                                        <button onClick={handleSaveGames} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
 
                         <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
                             <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>

@@ -182,6 +182,15 @@ export async function removeBooking(id: string) {
     return await saveToKV(updatedData);
 }
 
+export async function updateGames(newGames: any[]) {
+    noStore();
+    const appData = await getAppDataFresh();
+    const updatedData = { ...appData } as any;
+
+    updatedData.games = newGames;
+    return await saveToKV(updatedData);
+}
+
 export async function updateTranslations(translations: { en: any, de: any }) {
     noStore();
     const appData = await getAppDataFresh();
