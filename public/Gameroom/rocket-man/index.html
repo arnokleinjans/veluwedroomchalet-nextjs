@@ -3,75 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Rocket Man</title>
+    <title>Rocket Man Space</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #0a0a1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100vw;
-            height: 100dvh;
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; }
+        body { background: #1c66d9; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif; }
+        canvas { display: block; cursor: pointer; max-width: 100vw; max-height: 100vh; box-shadow: 0 0 50px rgba(0,0,0,0.5); border-radius: 10px; outline: none; }
 
-        canvas {
-            display: block;
-            cursor: pointer;
-            border-radius: 8px;
-            box-shadow: 0 0 40px rgba(255,107,53,0.15);
-        }
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.82); z-index: 100; display:flex; justify-content:center; align-items:center; }
+        .overlay.hidden { display: none; }
+        .overlay-box { background: linear-gradient(145deg, #0f1f5c, #1a3aaa); border-radius: 24px; padding: 30px 26px; text-align: center; border: 1.5px solid rgba(255,255,255,0.15); max-width: 400px; width: 90%; box-shadow: 0 0 60px rgba(0,0,0,0.7); }
+        .overlay-box h2 { color: #ff6b35; font-size: 1.9em; margin-bottom: 6px; text-shadow: 0 2px 12px rgba(255,107,53,0.5); }
+        .score-display { color: #FFD700; font-size: 2.5em; font-weight: bold; margin: 10px 0 4px; text-shadow: 0 0 20px rgba(255,215,0,0.6); }
+        .score-display span { font-size: 0.4em; color: #8090c0; vertical-align: middle; }
+
+        .new-record { background: linear-gradient(45deg, #ffd700, #ffb300); color: #0f1f5c; font-weight: bold; font-size: .95em; border-radius: 30px; padding: 5px 20px; margin: 6px auto 2px; display: inline-block; letter-spacing: 1px; animation: pulse .7s infinite alternate; }
+        .new-record.hidden { display: none; }
+        @keyframes pulse { from { transform: scale(1) } to { transform: scale(1.07) } }
+
+        .sb-wrap { background: rgba(0,0,0,0.3); border-radius: 14px; padding: 12px 16px; margin: 14px 0 10px; text-align: left; }
+        .sb-wrap h3 { color: #40E0D0; font-size: 0.72em; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 9px; text-align: center; }
+        .sb-entry { display: flex; align-items: center; justify-content: space-between; font-size: .82em; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: #90aad0; }
+        .sb-entry:last-child { border-bottom: none; }
+        .sb-entry .sb-rank { font-weight: 700; width: 22px; }
+        .sb-entry.r1 .sb-rank { color: #ffd700; }
+        .sb-entry.r2 .sb-rank { color: #c0c0c0; }
+        .sb-entry.r3 .sb-rank { color: #cd7f32; }
+        .sb-entry .sb-score { font-weight: 600; color: #d0e4ff; }
+        .sb-entry.is-new .sb-score { color: #FFD700; }
+        .sb-empty { font-size: .78em; color: #40506a; text-align: center; padding: 8px 0; }
+
+        .play-btn { padding: 14px 44px; font-size: 1.05em; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; background: linear-gradient(45deg, #ff6b35, #ff9c00); color: #fff; transition: all .2s; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; box-shadow: 0 4px 20px rgba(255,107,53,0.45); }
+        .play-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(255,107,53,0.65); }
+        .play-btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas" tabindex="0"></canvas>
+
+    <div class="overlay hidden" id="gameOverOverlay">
+        <div class="overlay-box">
+            <h2>💥 GAME OVER!</h2>
+            <div class="score-display" id="finalScore">0 <span>punten</span></div>
+            <div id="newRecordBadge" class="new-record hidden">🏆 Nieuw Record!</div>
+            <div class="sb-wrap">
+                <h3>Topscores</h3>
+                <div id="scoreboardList"></div>
+            </div>
+            <button class="play-btn" id="restartBtn">🚀 Opnieuw</button>
+        </div>
+    </div>
+
     <script>
-    // ===== SETUP =====
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const W = 480;
-    const H = 720;
-    canvas.width = W;
-    canvas.height = H;
+    const W = 480, H = 720;
+    canvas.width = W; canvas.height = H;
 
-    // ===== RESPONSIVE SCALING =====
-    function resizeCanvas() {
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const ratio = W / H;
-        const screenRatio = vw / vh;
-        let displayW, displayH;
-        if (screenRatio > ratio) {
-            displayH = vh;
-            displayW = vh * ratio;
-        } else {
-            displayW = vw;
-            displayH = vw / ratio;
-        }
-        canvas.style.width = displayW + 'px';
-        canvas.style.height = displayH + 'px';
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // ===== IMAGE LOADER =====
-    const images = {};
+    // ── Images ──────────────────────────────────────────────────────────
+    const images = {}, imageStatus = {};
     const imagePaths = {
         rocket: 'resources/rocket.png',
-        maan: 'resources/maan01.png',
-        onderkant: 'resources/onderkant3.png',
-        gamecentre: 'resources/gamecentre.png',
-        scoreBg: 'resources/score.png',
-        restart: 'resources/restart.png',
-        musicicon: 'resources/musicicon.png',
-        sfx: 'resources/sfx.png',
-        slider: 'resources/slider.png',
-        medalB: 'resources/medalB.png',
-        medalG: 'resources/medalG.png',
-        medalZ: 'resources/medalZ.png',
         papa1: 'resources/papa1.png', papa2: 'resources/papa2.png', papa3: 'resources/papa3.png',
         mama1: 'resources/mama1.png', mama2: 'resources/mama2.png', mama3: 'resources/mama3.png',
         meisje1: 'resources/meisje1.png', meisje2: 'resources/meisje2.png', meisje3: 'resources/meisje3.png', meisje4: 'resources/meisje4.png',
@@ -79,1050 +70,296 @@
         zoon1: 'resources/zoon1.png', zoon2: 'resources/zoon2.png', zoon3: 'resources/zoon3.png',
         coin1: 'resources/coin1.png', coin2: 'resources/coin2.png', coin3: 'resources/coin3.png',
         coin4: 'resources/coin4.png', coin5: 'resources/coin5.png', coin6: 'resources/coin6.png',
-        coin7: 'resources/coin7.png', coin8: 'resources/coin8.png', coin9: 'resources/coin9.png'
+        coin7: 'resources/coin7.png', coin8: 'resources/coin8.png', coin9: 'resources/coin9.png',
     };
 
-    let imagesLoaded = 0;
-    let totalImages = Object.keys(imagePaths).length;
-
-    function loadImages(callback) {
-        for (const [key, path] of Object.entries(imagePaths)) {
+    function loadImages(cb) {
+        let loaded = 0;
+        const keys = Object.keys(imagePaths), total = keys.length;
+        keys.forEach(k => {
             const img = new Image();
-            img.onload = () => {
-                imagesLoaded++;
-                if (imagesLoaded >= totalImages) callback();
-            };
-            img.onerror = () => {
-                console.warn('Could not load: ' + path);
-                imagesLoaded++;
-                if (imagesLoaded >= totalImages) callback();
-            };
-            img.src = path;
-            images[key] = img;
-        }
+            img.onload = () => { imageStatus[k] = true; loaded++; if (loaded >= total) cb(); };
+            img.onerror = () => { imageStatus[k] = false; loaded++; if (loaded >= total) cb(); };
+            img.src = imagePaths[k]; images[k] = img;
+        });
+        setTimeout(() => { if (loaded < total) cb(); }, 1500);
     }
 
-    // ===== SOUND (Web Audio API) =====
-    let audioCtx = null;
-    let musicEnabled = true;
-    let sfxEnabled = true;
-    let musicVolume = 0.3;
-    let sfxVolume = 0.5;
+    // ── Audio ────────────────────────────────────────────────────────────
+    let audioCtx = null, musicInterval = null, noteIndex = 0;
+    const melody = [130, 146, 164, 174, 196, 220, 246, 261];
 
     function initAudio() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (!musicInterval) startMusic();
+        canvas.focus();
     }
 
-    function playTone(freq, duration, type = 'square', vol = 0.3) {
-        if (!audioCtx || !sfxEnabled) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol * sfxVolume, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
+    function playTone(f, d, t = 'sine', v = 0.1) {
+        if (!audioCtx || audioCtx.state === 'suspended') return;
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
     }
-
-    function playBoost() {
-        playTone(300, 0.08, 'sine', 0.2);
-        setTimeout(() => playTone(450, 0.06, 'sine', 0.15), 30);
-    }
-
-    function playCoin() {
-        playTone(880, 0.08, 'sine', 0.3);
-        setTimeout(() => playTone(1100, 0.12, 'sine', 0.25), 60);
-    }
-
-    function playScore() {
-        playTone(660, 0.1, 'sine', 0.25);
-        setTimeout(() => playTone(880, 0.15, 'sine', 0.2), 80);
-    }
-
-    function playDie() {
-        playTone(200, 0.3, 'sawtooth', 0.3);
-        setTimeout(() => playTone(120, 0.4, 'sawtooth', 0.25), 150);
-        setTimeout(() => playTone(80, 0.5, 'sawtooth', 0.2), 350);
-    }
-
-    // Background music - simple looping melody
-    let musicOscillators = [];
-    let musicPlaying = false;
 
     function startMusic() {
-        if (!audioCtx || !musicEnabled || musicPlaying) return;
-        musicPlaying = true;
-        playMusicLoop();
+        musicInterval = setInterval(() => {
+            if (['playing', 'menu', 'waiting'].includes(state)) {
+                let speedMod = state === 'playing' ? Math.min(200, score + coinScore) : 0;
+                playTone((melody[noteIndex % melody.length] + speedMod * 0.5) / 2, 0.4, 'triangle', 0.03);
+                noteIndex++;
+            }
+        }, 250);
     }
 
-    function stopMusic() {
-        musicPlaying = false;
-        musicOscillators.forEach(o => { try { o.stop(); } catch(e) {} });
-        musicOscillators = [];
+    function playRecordSound() {
+        [440, 554, 659, 880].forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.1), i * 150));
     }
 
-    function playMusicLoop() {
-        if (!musicPlaying || !musicEnabled || !audioCtx) return;
-        const notes = [262, 330, 392, 523, 392, 330, 262, 196, 262, 330, 392, 440, 523, 440, 392, 330];
-        const noteLen = 0.25;
-        notes.forEach((freq, i) => {
-            if (!musicPlaying) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * noteLen);
-            gain.gain.setValueAtTime(musicVolume * 0.15, audioCtx.currentTime + i * noteLen);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * noteLen + noteLen * 0.9);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(audioCtx.currentTime + i * noteLen);
-            osc.stop(audioCtx.currentTime + i * noteLen + noteLen);
-            musicOscillators.push(osc);
-        });
-        setTimeout(() => {
-            if (musicPlaying) playMusicLoop();
-        }, notes.length * noteLen * 1000);
+    // ── Scoreboard ───────────────────────────────────────────────────────
+    let highScore = parseInt(localStorage.getItem('rocketman_hs') || '0');
+    let topScores = JSON.parse(localStorage.getItem('rocketman_scores') || '[]');
+
+    function saveAndRender(s) {
+        let isNew = false;
+        topScores.push({ s });
+        topScores.sort((a, b) => b.s - a.s);
+        topScores = topScores.slice(0, 5);
+        localStorage.setItem('rocketman_scores', JSON.stringify(topScores));
+        if (s > highScore) { highScore = s; localStorage.setItem('rocketman_hs', s); isNew = true; }
+
+        document.getElementById('finalScore').innerHTML = `${s} <span>punten</span>`;
+        document.getElementById('newRecordBadge').classList.toggle('hidden', !isNew);
+
+        const medals = ['★', '▲', '●'];
+        const newIdx = topScores.findIndex(e => e.s === s);
+        const list = document.getElementById('scoreboardList');
+        list.innerHTML = topScores.length === 0
+            ? '<div class="sb-empty">Nog geen scores</div>'
+            : topScores.map((e, i) => `<div class="sb-entry r${i+1}${i === newIdx ? ' is-new' : ''}">
+                <span class="sb-rank">${i < 3 ? medals[i] : (i+1) + '.'}</span>
+                <span class="sb-score">${e.s} punten</span>
+              </div>`).join('');
     }
 
-    // ===== GAME CONSTANTS =====
-    const GRAVITY = 0.42;
-    const BOOST = -7.2;
-    const BASE_SPEED = 3;
-    const ROCKET_W = 80;
-    const ROCKET_H = 50;
-    const GROUND_H = 80;
-    const COMET_SIZE = 60;
-    const COIN_SIZE = 36;
+    function showGameOver() {
+        saveAndRender(score + coinScore);
+        document.getElementById('gameOverOverlay').classList.remove('hidden');
+    }
 
-    // Comet types with their sprite frames
-    const COMET_TYPES = [
-        { name: 'papa', frames: ['papa1','papa2','papa3'], frameCount: 3 },
-        { name: 'mama', frames: ['mama1','mama2','mama3'], frameCount: 3 },
-        { name: 'meisje', frames: ['meisje1','meisje2','meisje3','meisje4'], frameCount: 4 },
-        { name: 'neef', frames: ['neef1','neef2','neef3'], frameCount: 3 },
-        { name: 'zoon', frames: ['zoon1','zoon2','zoon3'], frameCount: 3 }
-    ];
+    document.getElementById('restartBtn').addEventListener('click', () => {
+        document.getElementById('gameOverOverlay').classList.add('hidden');
+        resetGame();
+    });
 
-    const COIN_FRAMES = ['coin1','coin2','coin3','coin4','coin5','coin6','coin7','coin8','coin9'];
+    // ── Game state ───────────────────────────────────────────────────────
+    let GRAVITY = 0.42, BOOST = -7.5;
+    const COMET_SIZE = 120, COIN_SIZE = 36;
+    let state = 'menu';
+    let score = 0, coinScore = 0, speed = 3.5, frameCount = 0;
+    let rocket = { x: 80, y: H/2, vy: 0, angle: 0, invul: 0 };
+    let comets = [], coins = [], stars = [], particles = [];
+    let animFrame = 0, recordBeaten = false;
 
-    // ===== GAME STATE =====
-    let state = 'loading'; // loading, menu, playing, dead, leaderboard
-    let rocket = { x: 100, y: H / 2, vy: 0, angle: 0 };
-    let comets = [];
-    let coins = [];
-    let particles = [];
-    let stars = [];
-    let score = 0;
-    let coinScore = 0;
-    let bestScore = parseInt(localStorage.getItem('rocketManBest') || '0');
-    let leaderboard = JSON.parse(localStorage.getItem('rocketManLeaderboard') || '[]');
-    let frameCount = 0;
-    let speed = BASE_SPEED;
-    let spawnTimer = 0;
-    let spawnInterval = 120;
-    let shakeTimer = 0;
-    let flashTimer = 0;
-    let groundX = 0;
-    let moonX = W + 100;
-    let animFrame = 0;
-    let animTimer = 0;
-    let deathTimer = 0;
-    let settingsOpen = false;
-    let playerName = '';
-    let nameInputActive = false;
-
-    // ===== STARS =====
     function createStars() {
         stars = [];
-        for (let i = 0; i < 100; i++) {
-            stars.push({
-                x: Math.random() * W,
-                y: Math.random() * (H - GROUND_H),
-                size: Math.random() * 2 + 0.5,
-                speed: Math.random() * 1.5 + 0.3,
-                brightness: Math.random()
-            });
-        }
+        for (let i = 0; i < 60; i++) stars.push({ x: Math.random()*W, y: Math.random()*H, s: Math.random()*2, sp: Math.random() });
     }
 
-    // ===== PARTICLES =====
-    function spawnExhaust() {
-        for (let i = 0; i < 2; i++) {
-            particles.push({
-                x: rocket.x - 5 + (Math.random() - 0.5) * 6,
-                y: rocket.y + ROCKET_H / 2 + (Math.random() - 0.5) * 8,
-                vx: -(Math.random() * 2 + 1),
-                vy: (Math.random() - 0.5) * 1.5,
-                life: 15 + Math.random() * 10,
-                maxLife: 25,
-                size: Math.random() * 4 + 2,
-                color: Math.random() > 0.5 ? '#ff6b35' : '#ffcc00'
-            });
-        }
+    function spawnParticle(x, y, color, speedX, size) {
+        particles.push({ x, y, vx: speedX, vy: Math.random()*2-1, life: 1, c: color, s: size, decay: 0.04 });
     }
 
-    function spawnBoostParticles() {
-        for (let i = 0; i < 6; i++) {
-            particles.push({
-                x: rocket.x - 5 + (Math.random() - 0.5) * 8,
-                y: rocket.y + ROCKET_H / 2 + (Math.random() - 0.5) * 12,
-                vx: -(Math.random() * 4 + 2),
-                vy: (Math.random() - 0.5) * 3,
-                life: 20 + Math.random() * 15,
-                maxLife: 35,
-                size: Math.random() * 5 + 2,
-                color: Math.random() > 0.5 ? '#ff6b35' : '#ffcc00'
-            });
-        }
-    }
-
-    function spawnExplosion(x, y) {
-        for (let i = 0; i < 50; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const spd = Math.random() * 7 + 1;
-            particles.push({
-                x, y,
-                vx: Math.cos(angle) * spd,
-                vy: Math.sin(angle) * spd,
-                life: 30 + Math.random() * 30,
-                maxLife: 60,
-                size: Math.random() * 6 + 2,
-                color: ['#ff6b35','#ffcc00','#ff3300','#fff'][Math.floor(Math.random()*4)]
-            });
-        }
-    }
-
-    function spawnCoinParticles(x, y) {
-        for (let i = 0; i < 12; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const spd = Math.random() * 3 + 1;
-            particles.push({
-                x, y,
-                vx: Math.cos(angle) * spd,
-                vy: Math.sin(angle) * spd,
-                life: 15 + Math.random() * 10,
-                maxLife: 25,
-                size: Math.random() * 3 + 1,
-                color: '#ffd700'
-            });
-        }
-    }
-
-    // ===== SPAWN OBSTACLES =====
-    function spawnComet() {
-        const type = COMET_TYPES[Math.floor(Math.random() * COMET_TYPES.length)];
-        const minY = 60;
-        const maxY = H - GROUND_H - COMET_SIZE - 60;
-        const y = minY + Math.random() * (maxY - minY);
-        const floatAmplitude = 20 + Math.random() * 30;
-        const floatSpeed = 0.02 + Math.random() * 0.02;
-        comets.push({
-            x: W + 20,
-            y: y,
-            baseY: y,
-            type: type,
-            frame: 0,
-            floatAmplitude,
-            floatSpeed,
-            floatOffset: Math.random() * Math.PI * 2,
-            scored: false
-        });
-    }
-
-    function spawnCoin() {
-        const minY = 80;
-        const maxY = H - GROUND_H - COIN_SIZE - 80;
-        const y = minY + Math.random() * (maxY - minY);
-        coins.push({
-            x: W + 20,
-            y: y,
-            frame: 0,
-            collected: false
-        });
-    }
-
-    // ===== COLLISION =====
-    function checkCollisions() {
-        const margin = 10;
-        const rx = rocket.x + margin;
-        const ry = rocket.y + margin;
-        const rw = ROCKET_W - margin * 2;
-        const rh = ROCKET_H - margin * 2;
-
-        // Ground
-        if (rocket.y + ROCKET_H > H - GROUND_H) {
-            rocket.y = H - GROUND_H - ROCKET_H;
-            die();
-            return;
-        }
-        // Ceiling
-        if (rocket.y < 0) {
-            rocket.y = 0;
-            rocket.vy = 0;
-        }
-
-        // Comets
-        for (const comet of comets) {
-            const cx = comet.x + 8;
-            const cy = comet.y + 8;
-            const cw = COMET_SIZE - 16;
-            const ch = COMET_SIZE - 16;
-            if (rx < cx + cw && rx + rw > cx && ry < cy + ch && ry + rh > cy) {
-                die();
-                return;
-            }
-            // Score
-            if (!comet.scored && comet.x + COMET_SIZE < rocket.x) {
-                comet.scored = true;
-                score++;
-                playScore();
-            }
-        }
-
-        // Coins
-        for (const coin of coins) {
-            if (coin.collected) continue;
-            const cx = coin.x + 4;
-            const cy = coin.y + 4;
-            const cs = COIN_SIZE - 8;
-            if (rx < cx + cs && rx + rw > cx && ry < cy + cs && ry + rh > cy) {
-                coin.collected = true;
-                coinScore += 5;
-                playCoin();
-                spawnCoinParticles(coin.x + COIN_SIZE/2, coin.y + COIN_SIZE/2);
-            }
-        }
-    }
-
-    // ===== GAME FLOW =====
-    function die() {
-        if (state !== 'playing') return;
-        state = 'dead';
-        shakeTimer = 15;
-        flashTimer = 8;
-        deathTimer = 0;
-        playDie();
-        stopMusic();
-        spawnExplosion(rocket.x + ROCKET_W / 2, rocket.y + ROCKET_H / 2);
-
-        const totalScore = score + coinScore;
-        if (totalScore > bestScore) {
-            bestScore = totalScore;
-            localStorage.setItem('rocketManBest', bestScore);
-        }
-    }
-
-    function startGame() {
+    function resetGame() {
+        rocket = { x: 80, y: H/2 - 25, vy: 0, angle: 0, invul: 0 };
+        GRAVITY = 0.42; comets = []; coins = []; particles = [];
+        score = 0; coinScore = 0; speed = 3.5; frameCount = 0;
+        recordBeaten = false;
+        state = 'waiting';
         initAudio();
-        rocket = { x: 100, y: H / 2, vy: 0, angle: 0 };
-        comets = [];
-        coins = [];
-        particles = [];
-        score = 0;
-        coinScore = 0;
-        frameCount = 0;
-        speed = BASE_SPEED;
-        spawnTimer = 0;
-        spawnInterval = 120;
-        shakeTimer = 0;
-        flashTimer = 0;
-        state = 'playing';
-        settingsOpen = false;
-        startMusic();
     }
 
-    function addToLeaderboard(name, sc) {
-        leaderboard.push({ name: name || 'Anoniem', score: sc, date: new Date().toLocaleDateString('nl-NL') });
-        leaderboard.sort((a, b) => b.score - a.score);
-        leaderboard = leaderboard.slice(0, 10);
-        localStorage.setItem('rocketManLeaderboard', JSON.stringify(leaderboard));
-    }
-
-    // ===== DRAWING =====
-    function drawBackground() {
-        const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-        bgGrad.addColorStop(0, '#0a0a2e');
-        bgGrad.addColorStop(0.5, '#0d0d3a');
-        bgGrad.addColorStop(1, '#1a0a2e');
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, W, H);
-    }
-
-    function drawStars() {
-        for (const star of stars) {
-            star.x -= star.speed * (speed / BASE_SPEED);
-            star.brightness += (Math.random() - 0.5) * 0.1;
-            star.brightness = Math.max(0.3, Math.min(1, star.brightness));
-            if (star.x < 0) { star.x = W; star.y = Math.random() * (H - GROUND_H); }
-            ctx.fillStyle = `rgba(255,255,255,${star.brightness * 0.7})`;
-            ctx.beginPath();
-            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    function drawMoon() {
-        if (images.maan && images.maan.complete && images.maan.naturalWidth > 0) {
-            moonX -= 0.3 * (speed / BASE_SPEED);
-            if (moonX < -200) moonX = W + 100;
-            ctx.globalAlpha = 0.6;
-            ctx.drawImage(images.maan, moonX, 60, 160, 160);
-            ctx.globalAlpha = 1;
-        }
-    }
-
-    function drawGround() {
-        if (images.onderkant && images.onderkant.complete && images.onderkant.naturalWidth > 0) {
-            groundX -= speed;
-            const imgW = images.onderkant.naturalWidth;
-            if (Math.abs(groundX) >= imgW) groundX += imgW;
-            for (let x = groundX; x < W + imgW; x += imgW) {
-                ctx.drawImage(images.onderkant, x, H - GROUND_H, imgW, GROUND_H);
-            }
-        } else {
-            ctx.fillStyle = '#3a2a1a';
-            ctx.fillRect(0, H - GROUND_H, W, GROUND_H);
-        }
-    }
-
-    function drawRocket() {
-        if (state === 'dead' && deathTimer > 10) return;
-        ctx.save();
-        ctx.translate(rocket.x + ROCKET_W / 2, rocket.y + ROCKET_H / 2);
-        ctx.rotate(rocket.angle * Math.PI / 180);
-
-        // Draw exhaust flame from the back (left side) of the rocket
-        if (state === 'playing') {
-            const flameLen = 20 + Math.random() * 25;
-            const flameW = 12 + Math.random() * 8;
-            // Outer flame - going left from the back of the rocket
-            const flameGrad = ctx.createLinearGradient(-ROCKET_W/2, 0, -ROCKET_W/2 - flameLen, 0);
-            flameGrad.addColorStop(0, '#ff6b35');
-            flameGrad.addColorStop(0.4, '#ff4500');
-            flameGrad.addColorStop(1, 'rgba(255,69,0,0)');
-            ctx.fillStyle = flameGrad;
-            ctx.beginPath();
-            ctx.moveTo(-ROCKET_W/2, -flameW/2);
-            ctx.quadraticCurveTo(-ROCKET_W/2 - flameLen*0.6, -flameW/3, -ROCKET_W/2 - flameLen, 0);
-            ctx.quadraticCurveTo(-ROCKET_W/2 - flameLen*0.6, flameW/3, -ROCKET_W/2, flameW/2);
-            ctx.fill();
-
-            // Inner flame
-            const innerLen = flameLen * 0.55;
-            const innerW = flameW * 0.45;
-            const innerGrad = ctx.createLinearGradient(-ROCKET_W/2, 0, -ROCKET_W/2 - innerLen, 0);
-            innerGrad.addColorStop(0, '#fff7a0');
-            innerGrad.addColorStop(0.5, '#ffcc00');
-            innerGrad.addColorStop(1, 'rgba(255,204,0,0)');
-            ctx.fillStyle = innerGrad;
-            ctx.beginPath();
-            ctx.moveTo(-ROCKET_W/2, -innerW/2);
-            ctx.quadraticCurveTo(-ROCKET_W/2 - innerLen*0.6, -innerW/3, -ROCKET_W/2 - innerLen, 0);
-            ctx.quadraticCurveTo(-ROCKET_W/2 - innerLen*0.6, innerW/3, -ROCKET_W/2, innerW/2);
-            ctx.fill();
-        }
-
-        // Draw rocket sprite
-        if (images.rocket && images.rocket.complete && images.rocket.naturalWidth > 0) {
-            ctx.drawImage(images.rocket, -ROCKET_W/2, -ROCKET_H/2, ROCKET_W, ROCKET_H);
-        } else {
-            // Fallback
-            ctx.fillStyle = '#ccc';
-            ctx.fillRect(-ROCKET_W/2, -ROCKET_H/2, ROCKET_W, ROCKET_H);
-        }
-        ctx.restore();
-    }
-
-    function drawComets() {
-        for (const comet of comets) {
-            const type = comet.type;
-            const frameKey = type.frames[comet.frame % type.frameCount];
-            const img = images[frameKey];
-            if (img && img.complete && img.naturalWidth > 0) {
-                // Draw comet tail
-                ctx.save();
-                const tailGrad = ctx.createLinearGradient(comet.x + COMET_SIZE, comet.y + COMET_SIZE/2, comet.x + COMET_SIZE + 40, comet.y + COMET_SIZE/2);
-                tailGrad.addColorStop(0, 'rgba(255,150,50,0.5)');
-                tailGrad.addColorStop(1, 'rgba(255,150,50,0)');
-                ctx.fillStyle = tailGrad;
-                ctx.beginPath();
-                ctx.moveTo(comet.x + COMET_SIZE, comet.y + 10);
-                ctx.lineTo(comet.x + COMET_SIZE + 30 + Math.random()*15, comet.y + COMET_SIZE/2);
-                ctx.lineTo(comet.x + COMET_SIZE, comet.y + COMET_SIZE - 10);
-                ctx.fill();
-                ctx.restore();
-
-                ctx.drawImage(img, comet.x, comet.y, COMET_SIZE, COMET_SIZE);
-            }
-        }
-    }
-
-    function drawCoins() {
-        for (const coin of coins) {
-            if (coin.collected) continue;
-            const frameKey = COIN_FRAMES[coin.frame % 9];
-            const img = images[frameKey];
-            if (img && img.complete && img.naturalWidth > 0) {
-                ctx.drawImage(img, coin.x, coin.y, COIN_SIZE, COIN_SIZE);
-            }
-        }
-    }
-
-    function drawParticles() {
-        for (let i = particles.length - 1; i >= 0; i--) {
-            const p = particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life--;
-            if (p.life <= 0) { particles.splice(i, 1); continue; }
-            const alpha = p.life / p.maxLife;
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-    }
-
-    function drawScore() {
-        // Score background
-        if (images.scoreBg && images.scoreBg.complete && images.scoreBg.naturalWidth > 0) {
-            ctx.drawImage(images.scoreBg, W/2 - 60, 10, 120, 50);
-        } else {
-            ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.fillRect(W/2 - 50, 15, 100, 40);
-        }
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 26px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(score + coinScore, W/2, 36);
-
-        // Coin indicator
-        if (coinScore > 0) {
-            ctx.font = '14px "Segoe UI", sans-serif';
-            ctx.fillStyle = '#ffd700';
-            ctx.fillText('🪙 +' + coinScore, W/2, 56);
-        }
-    }
-
-    function getMedal() {
-        const total = score + coinScore;
-        if (total >= 30) return images.medalG;
-        if (total >= 15) return images.medalZ;
-        if (total >= 5) return images.medalB;
-        return null;
-    }
-
-    function drawMenu() {
-        drawBackground();
-        drawStars();
-        drawMoon();
-        drawGround();
-
-        // Title
-        ctx.fillStyle = '#ff6b35';
-        ctx.font = 'bold 48px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(255,107,53,0.5)';
-        ctx.shadowBlur = 20;
-        ctx.fillText('ROCKET MAN', W/2, H/3 - 40);
-        ctx.shadowBlur = 0;
-
-        // Rocket preview
-        if (images.rocket && images.rocket.complete && images.rocket.naturalWidth > 0) {
-            ctx.drawImage(images.rocket, W/2 - 40, H/3 + 10, 80, 100);
-        }
-
-        // Start button
-        ctx.fillStyle = '#ff6b35';
-        ctx.fillRect(W/2 - 90, H/2 + 60, 180, 55);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 24px "Segoe UI", sans-serif';
-        ctx.fillText('START', W/2, H/2 + 88);
-
-        // Leaderboard button
-        ctx.fillStyle = '#0f3460';
-        ctx.fillRect(W/2 - 90, H/2 + 130, 180, 50);
-        ctx.strokeStyle = '#ff6b35';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(W/2 - 90, H/2 + 130, 180, 50);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 18px "Segoe UI", sans-serif';
-        ctx.fillText('LEADERBOARD', W/2, H/2 + 156);
-
-        // Settings button
-        if (images.musicicon && images.musicicon.complete && images.musicicon.naturalWidth > 0) {
-            ctx.drawImage(images.musicicon, 20, H - 60, 40, 40);
-        }
-        if (images.sfx && images.sfx.complete && images.sfx.naturalWidth > 0) {
-            ctx.drawImage(images.sfx, 70, H - 60, 40, 40);
-        }
-
-        // Best score
-        ctx.fillStyle = '#888';
-        ctx.font = '16px "Segoe UI", sans-serif';
-        ctx.fillText('Beste: ' + bestScore, W/2, H/2 + 210);
-
-        // Hint
-        ctx.fillStyle = '#555';
-        ctx.font = '14px "Segoe UI", sans-serif';
-        ctx.fillText('Spatie / Klik om te vliegen', W/2, H - 30);
-    }
-
-    function drawDead() {
-        // Darken
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(0, 0, W, H);
-
-        // Game Over text
-        ctx.fillStyle = '#ff6b35';
-        ctx.font = 'bold 42px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(255,107,53,0.5)';
-        ctx.shadowBlur = 15;
-        ctx.fillText('CRASH!', W/2, H/3 - 20);
-        ctx.shadowBlur = 0;
-
-        // Score
-        const total = score + coinScore;
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 28px "Segoe UI", sans-serif';
-        ctx.fillText('Score: ' + total, W/2, H/3 + 40);
-
-        // Medal
-        const medal = getMedal();
-        if (medal && medal.complete && medal.naturalWidth > 0) {
-            ctx.drawImage(medal, W/2 - 30, H/3 + 60, 60, 60);
-        }
-
-        // New best
-        if (total >= bestScore && total > 0) {
-            ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 20px "Segoe UI", sans-serif';
-            ctx.fillText('🏆 Nieuw record!', W/2, H/3 + 135);
-        }
-
-        // Name input
-        ctx.fillStyle = '#aaa';
-        ctx.font = '16px "Segoe UI", sans-serif';
-        ctx.fillText('Naam:', W/2 - 80, H/2 + 40);
-        ctx.fillStyle = nameInputActive ? '#1a3a5c' : '#0f2040';
-        ctx.fillRect(W/2 - 40, H/2 + 25, 160, 35);
-        ctx.strokeStyle = nameInputActive ? '#ff6b35' : '#555';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(W/2 - 40, H/2 + 25, 160, 35);
-        ctx.fillStyle = '#fff';
-        ctx.font = '18px "Segoe UI", sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(playerName + (nameInputActive && frameCount % 60 < 30 ? '|' : ''), W/2 - 32, H/2 + 47);
-        ctx.textAlign = 'center';
-
-        // Save & Leaderboard button
-        ctx.fillStyle = '#0f3460';
-        ctx.fillRect(W/2 - 110, H/2 + 80, 220, 45);
-        ctx.strokeStyle = '#ff6b35';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(W/2 - 110, H/2 + 80, 220, 45);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 18px "Segoe UI", sans-serif';
-        ctx.fillText('OPSLAAN & LEADERBOARD', W/2, H/2 + 103);
-
-        // Restart button
-        if (images.restart && images.restart.complete && images.restart.naturalWidth > 0) {
-            ctx.drawImage(images.restart, W/2 - 40, H/2 + 145, 80, 50);
-        } else {
-            ctx.fillStyle = '#ff6b35';
-            ctx.fillRect(W/2 - 70, H/2 + 145, 140, 45);
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 18px "Segoe UI", sans-serif';
-            ctx.fillText('OPNIEUW', W/2, H/2 + 168);
-        }
-    }
-
-    function drawLeaderboard() {
-        // Background
-        if (images.gamecentre && images.gamecentre.complete && images.gamecentre.naturalWidth > 0) {
-            ctx.drawImage(images.gamecentre, 0, 0, W, H);
-        } else {
-            drawBackground();
-        }
-
-        // Overlay
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(0, 0, W, H);
-
-        // Title
-        ctx.fillStyle = '#ff6b35';
-        ctx.font = 'bold 36px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('LEADERBOARD', W/2, 60);
-
-        // Entries
-        ctx.font = '18px "Segoe UI", sans-serif';
-        const startY = 110;
-        for (let i = 0; i < Math.min(leaderboard.length, 10); i++) {
-            const entry = leaderboard[i];
-            const y = startY + i * 45;
-            // Row bg
-            ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)';
-            ctx.fillRect(40, y - 15, W - 80, 40);
-            // Rank
-            ctx.fillStyle = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#aaa';
-            ctx.textAlign = 'left';
-            ctx.fillText((i + 1) + '.', 55, y + 5);
-            // Name
-            ctx.fillStyle = '#fff';
-            ctx.fillText(entry.name, 90, y + 5);
-            // Score
-            ctx.textAlign = 'right';
-            ctx.fillStyle = '#ff6b35';
-            ctx.fillText(entry.score + '', W - 100, y + 5);
-            // Date
-            ctx.fillStyle = '#666';
-            ctx.font = '12px "Segoe UI", sans-serif';
-            ctx.fillText(entry.date, W - 50, y + 5);
-            ctx.font = '18px "Segoe UI", sans-serif';
-        }
-
-        if (leaderboard.length === 0) {
-            ctx.fillStyle = '#666';
-            ctx.textAlign = 'center';
-            ctx.fillText('Nog geen scores!', W/2, H/2);
-        }
-
-        // Back button
-        ctx.fillStyle = '#ff6b35';
-        ctx.fillRect(W/2 - 70, H - 80, 140, 45);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 18px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('TERUG', W/2, H - 57);
-    }
-
-    function drawSettings() {
-        ctx.fillStyle = 'rgba(0,0,0,0.8)';
-        ctx.fillRect(0, 0, W, H);
-
-        ctx.fillStyle = '#ff6b35';
-        ctx.font = 'bold 28px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('INSTELLINGEN', W/2, 80);
-
-        // Music toggle
-        const musicY = 160;
-        if (images.musicicon && images.musicicon.complete && images.musicicon.naturalWidth > 0) {
-            ctx.globalAlpha = musicEnabled ? 1 : 0.4;
-            ctx.drawImage(images.musicicon, W/2 - 80, musicY, 50, 50);
-            ctx.globalAlpha = 1;
-        }
-        ctx.fillStyle = '#fff';
-        ctx.font = '20px "Segoe UI", sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText('Muziek: ' + (musicEnabled ? 'AAN' : 'UIT'), W/2 - 15, musicY + 30);
-
-        // SFX toggle
-        const sfxY = 240;
-        if (images.sfx && images.sfx.complete && images.sfx.naturalWidth > 0) {
-            ctx.globalAlpha = sfxEnabled ? 1 : 0.4;
-            ctx.drawImage(images.sfx, W/2 - 80, sfxY, 50, 50);
-            ctx.globalAlpha = 1;
-        }
-        ctx.fillStyle = '#fff';
-        ctx.fillText('Geluid: ' + (sfxEnabled ? 'AAN' : 'UIT'), W/2 - 15, sfxY + 30);
-
-        // Volume slider
-        const sliderY = 330;
-        ctx.fillStyle = '#aaa';
-        ctx.textAlign = 'center';
-        ctx.font = '16px "Segoe UI", sans-serif';
-        ctx.fillText('Volume', W/2, sliderY);
-        if (images.slider && images.slider.complete && images.slider.naturalWidth > 0) {
-            ctx.drawImage(images.slider, W/2 - 80, sliderY + 10, 160, 30);
-        } else {
-            ctx.fillStyle = '#333';
-            ctx.fillRect(W/2 - 80, sliderY + 15, 160, 10);
-        }
-        // Slider knob
-        const knobX = W/2 - 80 + sfxVolume * 160;
-        ctx.fillStyle = '#ff6b35';
-        ctx.beginPath();
-        ctx.arc(knobX, sliderY + 20, 10, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Back
-        ctx.fillStyle = '#ff6b35';
-        ctx.fillRect(W/2 - 70, H - 100, 140, 45);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 18px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('TERUG', W/2, H - 77);
-    }
-
-    // ===== UPDATE =====
+    // ── Update ───────────────────────────────────────────────────────────
     function update() {
-        if (state !== 'playing') return;
-
         frameCount++;
+        if (state !== 'playing' && state !== 'dead') {
+            rocket.y = (H/2 - 25) + Math.sin(frameCount * 0.05) * 15;
+            rocket.angle = Math.sin(frameCount * 0.05) * 5;
+            if (state !== 'waiting') return;
+        }
 
-        // Increase difficulty
-        speed = BASE_SPEED + Math.floor(frameCount / 600) * 0.5;
-        spawnInterval = Math.max(60, 120 - Math.floor(frameCount / 500) * 5);
+        if (state === 'playing') {
+            const total = score + coinScore;
+            if (!recordBeaten && total > highScore && highScore > 0) { recordBeaten = true; playRecordSound(); }
+            speed = 3.5 + (frameCount / 900) + (total / 200);
+            rocket.vy += GRAVITY; rocket.y += rocket.vy;
+            rocket.angle = Math.max(-20, Math.min(35, rocket.vy * 3));
+            if (rocket.y < 0 || rocket.y > H) { die(); return; }
+            spawnParticle(rocket.x+5, rocket.y+20, '#ff6b35', -Math.random()*5-3, 6);
 
-        // Rocket physics
-        rocket.vy += GRAVITY;
-        rocket.y += rocket.vy;
-        const targetAngle = rocket.vy * 3;
-        rocket.angle += (targetAngle - rocket.angle) * 0.1;
-        rocket.angle = Math.max(-30, Math.min(50, rocket.angle));
-
-        // Exhaust
-        if (frameCount % 3 === 0) spawnExhaust();
-
-        // Spawn
-        spawnTimer++;
-        if (spawnTimer >= spawnInterval) {
-            spawnTimer = 0;
-            spawnComet();
-            // Chance to spawn coin
-            if (Math.random() < 0.4) {
-                setTimeout(() => { if (state === 'playing') spawnCoin(); }, 300);
+            if (frameCount % Math.max(35, 65 - Math.floor(total / 40)) === 0) {
+                const types = [{n:'papa',c:3},{n:'mama',c:3},{n:'meisje',c:4},{n:'neef',c:3},{n:'zoon',c:3}];
+                comets.push({ x: W+150, y: 50+Math.random()*(H-200), t: types[Math.floor(Math.random()*types.length)], s: false, hue: Math.floor(Math.random()*360) });
             }
-        }
-
-        // Update comets
-        for (let i = comets.length - 1; i >= 0; i--) {
-            const c = comets[i];
-            c.x -= speed;
-            c.y = c.baseY + Math.sin(frameCount * c.floatSpeed + c.floatOffset) * c.floatAmplitude;
-            if (c.x + COMET_SIZE < -20) { comets.splice(i, 1); continue; }
-        }
-
-        // Update coins
-        for (let i = coins.length - 1; i >= 0; i--) {
-            const c = coins[i];
-            c.x -= speed;
-            if (c.x + COIN_SIZE < -20 || c.collected) {
-                if (c.collected || c.x + COIN_SIZE < -20) { coins.splice(i, 1); continue; }
+            if (frameCount % 160 === 0) {
+                let r = Math.random(), type = 'gold';
+                if (r < 0.10) type = 'red'; else if (r < 0.18) type = 'green'; else if (r < 0.40) type = 'blue';
+                coins.push({ x: W+50, y: 50+Math.random()*(H-100), type });
             }
+
+            comets.forEach(c => {
+                c.x -= speed;
+                if (!c.s && c.x < rocket.x) { c.s = true; score++; playTone(600, 0.1, 'sine', 0.03); }
+                if (rocket.invul <= 0 && rocket.x < c.x+COMET_SIZE-45 && rocket.x+55 > c.x+45 && rocket.y < c.y+COMET_SIZE-45 && rocket.y+35 > c.y+45) { die(); return; }
+            });
+            coins.forEach((c, i) => {
+                c.x -= speed;
+                if (rocket.x < c.x+COIN_SIZE && rocket.x+60 > c.x && rocket.y < c.y+COIN_SIZE && rocket.y+40 > c.y) {
+                    if (c.type === 'red') { die(); return; }
+                    else if (c.type === 'green') { rocket.invul = 10; playTone(400, 0.5, 'square', 0.1); }
+                    else if (c.type === 'blue') { for (let j = 0; j < 10; j++) coins.push({ x: W+(j*45), y: c.y, type: 'gold' }); playTone(1500, 0.3, 'square', 0.1); }
+                    else { coinScore += 5; playTone(900, 0.2, 'sine', 0.15); }
+                    coins.splice(i, 1);
+                }
+            });
+            if (rocket.invul > 0) rocket.invul--;
         }
 
-        // Animation frames
-        animTimer++;
-        if (animTimer >= 8) {
-            animTimer = 0;
-            animFrame++;
-            for (const c of comets) c.frame = animFrame % c.type.frameCount;
-            for (const c of coins) c.frame = animFrame % 9;
-        }
-
-        checkCollisions();
+        particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= p.decay; if (p.life <= 0) particles.splice(i, 1); });
+        comets = comets.filter(c => c.x > -200);
+        coins = coins.filter(c => c.x > -500);
+        if (frameCount % 8 === 0) animFrame++;
     }
 
-    // ===== MAIN LOOP =====
-    function gameLoop() {
-        ctx.save();
+    function die() {
+        if (state !== 'dead') { state = 'dead'; playTone(100, 0.6, 'sawtooth', 0.2); showGameOver(); }
+    }
 
-        // Screen shake
-        if (shakeTimer > 0) {
-            ctx.translate((Math.random()-0.5)*shakeTimer, (Math.random()-0.5)*shakeTimer);
-            shakeTimer--;
-        }
+    // ── Draw ─────────────────────────────────────────────────────────────
+    function drawLogo() {
+        const cx = W/2, cy = 185;
+        ctx.fillStyle = '#FFD700'; ctx.font = '44px serif'; ctx.textAlign = 'center'; ctx.fillText('🚀', cx, cy - 72);
+        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 5;
+        const g = ctx.createLinearGradient(0, cy-52, 0, cy);
+        g.addColorStop(0, '#FF8C00'); g.addColorStop(1, '#FFA500');
+        ctx.fillStyle = g; ctx.font = 'bold 65px sans-serif'; ctx.fillText('ROCKETMAN', cx, cy);
+        ctx.fillStyle = '#40E0D0'; ctx.font = 'bold 55px sans-serif'; ctx.fillText('SPACE', cx, cy + 62);
+        ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    }
+
+    function drawStartButton() {
+        const bx = W/2-120, by = H-155, bw = 240, bh = 65;
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath(); ctx.roundRect(bx, by+5, bw, bh, 35); ctx.fill();
+        const bg = ctx.createLinearGradient(bx, by, bx, by+bh);
+        bg.addColorStop(0, '#ff9c00'); bg.addColorStop(1, '#ff6b35');
+        ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 35); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('🚀  START', W/2, by + bh/2 + 8);
+    }
+
+    function draw() {
+        const total = score + coinScore;
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+        bgGrad.addColorStop(0, '#2a82fb'); bgGrad.addColorStop(1, '#1346af');
+        ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, W, H);
+        stars.forEach(s => { s.x -= s.sp; if (s.x < 0) s.x = W; ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillRect(s.x, s.y, s.s, s.s); });
 
         if (state === 'menu') {
-            drawMenu();
-        } else if (state === 'leaderboard') {
-            drawLeaderboard();
-        } else if (state === 'settings') {
-            drawSettings();
-        } else if (state === 'playing' || state === 'dead') {
-            update();
+            ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(0,0,W,H);
+            drawLogo();
+            ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.beginPath(); ctx.roundRect(W/2-130, 295, 260, 165, 16); ctx.fill();
+            ctx.fillStyle = '#d0e8ff'; ctx.font = '16px sans-serif'; ctx.textAlign = 'left';
+            ctx.fillText('🔵  Blauw: Coin streak', W/2-110, 330);
+            ctx.fillText('🟢  Groen: Schild', W/2-110, 360);
+            ctx.fillText('🔴  Rood: GAME OVER!', W/2-110, 390);
+            ctx.fillText('🪐  Planeten: Ontwijk!', W/2-110, 420);
+            if (highScore > 0) {
+                ctx.fillStyle = '#FFD700'; ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText(`🏆  Record: ${highScore} punten`, W/2, 455);
+            }
+            drawStartButton();
 
-            drawBackground();
-            drawStars();
-            drawMoon();
-            drawCoins();
-            drawComets();
-            drawParticles();
-            drawRocket();
-            drawGround();
-            drawScore();
+        } else {
+            // Game world
+            particles.forEach(p => { ctx.globalAlpha = p.life; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.life * p.s, 0, Math.PI*2); ctx.fill(); });
+            ctx.globalAlpha = 1;
 
-            // Flash
-            if (flashTimer > 0) {
-                ctx.fillStyle = `rgba(255,100,50,${flashTimer*0.04})`;
-                ctx.fillRect(0, 0, W, H);
-                flashTimer--;
+            coins.forEach(c => {
+                ctx.save();
+                const imgKey = 'coin' + ((animFrame % 9) + 1);
+                if (c.type === 'red') { ctx.fillStyle = '#ff3333'; ctx.beginPath(); ctx.arc(c.x+COIN_SIZE/2, c.y+COIN_SIZE/2, COIN_SIZE/2, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center'; ctx.fillText('✕', c.x+COIN_SIZE/2, c.y+COIN_SIZE/2+7); }
+                else if (c.type === 'green') { ctx.fillStyle='#26d6a1'; ctx.beginPath(); ctx.arc(c.x+COIN_SIZE/2, c.y+COIN_SIZE/2, COIN_SIZE/2, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center'; ctx.fillText('🛡', c.x+COIN_SIZE/2, c.y+COIN_SIZE/2+7); }
+                else if (c.type === 'blue') { ctx.fillStyle='#4488ff'; ctx.beginPath(); ctx.arc(c.x+COIN_SIZE/2, c.y+COIN_SIZE/2, COIN_SIZE/2, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center'; ctx.fillText('×10', c.x+COIN_SIZE/2, c.y+COIN_SIZE/2+7); }
+                else if (imageStatus[imgKey]) ctx.drawImage(images[imgKey], c.x, c.y, COIN_SIZE, COIN_SIZE);
+                ctx.restore();
+            });
+
+            comets.forEach(c => {
+                const imgKey = c.t.n + ((animFrame % c.t.c) + 1);
+                if (imageStatus[imgKey]) { ctx.save(); ctx.filter = `hue-rotate(${c.hue}deg)`; ctx.drawImage(images[imgKey], c.x, c.y, COMET_SIZE, COMET_SIZE); ctx.restore(); }
+            });
+
+            if (rocket.invul > 0 && Math.floor(frameCount / 3) % 2 === 0) { /* blink — skip draw */ }
+            else {
+                ctx.save(); ctx.translate(rocket.x+30, rocket.y+20); ctx.rotate(rocket.angle*Math.PI/180);
+                if (imageStatus['rocket']) ctx.drawImage(images.rocket, -40, -25, 80, 50);
+                ctx.restore();
             }
 
-            if (state === 'dead') {
-                deathTimer++;
-                if (deathTimer > 30) drawDead();
+            // HUD
+            if (recordBeaten) { ctx.fillStyle = '#FFD700'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🏆 NIEUW RECORD!', W/2, 28); }
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(total, W/2, 68);
+
+            if (state === 'waiting') {
+                ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.roundRect(W/2-165, H/2+55, 330, 52, 26); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText('Klik, tik of druk SPATIE!', W/2, H/2 + 87);
             }
         }
 
-        ctx.restore();
-        requestAnimationFrame(gameLoop);
+        update();
+        requestAnimationFrame(draw);
     }
 
-    // ===== INPUT =====
-    function handleBoost() {
-        if (state === 'playing') {
-            rocket.vy = BOOST;
-            spawnBoostParticles();
-            playBoost();
-        }
+    // ── Input ────────────────────────────────────────────────────────────
+    function boost() {
+        initAudio();
+        if (state === 'waiting' || state === 'playing') { state = 'playing'; rocket.vy = BOOST; }
+        else if (state === 'menu') resetGame();
     }
 
-    canvas.addEventListener('click', (e) => {
-        e.preventDefault();
+    function handleMenuClick(canvasY) {
+        // Only block on the START button area in menu
+        if (state === 'menu' && canvasY > H-155 && canvasY < H-90) { resetGame(); initAudio(); }
+        else if (state === 'menu') { /* click elsewhere on menu = nothing */ }
+        else boost();
+    }
+
+    window.addEventListener('keydown', e => {
+        if (e.code === 'Space') { e.preventDefault(); boost(); }
+    });
+
+    canvas.addEventListener('mousedown', e => {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = W / rect.width;
-        const scaleY = H / rect.height;
-        const mx = (e.clientX - rect.left) * scaleX;
-        const my = (e.clientY - rect.top) * scaleY;
-
-        if (state === 'menu') {
-            // Start button
-            if (mx > W/2-90 && mx < W/2+90 && my > H/2+60 && my < H/2+115) {
-                startGame();
-                return;
-            }
-            // Leaderboard button
-            if (mx > W/2-90 && mx < W/2+90 && my > H/2+130 && my < H/2+180) {
-                state = 'leaderboard';
-                return;
-            }
-            // Music toggle
-            if (mx > 20 && mx < 60 && my > H-60 && my < H-20) {
-                musicEnabled = !musicEnabled;
-                return;
-            }
-            // SFX toggle
-            if (mx > 70 && mx < 110 && my > H-60 && my < H-20) {
-                sfxEnabled = !sfxEnabled;
-                return;
-            }
-        } else if (state === 'playing') {
-            handleBoost();
-        } else if (state === 'dead' && deathTimer > 30) {
-            // Name input area
-            if (mx > W/2-40 && mx < W/2+120 && my > H/2+25 && my < H/2+60) {
-                nameInputActive = true;
-                return;
-            }
-            // Save & Leaderboard
-            if (mx > W/2-110 && mx < W/2+110 && my > H/2+80 && my < H/2+125) {
-                const total = score + coinScore;
-                addToLeaderboard(playerName, total);
-                playerName = '';
-                nameInputActive = false;
-                state = 'leaderboard';
-                return;
-            }
-            // Restart
-            if (mx > W/2-40 && mx < W/2+40 && my > H/2+145 && my < H/2+195) {
-                startGame();
-                return;
-            }
-        } else if (state === 'leaderboard') {
-            // Back button
-            if (mx > W/2-70 && mx < W/2+70 && my > H-80 && my < H-35) {
-                state = 'menu';
-                return;
-            }
-        } else if (state === 'settings') {
-            // Music toggle
-            if (mx > W/2-80 && mx < W/2-30 && my > 160 && my < 210) {
-                musicEnabled = !musicEnabled;
-                return;
-            }
-            // SFX toggle
-            if (mx > W/2-80 && mx < W/2-30 && my > 240 && my < 290) {
-                sfxEnabled = !sfxEnabled;
-                return;
-            }
-            // Volume slider
-            if (my > 330 && my < 370) {
-                sfxVolume = Math.max(0, Math.min(1, (mx - (W/2-80)) / 160));
-                musicVolume = sfxVolume * 0.6;
-                return;
-            }
-            // Back
-            if (mx > W/2-70 && mx < W/2+70 && my > H-100 && my < H-55) {
-                settingsOpen = false;
-                state = 'menu';
-                return;
-            }
-        }
+        const cy = (e.clientY - rect.top) * (H / rect.height);
+        handleMenuClick(cy);
     });
 
-    canvas.addEventListener('touchstart', (e) => {
+    canvas.addEventListener('touchstart', e => {
         e.preventDefault();
-        if (state === 'playing') {
-            handleBoost();
-        }
-    });
+        boost(); // overal tikken werkt op touch — geen precisie nodig
+    }, { passive: false });
 
-    document.addEventListener('keydown', (e) => {
-        if (state === 'dead' && nameInputActive) {
-            if (e.key === 'Backspace') {
-                playerName = playerName.slice(0, -1);
-                return;
-            }
-            if (e.key === 'Enter') {
-                nameInputActive = false;
-                return;
-            }
-            if (e.key.length === 1 && playerName.length < 12) {
-                playerName += e.key;
-                return;
-            }
-            return;
-        }
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); }, { passive: false });
 
-        if (e.key === ' ' || e.key === 'ArrowUp') {
-            e.preventDefault();
-            if (state === 'playing') {
-                handleBoost();
-            } else if (state === 'dead' && deathTimer > 30) {
-                startGame();
-            }
-        }
-    });
-
-    // ===== INIT =====
+    // ── Boot ─────────────────────────────────────────────────────────────
     createStars();
-
-    // Show loading, then menu
-    function showLoading() {
-        drawBackground();
-        ctx.fillStyle = '#ff6b35';
-        ctx.font = 'bold 28px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('Laden...', W/2, H/2);
-    }
-
-    showLoading();
-    loadImages(() => {
-        state = 'menu';
-        gameLoop();
-    });
+    loadImages(() => { draw(); });
     </script>
 </body>
 </html>
-</task_progress>- [x] Vorige Tetris en Rocket Man basis gebouwd
-- [x] Resources analyseren en PRD opstellen
-- [x] Index.html herbouwen met resources
-- [ ] Testen</task_progress>
-</write_to_file>

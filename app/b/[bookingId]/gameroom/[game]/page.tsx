@@ -4,6 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 
 const GAMES: Record<string, { title: string; src: string }> = {
     tetris: { title: "Tetris", src: "/Gameroom/tetris/index.html" },
+    tetram: { title: "Tetram", src: "/Gameroom/Tetram/index.html" },
     "rocket-man": { title: "Rocket Man", src: "/Gameroom/rocket-man/index.html" },
     yahtzee: { title: "Yahtzee", src: "/Gameroom/yahtzee/index.html" },
     pacman: { title: "Pac-Man", src: "/Gameroom/pacman/index.html" },

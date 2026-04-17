@@ -80,7 +80,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [editValues, setEditValues] = useState<{ checkIn: string, checkOut: string, language: string }>({ checkIn: "", checkOut: "", language: "nl" });
 
     // CSV import
-    const [csvRows, setCsvRows] = useState<{ name: string, checkIn: string, checkOut: string, language: string }[]>([]);
+    const [csvRows, setCsvRows] = useState<{ name: string, checkIn: string, checkOut: string, language: string, isDuplicate?: boolean, overrideDuplicate?: boolean }[]>([]);
     const [importProgress, setImportProgress] = useState<{ done: number, total: number } | null>(null);
 
     const [isSaving, setIsSaving] = useState(false);
@@ -296,11 +296,15 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 }
 
                 if (!checkIn || !checkOut) continue;
+                // Voorkom dubbele boekingen op basis van gastnaam (ongeacht hoofdletters/spaties)
+                const isDuplicate = bookings.some(b => b.guestName.trim().toLowerCase() === name.trim().toLowerCase());
+
                 parsed.push({
                     name,
                     checkIn,
                     checkOut,
                     language: cols[3]?.trim() || 'nl',
+                    isDuplicate
                 });
             }
             setCsvRows(parsed);
@@ -310,17 +314,19 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     };
 
     const handleImportAll = async () => {
-        if (!csvRows.length) return;
-        setImportProgress({ done: 0, total: csvRows.length });
-        for (let i = 0; i < csvRows.length; i++) {
-            const row = csvRows[i];
+        const validRows = csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate);
+        if (!validRows.length) return;
+        setImportProgress({ done: 0, total: validRows.length });
+        for (let i = 0; i < validRows.length; i++) {
+            const row = validRows[i];
             await addBooking(row.name, row.checkIn, row.checkOut, row.language);
-            setImportProgress({ done: i + 1, total: csvRows.length });
+            setImportProgress({ done: i + 1, total: validRows.length });
         }
         setCsvRows([]);
         setImportProgress(null);
         await refreshBookings();
-        setSaveMessage(`✅ ${csvRows.length} boekingen geïmporteerd!`);
+        const validRowsCount = csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate).length;
+        setSaveMessage(`✅ ${validRowsCount} boekingen geïmporteerd!`);
         setTimeout(() => setSaveMessage(""), 4000);
     };
 
@@ -522,17 +528,29 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {csvRows.map((row, i) => (
-                                                        <tr key={i} style={{ borderBottom: "1px solid #eee" }}>
-                                                            <td style={{ padding: "5px 8px" }}>{row.name}</td>
-                                                            <td style={{ padding: "5px 8px", color: "#555" }}>{row.checkIn}</td>
-                                                            <td style={{ padding: "5px 8px", color: "#555" }}>{row.checkOut}</td>
-                                                            <td style={{ padding: "5px 8px", color: "#555" }}>{row.language}</td>
-                                                            <td style={{ padding: "5px 8px" }}>
-                                                                <button onClick={() => setCsvRows(r => r.filter((_, j) => j !== i))} style={{ background: "none", border: "none", color: "#c00", cursor: "pointer", fontSize: "0.85rem" }}>✕</button>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                    {csvRows.map((row, i) => {
+                                                        const isIgnored = row.isDuplicate && !row.overrideDuplicate;
+                                                        return (
+                                                            <tr key={i} style={{ borderBottom: "1px solid #eee", backgroundColor: isIgnored ? "#fafafa" : "transparent" }}>
+                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#333", textDecoration: isIgnored ? "line-through" : "none" }}>
+                                                                    {row.name} 
+                                                                    {row.isDuplicate && (
+                                                                        <button 
+                                                                            onClick={() => { const n = [...csvRows]; n[i].overrideDuplicate = !n[i].overrideDuplicate; setCsvRows(n); }}
+                                                                            style={{ fontSize: "0.7rem", backgroundColor: row.overrideDuplicate ? "#e8f5e9" : "#f0f0f0", color: row.overrideDuplicate ? "#2e7d32" : "#999", padding: "2px 6px", borderRadius: "8px", marginLeft: "4px", border: `1px solid ${row.overrideDuplicate ? "#c8e6c9" : "#e0e0e0"}`, cursor: "pointer", outline: "none" }}
+                                                                        >
+                                                                            {row.overrideDuplicate ? "Dubbel, toch toevoegen" : "Dubbel"}
+                                                                        </button>
+                                                                    )}
+                                                                </td>
+                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{row.checkIn} - {row.checkOut}</td>
+                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{row.language.toUpperCase()}</td>
+                                                                <td style={{ padding: "8px", textAlign: "right" }}>
+                                                                    <button onClick={() => setCsvRows(r => r.filter((_, j) => j !== i))} style={{ background: "none", border: "none", color: "#c00", cursor: "pointer", fontSize: "0.85rem", opacity: isIgnored ? 0.5 : 1 }}>✕</button>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </table>
                                             <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "12px" }}>
@@ -541,7 +559,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                 ) : (
                                                     <>
                                                         <button onClick={handleImportAll} style={{ backgroundColor: "#4A5D23", color: "white", padding: "8px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem" }}>
-                                                            + Genereer {csvRows.length} links
+                                                            + Genereer {csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate).length} links
                                                         </button>
                                                         <button onClick={() => setCsvRows([])} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: "0.85rem" }}>Annuleer</button>
                                                     </>
@@ -552,7 +570,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                 </div>
 
                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                    {bookings.map((booking) => {
+                                    {[...bookings].sort((a, b) => a.checkOut.localeCompare(b.checkOut)).map((booking) => {
                                         const shareUrl = `${window.location.origin}/b/${booking.id}`;
                                         const isEditing = editingId === booking.id;
                                         const isExpired = new Date(booking.checkOut + "T23:59:59") < new Date();

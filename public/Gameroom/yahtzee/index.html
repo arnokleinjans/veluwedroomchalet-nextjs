@@ -211,7 +211,8 @@
         .modal h2 { font-size: 1.5em; color: #c8a020; margin-bottom: 10px; }
         .modal .winner { font-size: 1.8em; font-weight: bold; margin: 10px 0; }
         .modal .final-scores { margin: 15px 0; line-height: 1.8; }
-        .modal .final-scores .score-line { display: flex; justify-content: space-between; padding: 4px 0; }
+        .modal .final-scores .score-line { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .modal .final-scores .score-line:last-child { border-bottom: none; }
         .modal button {
             padding: 12px 40px; font-size: 1em; font-weight: bold; border: none;
             border-radius: 50px; cursor: pointer;
@@ -221,6 +222,44 @@
         .modal button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(74,158,90,0.4); }
 
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99; }
+
+        /* Scoreboard */
+        .new-record { background: linear-gradient(45deg, #c8a020, #f5a623); color: #0a1508; font-weight: bold; font-size: .9em; border-radius: 30px; padding: 5px 18px; margin: 8px auto 2px; display: inline-block; letter-spacing: 1px; animation: pulse .7s infinite alternate; }
+        .new-record.hidden { display: none; }
+        @keyframes pulse { from { transform: scale(1) } to { transform: scale(1.07) } }
+        .sb-wrap { background: rgba(0,0,0,0.25); border-radius: 12px; padding: 11px 14px; margin: 12px 0 8px; text-align: left; }
+        .sb-wrap h3 { color: #c8a020; font-size: .7em; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; text-align: center; }
+        .sb-entry { display: flex; align-items: center; gap: 8px; font-size: .8em; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.07); color: #8aaa7a; }
+        .sb-entry:last-child { border-bottom: none; }
+        .sb-entry .sb-rank { font-weight: 700; width: 18px; flex-shrink: 0; }
+        .sb-entry.r1 .sb-rank { color: #c8a020; }
+        .sb-entry.r2 .sb-rank { color: #b0b0b0; }
+        .sb-entry.r3 .sb-rank { color: #cd7f32; }
+        .sb-entry .sb-name { flex: 1; color: #c8dab0; }
+        .sb-entry .sb-score { font-weight: 600; color: #d4e8c2; white-space: nowrap; }
+        .sb-entry.is-new .sb-score { color: #c8a020; }
+        .sb-empty { font-size: .78em; color: #3a4a2a; text-align: center; padding: 6px 0; }
+        .setup-record { font-size: .8em; color: #c8a020; margin: -6px 0 10px; min-height: 20px; text-align: center; letter-spacing: .5px; }
+
+        /* Stop knop */
+        .stop-game-btn {
+            margin-top: 12px; width: 100%; padding: 6px; font-size: 0.72em;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            background: transparent; color: #5a6a4a; cursor: pointer;
+            letter-spacing: 1px; transition: all 0.2s;
+        }
+        .stop-game-btn:hover { border-color: #e94560; color: #e94560; background: rgba(233,69,96,0.08); }
+        .stop-confirm {
+            margin-top: 10px; background: rgba(233,69,96,0.12); border: 1px solid rgba(233,69,96,0.3);
+            border-radius: 10px; padding: 8px; text-align: center; font-size: 0.78em; color: #d4a0a0;
+        }
+        .stop-confirm.hidden { display: none; }
+        .stop-confirm-btns { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+        .stop-confirm-btns button {
+            padding: 4px 14px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9em;
+        }
+        .stop-confirm-btns button:first-child { background: #e94560; color: #fff; }
+        .stop-confirm-btns button:last-child { background: rgba(255,255,255,0.1); color: #d4e8c2; }
 
         /* Responsive */
         @media (max-width: 650px) {
@@ -254,6 +293,7 @@
                 <button onclick="selectPlayerCount(4)">4</button>
             </div>
             <div class="player-names" id="playerNames"></div>
+            <div class="setup-record" id="setupRecord"></div>
             <button class="start-btn" onclick="startGame()">🎮 Start!</button>
         </div>
     </div>
@@ -272,6 +312,14 @@
                 <button class="roll-btn" id="rollBtn" onclick="rollDice()">🎲 Gooi!</button>
                 <div class="rolls-left" id="rollsLeft">Gooien: 3</div>
                 <div class="message" id="message">Gooi om te beginnen!</div>
+                <div id="stopConfirm" class="stop-confirm hidden">
+                    <span>Spel stoppen?</span>
+                    <div class="stop-confirm-btns">
+                        <button onclick="confirmStop()">Ja</button>
+                        <button onclick="cancelStop()">Nee</button>
+                    </div>
+                </div>
+                <button class="stop-game-btn" id="stopBtn" onclick="askStop()">✕ Stop spel</button>
             </div>
         </div>
     </div>
@@ -282,6 +330,11 @@
             <h2>🎉 Spel Afgelopen! 🎉</h2>
             <div class="winner" id="winnerText"></div>
             <div class="final-scores" id="finalScores"></div>
+            <div id="newRecordBadge" class="new-record hidden">🏆 Nieuw Record!</div>
+            <div class="sb-wrap">
+                <h3 id="sbTitle">Topscores</h3>
+                <div id="scoreboardList"></div>
+            </div>
             <button onclick="backToSetup()">🔄 Opnieuw</button>
         </div>
     </div>
@@ -326,6 +379,7 @@
                 b.classList.toggle('selected', i+1 === n);
             });
             renderPlayerNameInputs();
+            updateSetupRecord(n);
         }
 
         function renderPlayerNameInputs() {
@@ -367,7 +421,19 @@
             document.getElementById('gameOverModal').classList.remove('active');
             document.getElementById('gameContainer').style.display = 'none';
             document.getElementById('setupOverlay').classList.remove('hidden');
+            cancelStop();
         }
+
+        function askStop() {
+            document.getElementById('stopConfirm').classList.remove('hidden');
+            document.getElementById('stopBtn').style.display = 'none';
+        }
+        function cancelStop() {
+            document.getElementById('stopConfirm').classList.add('hidden');
+            const btn = document.getElementById('stopBtn');
+            if (btn) btn.style.display = '';
+        }
+        function confirmStop() { backToSetup(); }
 
         // Dice rendering
         function renderDice() {
@@ -579,12 +645,12 @@
             winnerEl.textContent = numPlayers > 1 ? `🏆 ${players[winnerIdx].name} wint!` : `🏆 Score: ${maxScore}`;
             winnerEl.style.color = PLAYER_COLORS[winnerIdx];
 
-            let html = '';
-            players.forEach((p,i) => {
-                const gt = getGrandTotal(p);
-                html += `<div class="score-line"><span style="color:${PLAYER_COLORS[i]}">${p.name}</span><span style="color:#4ecca3;font-weight:bold">${gt}</span></div>`;
-            });
-            document.getElementById('finalScores').innerHTML = html;
+            const sorted = players.map((p,i)=>({p,i,gt:getGrandTotal(p)})).sort((a,b)=>b.gt-a.gt);
+            document.getElementById('finalScores').innerHTML = sorted.map(({p,i,gt}) =>
+                `<div class="score-line"><span style="color:${PLAYER_COLORS[i]}">${p.name}</span><span style="color:#4ecca3;font-weight:bold">${gt}</span></div>`
+            ).join('');
+
+            saveAndRenderScores();
             document.getElementById('gameOverModal').classList.add('active');
             if (maxScore >= 200) launchConfetti();
         }
@@ -620,6 +686,68 @@
             const c=document.getElementById('confetti-canvas');
             c.width=window.innerWidth;c.height=window.innerHeight;
         });
+
+        // ── Scoreboard ───────────────────────────────────────────────────
+        // Solo en multiplayer apart opgeslagen — niet eerlijk om te vergelijken
+        let soloScores = JSON.parse(localStorage.getItem('yahtzee_solo') || '[]');
+        let multiScores = JSON.parse(localStorage.getItem('yahtzee_multi') || '[]');
+
+        const MEDALS = ['★','▲','●'];
+
+        function saveAndRenderScores() {
+            const medals = MEDALS;
+            let isNew = false;
+
+            if (numPlayers === 1) {
+                const myScore = getGrandTotal(players[0]);
+                const prevBest = soloScores.length > 0 ? soloScores[0].score : 0;
+                isNew = myScore > prevBest;
+                soloScores.push({ score: myScore });
+                soloScores.sort((a, b) => b.score - a.score);
+                soloScores = soloScores.slice(0, 5);
+                localStorage.setItem('yahtzee_solo', JSON.stringify(soloScores));
+
+                document.getElementById('sbTitle').textContent = '🎯 Persoonlijk Record';
+                const newIdx = isNew ? 0 : -1;
+                document.getElementById('scoreboardList').innerHTML = soloScores.length === 0
+                    ? '<div class="sb-empty">Nog geen scores</div>'
+                    : soloScores.map((e, i) => `<div class="sb-entry r${i+1}${i===0&&isNew?' is-new':''}">
+                        <span class="sb-rank">${i<3?medals[i]:(i+1)+'.'}  </span>
+                        <span class="sb-name">—</span>
+                        <span class="sb-score">${e.score} punten</span>
+                      </div>`).join('');
+            } else {
+                let maxScore = -1, winnerIdx = 0;
+                players.forEach((p, i) => { const s = getGrandTotal(p); if (s > maxScore) { maxScore = s; winnerIdx = i; } });
+                const prevBest = multiScores.length > 0 ? multiScores[0].winnerScore : 0;
+                isNew = maxScore > prevBest;
+                const entry = { winner: players[winnerIdx].name, winnerScore: maxScore, numPlayers };
+                multiScores.push(entry);
+                multiScores.sort((a, b) => b.winnerScore - a.winnerScore);
+                multiScores = multiScores.slice(0, 5);
+                localStorage.setItem('yahtzee_multi', JSON.stringify(multiScores));
+
+                document.getElementById('sbTitle').textContent = `🏆 Topwinnaars (${numPlayers} spelers)`;
+                document.getElementById('scoreboardList').innerHTML = multiScores.length === 0
+                    ? '<div class="sb-empty">Nog geen scores</div>'
+                    : multiScores.map((e, i) => `<div class="sb-entry r${i+1}${i===0&&isNew?' is-new':''}">
+                        <span class="sb-rank">${i<3?medals[i]:(i+1)+'.'}  </span>
+                        <span class="sb-name">${e.winner}</span>
+                        <span class="sb-score">${e.winnerScore} punten</span>
+                      </div>`).join('');
+            }
+            document.getElementById('newRecordBadge').classList.toggle('hidden', !isNew);
+        }
+
+        function updateSetupRecord(n) {
+            const el = document.getElementById('setupRecord');
+            if (!el) return;
+            if (n === 1) {
+                el.textContent = soloScores.length > 0 ? `🎯 Jouw record: ${soloScores[0].score} punten` : '';
+            } else {
+                el.textContent = multiScores.length > 0 ? `🏆 Hoogste win: ${multiScores[0].winner} · ${multiScores[0].winnerScore} punten` : '';
+            }
+        }
 
         // Init setup
         selectPlayerCount(2);

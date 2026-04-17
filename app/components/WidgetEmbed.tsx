@@ -43,6 +43,15 @@ export default function WidgetEmbed({ code }: { code?: string }) {
         // 3. Append the HTML container first (so LodgePilot script can find its target div!)
         nodesToAppend.forEach(node => container.appendChild(node));
 
+        // Fix internal links: never open in a new tab (external links keep their target)
+        container.querySelectorAll<HTMLAnchorElement>('a[target]').forEach(a => {
+            const href = a.getAttribute('href') || '';
+            if (href.startsWith('/') || href.startsWith('#')) {
+                a.removeAttribute('target');
+                a.removeAttribute('rel');
+            }
+        });
+
         // 4. Append the scripts to the document to force browser execution natively
         const addedScripts: HTMLScriptElement[] = [];
 
