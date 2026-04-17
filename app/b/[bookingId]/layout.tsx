@@ -50,9 +50,22 @@ export default async function BookingLayout({
         translatedAppData = mergeTranslations(appData, appData.translations[language]);
     }
 
-    // Check if the booking has expired (checkOut date has passed)
-    const checkOutDate = new Date(booking.checkOut + "T12:00:00");
-    const isExpired = checkOutDate < new Date();
+    // Check if the booking has expired — timezone-aware (Europe/Amsterdam)
+    const isExpired = (() => {
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Europe/Amsterdam',
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', hour12: false,
+        }).formatToParts(now);
+        const p: Record<string, string> = {};
+        parts.forEach(({ type, value }) => { if (type !== 'literal') p[type] = value; });
+        const todayAms = `${p.year}-${p.month}-${p.day}`;
+        const hourAms = parseInt(p.hour);
+        if (todayAms > booking.checkOut) return true;
+        if (todayAms === booking.checkOut && hourAms >= 12) return true;
+        return false;
+    })();
 
     if (isExpired) {
         return (
