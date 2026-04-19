@@ -505,19 +505,6 @@
                     ['_', '_', '_', '_', '_', '_', '_', 'R', 'L', '_', '_', '_', '_', '_', '_', '_']
                 ]
             },
-            LARGE_TRI_BLUE: {
-                color: '#0066FF',
-                shape: [
-                    ['R', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'L'],
-                    ['_', 'R', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'L', '_'],
-                    ['_', '_', 'R', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'L', '_', '_'],
-                    ['_', '_', '_', 'R', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'L', '_', '_', '_'],
-                    ['_', '_', '_', '_', 'R', 'F', 'F', 'F', 'F', 'F', 'F', 'L', '_', '_', '_', '_'],
-                    ['_', '_', '_', '_', '_', 'R', 'F', 'F', 'F', 'F', 'L', '_', '_', '_', '_', '_'],
-                    ['_', '_', '_', '_', '_', '_', 'R', 'F', 'F', 'L', '_', '_', '_', '_', '_', '_'],
-                    ['_', '_', '_', '_', '_', '_', '_', 'R', 'L', '_', '_', '_', '_', '_', '_', '_']
-                ]
-            },
             MED_TRI_GREEN: {
                 color: '#00FF00',
                 shape: [
@@ -575,6 +562,7 @@
             SML_SQUARE_WHITE: {
                 color: '#FFFFFF',
                 shape: [
+                    ['_', '_', '_', '_'],
                     ['_', 'B', 'D', '_'],
                     ['B', 'F', 'F', 'D'],
                     ['R', 'F', 'F', 'L'],
@@ -701,7 +689,7 @@
             }
         }
 
-        const isFine = (name) => name.startsWith('SML_') || name.startsWith('MED_') || name.startsWith('CORNER_');
+        const isFine = (name) => name.startsWith('SML_');
 
         function createPieceFromName(name) {
             const data = RAW_PIECES[name];
@@ -757,10 +745,10 @@
                 }
 
                 const weights = {
-                    'LARGE_TRI_RED': pLarge, 'LARGE_TRI_BLUE': pLarge,
+                    'LARGE_TRI_RED': pLarge,
                     'SQUARE_CYAN': pComplex, 'PARAL_ORANGE': pComplex,
                     'SML_PARAL_PINK': pHelpful, 'SML_SQUARE_WHITE': pHelpful,
-                    'MED_TRI_GREEN': pHelpful, 'SML_TRI_YELL': pHelpful, 'CORNER_TRI_PURPLE': pHelpful
+                    'MED_TRI_GREEN': pHelpful, 'SML_TRI_YELL': pHelpful * 3, 'CORNER_TRI_PURPLE': pHelpful * 2
                 };
 
                 let totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
@@ -905,7 +893,7 @@
                 score += (points[Math.min(clearedChunks, 4)] || (clearedChunks * 2000)) * level;
                 linesCleared += (clearedChunks * 4);
                 level = Math.floor(linesCleared / 10) + 1;
-                dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+                dropInterval = Math.max(150, 1000 - (level - 1) * 50);
                 document.getElementById('score').textContent = score.toLocaleString('nl-NL');
                 document.getElementById('level').textContent = level;
                 document.getElementById('lines').textContent = linesCleared;

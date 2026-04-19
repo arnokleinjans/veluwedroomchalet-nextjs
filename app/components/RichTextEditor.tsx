@@ -35,18 +35,27 @@ const FontSize = Extension.create({
     },
 });
 
-// Extended Image with width support
+// Extended Image with width + text-wrap (float) support
 const ResizableImage = Image.extend({
     addAttributes() {
         return {
             ...this.parent?.(),
             width: {
                 default: null,
-                parseHTML: element => element.getAttribute('width') || element.style.width || null,
-                renderHTML: attributes => {
-                    if (!attributes.width) return {};
-                    return { width: attributes.width, style: `width: ${attributes.width}` };
+                parseHTML: el => el.getAttribute('width') || el.style.width || null,
+                renderHTML: attrs => {
+                    const styles: string[] = [];
+                    if (attrs.width) styles.push(`width: ${attrs.width}`);
+                    if (attrs.float === 'left')  styles.push('float: left; margin-right: 14px; margin-bottom: 8px');
+                    if (attrs.float === 'right') styles.push('float: right; margin-left: 14px; margin-bottom: 8px');
+                    if (!styles.length) return {};
+                    return { width: attrs.width || undefined, style: styles.join('; ') };
                 },
+            },
+            float: {
+                default: null,
+                parseHTML: el => el.style.float || null,
+                renderHTML: () => ({}), // handled inside width renderHTML
             },
         };
     },
@@ -340,7 +349,7 @@ function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
                     </>
                 )}
 
-                {/* Afbeelding schalen - toont alleen als een afbeelding geselecteerd is */}
+                {/* Afbeelding schalen + tekstomloop - toont alleen als een afbeelding geselecteerd is */}
                 {editor.isActive("image") && (
                     <>
                         <div style={sep} />
@@ -355,6 +364,11 @@ function Toolbar({ editor, images }: { editor: any, images?: string[] }) {
                                 {w.label}
                             </button>
                         ))}
+                        <div style={sep} />
+                        <span style={{ fontSize: "0.75rem", color: "#888", marginRight: "2px" }}>↩ Omloop</span>
+                        <button type="button" title="Geen tekstomloop" onClick={() => editor.chain().focus().updateAttributes('image', { float: null }).run()} style={btn(!editor.getAttributes('image').float)}>—</button>
+                        <button type="button" title="Tekst rechts naast afbeelding" onClick={() => editor.chain().focus().updateAttributes('image', { float: 'left' }).run()} style={btn(editor.getAttributes('image').float === 'left')}>◧ L</button>
+                        <button type="button" title="Tekst links naast afbeelding" onClick={() => editor.chain().focus().updateAttributes('image', { float: 'right' }).run()} style={btn(editor.getAttributes('image').float === 'right')}>◨ R</button>
                     </>
                 )}
             </div>
@@ -465,6 +479,10 @@ export default function RichTextEditor({ content, onChange, images }: { content:
                 .tiptap th, .tiptap td { border: 1px solid #ccc !important; padding: 6px 10px !important; text-align: left !important; display: table-cell !important; }
                 .tiptap th { background-color: #f0efe8 !important; font-weight: bold !important; }
                 .tiptap img { max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0; }
+                .tiptap img[style*="float: left"]  { float: left !important; margin-right: 14px !important; margin-bottom: 8px !important; margin-top: 4px !important; }
+                .tiptap img[style*="float: right"] { float: right !important; margin-left: 14px !important; margin-bottom: 8px !important; margin-top: 4px !important; }
+                .tiptap p { overflow: hidden; }
+                .tiptap::after { content: ''; display: table; clear: both; }
                 .tiptap img[style*="text-align: center"], .tiptap [style*="text-align: center"] img { display: block; margin-left: auto; margin-right: auto; }
                 .tiptap img[style*="text-align: right"], .tiptap [style*="text-align: right"] img { display: block; margin-left: auto; margin-right: 0; }
             `}</style>
