@@ -56,6 +56,7 @@ export default function Home() {
         }
       `}</style>
       <div className="md:-mt-16 mt-[-2rem] relative z-30 space-y-8 md:space-y-12">
+
         <div id="insights-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {visibleInsights.map((insight: { icon: string, title: string, subtitle: string, action: string, detailContent?: string, widgetCode?: string, hideOnMobile?: boolean, originalIndex: number }, index: number) => {
           const isImage = insight.icon && insight.icon.includes('.');

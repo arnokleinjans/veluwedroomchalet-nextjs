@@ -136,9 +136,77 @@ export default function ClientLayout({ children, basePath = "", appData, booking
                     <div className="header-overlay flex">
                         <div className="welcome-text max-w-[1280px] mx-auto w-full relative h-full flex items-end">
                             
-                            {/* Weather Widget (TopRight on mobile, TopLeft on desktop) */}
-                            <div className="absolute right-0 -top-[120px] md:right-auto md:left-4 xl:left-0 md:-top-[100px] xl:-top-[140px] scale-[0.65] md:scale-100 origin-top-right md:origin-top-left pointer-events-auto">
+                            {/* Weather Widget + Route Card stacked (TopRight on mobile, TopLeft on desktop) */}
+                            <div className="absolute right-0 -top-[120px] md:right-auto md:left-4 xl:left-0 md:-top-[100px] xl:-top-[140px] scale-[0.65] md:scale-100 origin-top-right md:origin-top-left pointer-events-auto flex flex-col gap-3">
                                 <WeatherWidget />
+                                <style>{`
+                                  @keyframes routePinPulse {
+                                    0% { transform: scale(0.85); opacity: 0.8; }
+                                    100% { transform: scale(2.0); opacity: 0; }
+                                  }
+                                  .route-pin-ring {
+                                    position: absolute;
+                                    inset: 0;
+                                    border-radius: 50%;
+                                    background: rgba(251, 191, 36, 0.35);
+                                    animation: routePinPulse 2.4s ease-out infinite;
+                                  }
+                                  .route-pin-ring2 {
+                                    animation-delay: 0.8s;
+                                    background: rgba(251, 191, 36, 0.18);
+                                  }
+                                  .route-widget-link {
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 14px;
+                                    text-decoration: none;
+                                    color: white;
+                                    width: 288px;
+                                    background: rgba(0,0,0,0.20);
+                                    backdrop-filter: blur(12px);
+                                    -webkit-backdrop-filter: blur(12px);
+                                    border: 1px solid rgba(255,255,255,0.20);
+                                    border-radius: 2rem;
+                                    padding: 16px 20px;
+                                    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+                                    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+                                  }
+                                  .route-widget-link:hover {
+                                    transform: scale(1.02);
+                                    background: rgba(0,0,0,0.28);
+                                    box-shadow: 0 12px 36px rgba(0,0,0,0.28);
+                                  }
+                                  .route-widget-link:active {
+                                    transform: scale(0.97);
+                                  }
+                                `}</style>
+                                <a
+                                    href="https://www.google.com/maps/place/Recreatiepark+'t+Veluws+Hof/@52.1220391,5.9227256,612m/data=!3m2!1e3!4b1!4m6!3m5!1s0x47c7ba241b7b9487:0x8018f4c652072f60!8m2!3d52.1220391!4d5.9227256!16s%2Fg%2F11c59_4ycr?hl=nl-NL&entry=ttu&g_ep=EgoyMDI2MDQxNS4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="route-widget-link"
+                                >
+                                    {/* Pulsing pin */}
+                                    <div style={{ position: "relative", width: 40, height: 40, minWidth: 40, flexShrink: 0 }}>
+                                        <div className="route-pin-ring" />
+                                        <div className="route-pin-ring route-pin-ring2" />
+                                        <div style={{ position: "relative", zIndex: 2, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.18)", border: "1.5px solid rgba(255,255,255,0.28)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            {/* @ts-ignore */}
+                                            <ion-icon name="location" style={{ fontSize: "20px", color: "#FBBF24" }}></ion-icon>
+                                        </div>
+                                    </div>
+                                    {/* Text */}
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.09em", color: "rgba(255,255,255,0.60)", marginBottom: 2 }}>Route naar</div>
+                                        <div style={{ fontSize: "0.95rem", fontWeight: 700, lineHeight: 1.25, color: "white" }}>&apos;t Veluws Hof</div>
+                                        <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.55)", marginTop: 2 }}>~5 min rijden</div>
+                                    </div>
+                                    {/* Navigate icon */}
+                                    <div style={{ flexShrink: 0, color: "rgba(255,255,255,0.55)" }}>
+                                        {/* @ts-ignore */}
+                                        <ion-icon name="navigate-outline" style={{ fontSize: "18px", display: "block" }}></ion-icon>
+                                    </div>
+                                </a>
                             </div>
 
                             {/* Welcome Text */}
