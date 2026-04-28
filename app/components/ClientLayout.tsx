@@ -199,7 +199,6 @@ export default function ClientLayout({ children, basePath = "", appData, booking
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.09em", color: "rgba(255,255,255,0.60)", marginBottom: 2 }}>Route naar</div>
                                         <div style={{ fontSize: "0.95rem", fontWeight: 700, lineHeight: 1.25, color: "white" }}>&apos;t Veluws Hof</div>
-                                        <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.55)", marginTop: 2 }}>~5 min rijden</div>
                                     </div>
                                     {/* Navigate icon */}
                                     <div style={{ flexShrink: 0, color: "rgba(255,255,255,0.55)" }}>

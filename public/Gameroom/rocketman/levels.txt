@@ -1,0 +1,13 @@
+Level	Doel	Brons	Zilver	Goud
+1	50	100	250	500
+2	75	150	375	750
+3	100	200	500	1000
+4	150	300	750	1500
+
+Levels bekijken voor test:
+
+file:///Users/arnokleinjans/Antigravity/Spelletjes/Rocketman/RocketmanAdventure.html?preview=4
+
+file:///Users/arnokleinjans/Antigravity/Spelletjes/Rocketman/test_cup.html
+
+Test de beker

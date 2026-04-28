@@ -1,0 +1,31 @@
+{
+  "sprite": "zoon_komeet_spritesheet",
+  "cols": 2,
+  "rows": 2,
+  "frames": 4,
+  "fps": 8,
+  "padL": 0,
+  "padR": 0,
+  "frameOffsets": [
+    {
+      "L": 0,
+      "R": 0,
+      "Y": 0
+    },
+    {
+      "L": 0,
+      "R": 0,
+      "Y": 0
+    },
+    {
+      "L": 0,
+      "R": 0,
+      "Y": 0
+    },
+    {
+      "L": 0,
+      "R": 0,
+      "Y": 0
+    }
+  ]
+}

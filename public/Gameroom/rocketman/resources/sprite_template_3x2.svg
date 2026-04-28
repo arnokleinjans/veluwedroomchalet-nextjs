@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Transparante achtergrond -->
+
+  <!-- Rijen lijnen (horizontaal) -->
+  <line x1="0" y1="0"   x2="1024" y2="0"   stroke="#ff0066" stroke-width="3"/>
+  <line x1="0" y1="512" x2="1024" y2="512" stroke="#ff0066" stroke-width="3" stroke-dasharray="12,6"/>
+  <line x1="0" y1="1024" x2="1024" y2="1024" stroke="#ff0066" stroke-width="3"/>
+
+  <!-- Kolom lijnen (verticaal) -->
+  <line x1="0"    y1="0" x2="0"    y2="1024" stroke="#0066ff" stroke-width="3"/>
+  <line x1="341"  y1="0" x2="341"  y2="1024" stroke="#0066ff" stroke-width="3" stroke-dasharray="12,6"/>
+  <line x1="682"  y1="0" x2="682"  y2="1024" stroke="#0066ff" stroke-width="3" stroke-dasharray="12,6"/>
+  <line x1="1024" y1="0" x2="1024" y2="1024" stroke="#0066ff" stroke-width="3"/>
+
+  <!-- Midden kruisjes per cel -->
+  <line x1="161" y1="246" x2="181" y2="266" stroke="#999" stroke-width="1.5"/>
+  <line x1="181" y1="246" x2="161" y2="266" stroke="#999" stroke-width="1.5"/>
+
+  <line x1="502" y1="246" x2="522" y2="266" stroke="#999" stroke-width="1.5"/>
+  <line x1="522" y1="246" x2="502" y2="266" stroke="#999" stroke-width="1.5"/>
+
+  <line x1="843" y1="246" x2="863" y2="266" stroke="#999" stroke-width="1.5"/>
+  <line x1="863" y1="246" x2="843" y2="266" stroke="#999" stroke-width="1.5"/>
+
+  <line x1="161" y1="758" x2="181" y2="778" stroke="#999" stroke-width="1.5"/>
+  <line x1="181" y1="758" x2="161" y2="778" stroke="#999" stroke-width="1.5"/>
+
+  <line x1="502" y1="758" x2="522" y2="778" stroke="#999" stroke-width="1.5"/>
+  <line x1="522" y1="758" x2="502" y2="778" stroke="#999" stroke-width="1.5"/>
+
+  <line x1="843" y1="758" x2="863" y2="778" stroke="#999" stroke-width="1.5"/>
+  <line x1="863" y1="758" x2="843" y2="778" stroke="#999" stroke-width="1.5"/>
+
+  <!-- Frame nummers -->
+  <text x="18" y="40" font-family="Arial" font-size="28" font-weight="bold" fill="#ff0066">1</text>
+  <text x="359" y="40" font-family="Arial" font-size="28" font-weight="bold" fill="#ff0066">2</text>
+  <text x="700" y="40" font-family="Arial" font-size="28" font-weight="bold" fill="#ff0066">3</text>
+  <text x="18" y="552" font-family="Arial" font-size="28" font-weight="bold" fill="#ff0066">4</text>
+  <text x="359" y="552" font-family="Arial" font-size="28" font-weight="bold" fill="#ff0066">5</text>
+  <text x="700" y="552" font-family="Arial" font-size="28" font-weight="bold" fill="#ff0066">6</text>
+
+  <!-- Celafmetingen label -->
+  <text x="18" y="490" font-family="Arial" font-size="18" fill="#0066ff">341 × 512 px</text>
+</svg>

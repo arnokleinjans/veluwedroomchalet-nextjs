@@ -1,0 +1,31 @@
+{
+  "sprite": "meisje_komeet_spritesheet",
+  "cols": 4,
+  "rows": 1,
+  "frames": 4,
+  "fps": 8,
+  "padL": 50,
+  "padR": 0,
+  "frameOffsets": [
+    {
+      "L": -65,
+      "R": -42,
+      "Y": 0
+    },
+    {
+      "L": -20,
+      "R": -45,
+      "Y": 0
+    },
+    {
+      "L": -1,
+      "R": -40,
+      "Y": 0
+    },
+    {
+      "L": -24,
+      "R": 0,
+      "Y": 0
+    }
+  ]
+}
