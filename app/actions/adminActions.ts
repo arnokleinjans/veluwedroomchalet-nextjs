@@ -20,6 +20,12 @@ async function saveToKV(newData: any) {
     }
 }
 
+export async function verifyAdminPin(pin: string): Promise<boolean> {
+    const adminPin = process.env.ADMIN_PIN;
+    if (!adminPin) throw new Error("ADMIN_PIN is niet geconfigureerd");
+    return pin === adminPin;
+}
+
 // Securely fetch data for client-side Admin Panel (always fresh)
 export async function fetchAdminData() {
     return await getAppDataFresh();

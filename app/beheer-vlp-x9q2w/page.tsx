@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
-    updateChatbotContext, updateTranslations, updateExpiredPageContent, updateGames
+    updateChatbotContext, updateTranslations, updateExpiredPageContent, updateGames,
+    verifyAdminPin
 } from "../actions/adminActions";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
@@ -135,8 +136,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         });
     }, []);
 
-    const handleLogin = () => {
-        if (pin === "2026") {
+    const handleLogin = async () => {
+        const ok = await verifyAdminPin(pin);
+        if (ok) {
             setIsAuthenticated(true);
             localStorage.setItem("veluwe_admin_auth", "true");
             setError(false);
