@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <path d="M313.27,124.64L198.73,51.36a32,32,0,0,0-33.45,0L48,124.64V448a16,16,0,0,0,16,16H160V328a24,24,0,0,1,24-24h80a24,24,0,0,1,24,24V464h96a16,16,0,0,0,16-16V124.64C376,108,348.67,112.5,313.27,124.64Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" />
-  <path d="M464,256,313.27,152.64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" />
+  <rect x="80" y="80" width="352" height="352" rx="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/>
+  <line x1="256" y1="80" x2="256" y2="432" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"/>
+  <line x1="80" y1="256" x2="432" y2="256" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"/>
+  <line x1="168" y1="80" x2="168" y2="432" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+  <line x1="344" y1="80" x2="344" y2="432" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+  <line x1="80" y1="168" x2="432" y2="168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+  <line x1="80" y1="344" x2="432" y2="344" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+  <circle cx="256" cy="256" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="28"/>
 </svg>
