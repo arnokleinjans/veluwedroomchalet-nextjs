@@ -32,7 +32,7 @@ export async function fetchAdminData() {
 }
 
 // Batched save: General info + header image in ONE write instead of TWO
-export async function updateGeneralInfo(name: string, hostName: string, phone: string, subtitle: string, headerImage: string, keyCode: string = "") {
+export async function updateGeneralInfo(name: string, hostName: string, phone: string, subtitle: string, headerImage: string, keyCode: string = "", staanplaats: string = "", campingEmail: string = "") {
     noStore();
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
@@ -43,6 +43,8 @@ export async function updateGeneralInfo(name: string, hostName: string, phone: s
     updatedData.property.host.phone = phone;
     updatedData.property.headerImage = headerImage;
     (updatedData.property as any).keyCode = keyCode;
+    (updatedData.property as any).staanplaats = staanplaats;
+    (updatedData.property as any).campingEmail = campingEmail;
 
     return await saveToKV(updatedData);
 }
@@ -239,15 +241,6 @@ export async function updateTranslations(translations: { en: any, de: any }) {
 
 // ---------- Nachtregistratie ----------
 
-export async function updateNachtregistratieSettings(settings: { verhuurderNaam: string, verhuurderTelefoon: string, staanplaats: string, campingEmail: string }) {
-    noStore();
-    const appData = await getAppDataFresh();
-    const updatedData = { ...appData } as any;
-
-    updatedData.nachtregistratieSettings = settings;
-    return await saveToKV(updatedData);
-}
-
 export async function adminUpdateNachtregistratie(bookingId: string, registratie: any) {
     noStore();
     const appData = await getAppDataFresh();
@@ -272,8 +265,16 @@ export async function verstuurNachtregistratie(bookingId: string, registratie: a
     const booking = updatedData.bookings?.find((b: any) => b.id === bookingId);
     if (!booking) return { success: false, error: "Boeking niet gevonden." };
 
-    const settings = updatedData.nachtregistratieSettings;
-    if (!settings?.campingEmail) return { success: false, error: "Geen camping-e-mailadres ingesteld (zie sectie Nachtregistratie)." };
+    const property = updatedData.property || {};
+    const campingEmail = property.campingEmail;
+    if (!campingEmail) return { success: false, error: "Geen camping-e-mailadres ingesteld (zie sectie Algemene Informatie)." };
+
+    const settings = {
+        verhuurderNaam: property.name || "",
+        verhuurderTelefoon: property.host?.phone || "",
+        staanplaats: property.staanplaats || "",
+        campingEmail,
+    };
 
     try {
         const { vulNachtregistratiePdf } = await import("../utils/nachtregistratiePdf");
@@ -286,7 +287,7 @@ export async function verstuurNachtregistratie(bookingId: string, registratie: a
         };
 
         const pdf = await vulNachtregistratiePdf(verzonden, settings);
-        await verstuurNachtregistratieMail(settings.campingEmail, verzonden, pdf);
+        await verstuurNachtregistratieMail(campingEmail, verzonden, pdf);
 
         updatedData.bookings = updatedData.bookings.map((b: any) =>
             b.id === bookingId ? { ...b, nachtregistratie: verzonden } : b

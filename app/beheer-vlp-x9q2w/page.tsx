@@ -5,7 +5,7 @@ import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
     updateChatbotContext, updateTranslations, updateExpiredPageContent, updateGames,
-    verifyAdminPin, updateNachtregistratieSettings
+    verifyAdminPin
 } from "../actions/adminActions";
 import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
@@ -103,7 +103,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [editValues, setEditValues] = useState<{ checkIn: string, checkOut: string, language: string, bookingNumber: string }>({ checkIn: "", checkOut: "", language: "nl", bookingNumber: "" });
     const [expandedRegId, setExpandedRegId] = useState<string | null>(null);
     const [bookingFilter, setBookingFilter] = useState<"nieuw" | "verlopen">("nieuw");
-    const [nrSettings, setNrSettings] = useState({ verhuurderNaam: "", verhuurderTelefoon: "", staanplaats: "", campingEmail: "" });
+    const [staanplaats, setStaanplaats] = useState("");
+    const [campingEmail, setCampingEmail] = useState("");
 
     // CSV import
     const [csvRows, setCsvRows] = useState<{ name: string, checkIn: string, checkOut: string, language: string, isDuplicate?: boolean, overrideDuplicate?: boolean }[]>([]);
@@ -135,7 +136,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setVideos(data.videos || []);
             setOmgeving(((data as any).omgeving || (data as any).restaurants || []).map((tip: any) => ({ ...tip, widgetCode: tip.widgetCode || "" })));
             setBookings(data.bookings || []);
-            if ((data as any).nachtregistratieSettings) setNrSettings((data as any).nachtregistratieSettings);
+            setStaanplaats((data.property as any).staanplaats || "");
+            setCampingEmail((data.property as any).campingEmail || "");
             setChatbotContext(data.chatbotContext || "");
             setExpiredPageContent((data as any).expiredPageContent || "");
             if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
@@ -212,7 +214,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     };
 
     const handleSaveGeneral = () => runSaveAction(
-        () => updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode),
+        () => updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
         "Algemene info succesvol opgeslagen!"
     );
 
@@ -230,7 +232,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         setIsSaving(true);
         setSaveMessage("⏳ Alles aan het opslaan...");
         const results = await Promise.all([
-            updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode),
+            updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
             updateGames(games),
             updateInsights(insights),
             updateVideos(videos),
@@ -701,44 +703,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             </div>
                         </details>
 
-                        {/* Sectie: Nachtregistratie instellingen */}
-                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📋 Nachtregistratie</summary>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
-                                <p style={{ fontSize: "0.85rem", color: "#666" }}>Vaste verhuurdergegevens voor het nachtregistratieformulier van 't Veluws Hof. Deze staan niet op het gastformulier, maar gaan mee in de PDF naar de camping.</p>
-                                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                                    <div style={{ flex: "2 1 220px" }}>
-                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Naam verhuurder</label>
-                                        <input type="text" value={nrSettings.verhuurderNaam} onChange={e => setNrSettings(s => ({ ...s, verhuurderNaam: e.target.value }))} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                    </div>
-                                    <div style={{ flex: "1 1 150px" }}>
-                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Telefoonnummer</label>
-                                        <input type="text" value={nrSettings.verhuurderTelefoon} onChange={e => setNrSettings(s => ({ ...s, verhuurderTelefoon: e.target.value }))} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                    </div>
-                                </div>
-                                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                                    <div style={{ flex: "1 1 220px" }}>
-                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Staanplaats accommodatie</label>
-                                        <input type="text" value={nrSettings.staanplaats} onChange={e => setNrSettings(s => ({ ...s, staanplaats: e.target.value }))} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                    </div>
-                                    <div style={{ flex: "1 1 220px" }}>
-                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>E-mailadres camping (ontvanger)</label>
-                                        <input type="email" value={nrSettings.campingEmail} onChange={e => setNrSettings(s => ({ ...s, campingEmail: e.target.value }))} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                    </div>
-                                </div>
-                                <button onClick={async () => {
-                                    setIsSaving(true);
-                                    setSaveMessage("⏳ Opslaan...");
-                                    const res = await updateNachtregistratieSettings(nrSettings);
-                                    setIsSaving(false);
-                                    setSaveMessage(res.success ? "✅ Nachtregistratie-instellingen opgeslagen!" : "❌ " + res.error);
-                                    if (res.success) setTimeout(() => setSaveMessage(""), 3000);
-                                }} disabled={isSaving} style={{ alignSelf: "flex-start", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>
-                                    Opslaan
-                                </button>
-                            </div>
-                        </details>
-
                         {/* Sectie: Algemeen */}
                         <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
                             <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🏡 Algemene Informatie</summary>
@@ -779,6 +743,19 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Sleutelcode <span style={{ fontSize: "0.8rem", color: "#888", fontWeight: "normal" }}>(beschikbaar als <code>@sleutelcode</code>)</span></label>
                                     <input type="text" value={keyCode} onChange={e => setKeyCode(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: 1234#" />
                                 </div>
+                                <div style={{ borderTop: "1px solid #eee", paddingTop: "15px", display: "flex", flexDirection: "column", gap: "15px" }}>
+                                    <p style={{ fontSize: "0.85rem", color: "#666", margin: 0 }}>📋 Voor het nachtregistratieformulier van 't Veluws Hof: Naam Huisje en WhatsApp Nummer hierboven gaan ook mee als verhuurdergegevens in de PDF naar de camping.</p>
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                        <div style={{ flex: "1 1 220px" }}>
+                                            <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Staanplaats accommodatie</label>
+                                            <input type="text" value={staanplaats} onChange={e => setStaanplaats(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                        </div>
+                                        <div style={{ flex: "1 1 220px" }}>
+                                            <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>E-mailadres camping (ontvanger nachtregistratie)</label>
+                                            <input type="email" value={campingEmail} onChange={e => setCampingEmail(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                        </div>
+                                    </div>
+                                </div>
                                 <button onClick={handleSaveGeneral} disabled={isSaving} style={{ alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                             </div>
                         </details>
@@ -802,7 +779,17 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         </label>
                                                         <select
                                                             value={item.visibility || "always"}
-                                                            onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], visibility: e.target.value }; setInsights(n); }}
+                                                            onChange={e => {
+                                                                const n = [...insights];
+                                                                const nieuweVisibility = e.target.value;
+                                                                const iconNogNietGezet = !n[idx].icon || n[idx].icon === "icons/default.png";
+                                                                n[idx] = {
+                                                                    ...n[idx],
+                                                                    visibility: nieuweVisibility,
+                                                                    icon: nieuweVisibility === "nachtregistratie" && iconNogNietGezet ? "icons/clipboard.svg" : n[idx].icon,
+                                                                };
+                                                                setInsights(n);
+                                                            }}
                                                             style={{ padding: "3px 6px", borderRadius: "4px", border: `1px solid ${item.visibility && item.visibility !== "always" ? "#4A5D23" : "#ccc"}`, fontSize: "0.75rem", color: item.visibility && item.visibility !== "always" ? "#4A5D23" : "#888", backgroundColor: item.visibility && item.visibility !== "always" ? "#f6faf0" : "white", cursor: "pointer" }}
                                                             title="Wanneer zichtbaar?"
                                                         >

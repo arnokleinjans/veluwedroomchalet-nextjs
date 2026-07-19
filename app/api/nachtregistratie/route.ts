@@ -20,6 +20,8 @@ export async function POST(req: Request) {
         const betaalwijze = body.betaalwijze;
         const huurderNaam = String(body.huurderNaam || "").trim();
         const adres = String(body.adres || "").trim();
+        const postcode = String(body.postcode || "").trim();
+        const woonplaats = String(body.woonplaats || "").trim();
         const telefoon = String(body.telefoon || "").trim();
         const email = String(body.email || "").trim();
         const aantalPersonen = parseInt(body.aantalPersonen, 10);
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
         if (betaalwijze !== 'receptie' && betaalwijze !== 'overmaken') {
             return NextResponse.json({ error: "Kies hoe de toeristenbelasting betaald wordt." }, { status: 400 });
         }
-        if (!huurderNaam || !adres || !telefoon) {
+        if (!huurderNaam || !adres || !postcode || !woonplaats || !telefoon) {
             return NextResponse.json({ error: "Vul alle verplichte velden in." }, { status: 400 });
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -54,6 +56,8 @@ export async function POST(req: Request) {
             betaalwijze,
             huurderNaam,
             adres,
+            postcode,
+            woonplaats,
             telefoon,
             email,
             aantalPersonen,

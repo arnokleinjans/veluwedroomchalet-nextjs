@@ -43,7 +43,9 @@ const defaultAppData = {
             "name": "Kitty",
             "phone": "+31653238603",
             "avatar": "https://ui-avatars.com/api/?name=Arno&background=4A5D23&color=fff&rounded=true"
-        }
+        },
+        "staanplaats": "Bosrand 18, Klavergraslaan",
+        "campingEmail": ""
     },
     "rules": [
         {
@@ -120,12 +122,6 @@ const defaultAppData = {
         }
     ],
     "chatbotContext": "",
-    "nachtregistratieSettings": {
-        "verhuurderNaam": "Veluwe Droom Chalet, Arno Kleinjans",
-        "verhuurderTelefoon": "06-82287283",
-        "staanplaats": "Bosrand 18, Klavergraslaan",
-        "campingEmail": "akleinjans@me.com"
-    },
     "translations": {} as any,
     "games": [
         { "id": "tetris", "title": "Tetris", "src": "/Gameroom/tetris/index.html" },

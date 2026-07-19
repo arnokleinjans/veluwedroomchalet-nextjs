@@ -38,6 +38,8 @@ export default function NachtregistratieForm({ bookingId, guestName, checkIn, ch
     const [betaalwijze, setBetaalwijze] = useState<string>(registratie?.betaalwijze || "");
     const [huurderNaam, setHuurderNaam] = useState(registratie?.huurderNaam || guestName);
     const [adres, setAdres] = useState(registratie?.adres || "");
+    const [postcode, setPostcode] = useState(registratie?.postcode || "");
+    const [woonplaats, setWoonplaats] = useState(registratie?.woonplaats || "");
     const [telefoon, setTelefoon] = useState(registratie?.telefoon || "");
     const [email, setEmail] = useState(registratie?.email || "");
     const [aantalPersonen, setAantalPersonen] = useState(registratie?.aantalPersonen ? String(registratie.aantalPersonen) : "");
@@ -56,7 +58,7 @@ export default function NachtregistratieForm({ bookingId, guestName, checkIn, ch
     const handleSave = async () => {
         setError("");
         if (!betaalwijze) { setError(t("nr_err_betaalwijze", lang)); return; }
-        if (!huurderNaam.trim() || !adres.trim() || !telefoon.trim()) { setError(t("nr_err_verplicht", lang)); return; }
+        if (!huurderNaam.trim() || !adres.trim() || !postcode.trim() || !woonplaats.trim() || !telefoon.trim()) { setError(t("nr_err_verplicht", lang)); return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError(t("nr_err_email", lang)); return; }
         const personen = parseInt(aantalPersonen, 10);
         if (!Number.isInteger(personen) || personen < 1) { setError(t("nr_err_personen", lang)); return; }
@@ -66,7 +68,7 @@ export default function NachtregistratieForm({ bookingId, guestName, checkIn, ch
             const res = await fetch("/api/nachtregistratie", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ bookingId, betaalwijze, huurderNaam, adres, telefoon, email, aantalPersonen: personen }),
+                body: JSON.stringify({ bookingId, betaalwijze, huurderNaam, adres, postcode, woonplaats, telefoon, email, aantalPersonen: personen }),
             });
             const data = await res.json();
             if (!res.ok) {
@@ -135,6 +137,16 @@ export default function NachtregistratieForm({ bookingId, guestName, checkIn, ch
                 <div>
                     <label style={labelStyle}>{t("nr_adres", lang)} *</label>
                     <input type="text" value={adres} onChange={e => setAdres(e.target.value)} disabled={disabled} style={inputStyle} autoComplete="street-address" placeholder={t("nr_adres_hint", lang)} />
+                </div>
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                    <div style={{ flex: "1 1 120px", minWidth: 0 }}>
+                        <label style={labelStyle}>{t("nr_postcode", lang)} *</label>
+                        <input type="text" value={postcode} onChange={e => setPostcode(e.target.value)} disabled={disabled} style={inputStyle} autoComplete="postal-code" />
+                    </div>
+                    <div style={{ flex: "1 1 180px", minWidth: 0 }}>
+                        <label style={labelStyle}>{t("nr_woonplaats", lang)} *</label>
+                        <input type="text" value={woonplaats} onChange={e => setWoonplaats(e.target.value)} disabled={disabled} style={inputStyle} autoComplete="address-level2" />
+                    </div>
                 </div>
                 <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                     <div style={{ flex: "1 1 180px", minWidth: 0 }}>

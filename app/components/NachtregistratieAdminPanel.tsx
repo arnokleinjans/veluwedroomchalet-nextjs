@@ -23,6 +23,8 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
     const [betaalwijze, setBetaalwijze] = useState<string>(reg?.betaalwijze || "receptie");
     const [huurderNaam, setHuurderNaam] = useState(reg?.huurderNaam || booking.guestName);
     const [adres, setAdres] = useState(reg?.adres || "");
+    const [postcode, setPostcode] = useState(reg?.postcode || "");
+    const [woonplaats, setWoonplaats] = useState(reg?.woonplaats || "");
     const [telefoon, setTelefoon] = useState(reg?.telefoon || "");
     const [email, setEmail] = useState(reg?.email || "");
     const [aantalPersonen, setAantalPersonen] = useState(reg?.aantalPersonen ? String(reg.aantalPersonen) : "");
@@ -48,6 +50,8 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
         betaalwijze,
         huurderNaam: huurderNaam.trim(),
         adres: adres.trim(),
+        postcode: postcode.trim(),
+        woonplaats: woonplaats.trim(),
         telefoon: telefoon.trim(),
         email: email.trim(),
         aantalPersonen: parseInt(aantalPersonen, 10) || 0,
@@ -59,7 +63,7 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
     });
 
     const valideer = (): string | null => {
-        if (!huurderNaam.trim() || !adres.trim() || !telefoon.trim()) return "Naam, adres en telefoonnummer zijn verplicht.";
+        if (!huurderNaam.trim() || !adres.trim() || !postcode.trim() || !woonplaats.trim() || !telefoon.trim()) return "Naam, adres, postcode, woonplaats en telefoonnummer zijn verplicht.";
         const p = parseInt(aantalPersonen, 10);
         if (!Number.isInteger(p) || p < 1) return "Vul een geldig aantal personen in.";
         return null;
@@ -114,6 +118,14 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
                 <div style={{ flex: "2 1 200px" }}>
                     <label style={labelStyle}>Adres</label>
                     <input type="text" value={adres} onChange={e => setAdres(e.target.value)} style={veldStyle} />
+                </div>
+                <div style={{ flex: "1 1 100px" }}>
+                    <label style={labelStyle}>Postcode</label>
+                    <input type="text" value={postcode} onChange={e => setPostcode(e.target.value)} style={veldStyle} />
+                </div>
+                <div style={{ flex: "1 1 130px" }}>
+                    <label style={labelStyle}>Woonplaats</label>
+                    <input type="text" value={woonplaats} onChange={e => setWoonplaats(e.target.value)} style={veldStyle} />
                 </div>
                 <div style={{ flex: "1 1 130px" }}>
                     <label style={labelStyle}>Telefoonnummer</label>

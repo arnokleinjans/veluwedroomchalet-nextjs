@@ -7,6 +7,8 @@ export type NachtregistratieData = {
     betaalwijze: 'receptie' | 'overmaken';
     huurderNaam: string;
     adres: string;
+    postcode: string;
+    woonplaats: string;
     telefoon: string;
     email: string;
     aantalPersonen: number;
