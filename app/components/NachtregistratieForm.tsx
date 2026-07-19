@@ -83,7 +83,7 @@ export default function NachtregistratieForm({ bookingId, guestName, checkIn, ch
     };
 
     return (
-        <div className="card card-glass" style={{ padding: "28px", maxWidth: "560px", margin: "0 auto", opacity: 1 }}>
+        <div className="card card-glass" style={{ display: "block", padding: "28px", maxWidth: "560px", margin: "0 auto", opacity: 1 }}>
             <h2 style={{ fontFamily: "var(--font-lora), 'Lora', serif", fontSize: "1.5rem", color: "var(--primary-color, #4A5D23)", marginBottom: "6px" }}>
                 {t("nr_titel", lang)}
             </h2>
@@ -118,11 +118,11 @@ export default function NachtregistratieForm({ bookingId, guestName, checkIn, ch
 
                 {/* Automatisch ingevulde datums */}
                 <div style={{ display: "flex", gap: "12px" }}>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                         <label style={labelStyle}>{t("nr_aankomst", lang)}</label>
                         <input type="text" value={formatDatumNL(aankomst)} readOnly style={{ ...inputStyle, backgroundColor: "#f2efe8", color: "#666" }} />
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                         <label style={labelStyle}>{t("nr_vertrek", lang)}</label>
                         <input type="text" value={formatDatumNL(vertrek)} readOnly style={{ ...inputStyle, backgroundColor: "#f2efe8", color: "#666" }} />
                     </div>
@@ -137,11 +137,11 @@ export default function NachtregistratieForm({ bookingId, guestName, checkIn, ch
                     <input type="text" value={adres} onChange={e => setAdres(e.target.value)} disabled={disabled} style={inputStyle} autoComplete="street-address" placeholder={t("nr_adres_hint", lang)} />
                 </div>
                 <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 1 180px" }}>
+                    <div style={{ flex: "1 1 180px", minWidth: 0 }}>
                         <label style={labelStyle}>{t("nr_telefoon", lang)} *</label>
                         <input type="tel" value={telefoon} onChange={e => setTelefoon(e.target.value)} disabled={disabled} style={inputStyle} autoComplete="tel" />
                     </div>
-                    <div style={{ flex: "1 1 120px" }}>
+                    <div style={{ flex: "1 1 120px", minWidth: 0 }}>
                         <label style={labelStyle}>{t("nr_personen", lang)} *</label>
                         <input type="number" min={1} max={20} value={aantalPersonen} onChange={e => setAantalPersonen(e.target.value)} disabled={disabled} style={inputStyle} />
                     </div>
