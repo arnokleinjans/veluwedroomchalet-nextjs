@@ -142,12 +142,10 @@ function normalizeBookingId(raw: string): string {
     return raw.trim().toUpperCase();
 }
 
-// Controleert of een id al in gebruik is als boekingsnummer óf als oude alias.
 function isBookingIdTaken(bookings: any[], id: string, excludeId?: string): boolean {
     return bookings.some((b: any) => {
         if (excludeId && b.id === excludeId) return false;
-        return b.id?.toUpperCase() === id ||
-            (Array.isArray(b.aliases) && b.aliases.some((a: string) => (a || "").toUpperCase() === id));
+        return b.id?.toUpperCase() === id;
     });
 }
 
@@ -201,13 +199,8 @@ export async function updateBooking(id: string, checkIn: string, checkOut: strin
     updatedData.bookings = updatedData.bookings.map((b: any) => {
         if (b.id !== id) return b;
         const updated = { ...b, checkIn, checkOut, language };
-        if (newId) {
-            // Oude code als alias bewaren zodat een al gedeelde link blijft werken.
-            const aliases = (b.aliases || []).concat(b.id)
-                .filter((a: string, i: number, arr: string[]) => a !== newId && arr.indexOf(a) === i);
-            updated.id = newId;
-            updated.aliases = aliases;
-        }
+        if (newId) updated.id = newId;
+        delete updated.aliases;
         return updated;
     });
 
@@ -242,4 +235,65 @@ export async function updateTranslations(translations: { en: any, de: any }) {
 
     updatedData.translations = translations;
     return await saveToKV(updatedData);
+}
+
+// ---------- Nachtregistratie ----------
+
+export async function updateNachtregistratieSettings(settings: { verhuurderNaam: string, verhuurderTelefoon: string, staanplaats: string, campingEmail: string }) {
+    noStore();
+    const appData = await getAppDataFresh();
+    const updatedData = { ...appData } as any;
+
+    updatedData.nachtregistratieSettings = settings;
+    return await saveToKV(updatedData);
+}
+
+export async function adminUpdateNachtregistratie(bookingId: string, registratie: any) {
+    noStore();
+    const appData = await getAppDataFresh();
+    const updatedData = { ...appData } as any;
+
+    if (!updatedData.bookings) return { success: false, error: "Geen boekingen gevonden." };
+    const booking = updatedData.bookings.find((b: any) => b.id === bookingId);
+    if (!booking) return { success: false, error: "Boeking niet gevonden." };
+
+    updatedData.bookings = updatedData.bookings.map((b: any) =>
+        b.id === bookingId ? { ...b, nachtregistratie: { ...registratie } } : b
+    );
+
+    return await saveToKV(updatedData);
+}
+
+export async function verstuurNachtregistratie(bookingId: string, registratie: any) {
+    noStore();
+    const appData = await getAppDataFresh();
+    const updatedData = { ...appData } as any;
+
+    const booking = updatedData.bookings?.find((b: any) => b.id === bookingId);
+    if (!booking) return { success: false, error: "Boeking niet gevonden." };
+
+    const settings = updatedData.nachtregistratieSettings;
+    if (!settings?.campingEmail) return { success: false, error: "Geen camping-e-mailadres ingesteld (zie sectie Nachtregistratie)." };
+
+    try {
+        const { vulNachtregistratiePdf } = await import("../utils/nachtregistratiePdf");
+        const { verstuurNachtregistratieMail } = await import("../utils/mailer");
+
+        const verzonden = {
+            ...registratie,
+            status: 'verstuurd',
+            verstuurdOp: new Date().toISOString(),
+        };
+
+        const pdf = await vulNachtregistratiePdf(verzonden, settings);
+        await verstuurNachtregistratieMail(settings.campingEmail, verzonden, pdf);
+
+        updatedData.bookings = updatedData.bookings.map((b: any) =>
+            b.id === bookingId ? { ...b, nachtregistratie: verzonden } : b
+        );
+        return await saveToKV(updatedData);
+    } catch (error: any) {
+        console.error("Nachtregistratie verzendfout:", error);
+        return { success: false, error: "Verzenden mislukt: " + (error.message || "onbekende fout") };
+    }
 }

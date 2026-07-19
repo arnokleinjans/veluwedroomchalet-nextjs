@@ -10,6 +10,12 @@ export const dynamic = "force-dynamic";
 function isInsightVisible(insight: any, booking: any): boolean {
   const visibility = insight.visibility || "always";
   if (visibility === "always") return true;
+
+  if (visibility === "nachtregistratie") {
+    // Alleen tonen zolang het nachtregistratieformulier nog niet is ingevuld
+    return !booking?.nachtregistratie;
+  }
+
   if (!booking?.checkIn || !booking?.checkOut) return true;
 
   const now = new Date();
@@ -54,6 +60,14 @@ export default function Home() {
           border: 1px solid rgba(74, 93, 35, 0.25) !important;
           box-shadow: 0 4px 18px rgba(74, 93, 35, 0.12) !important;
         }
+        .card-glass[data-visibility="nachtregistratie"] {
+          background: rgba(250, 226, 222, 0.88) !important;
+          border: 1px solid rgba(179, 54, 42, 0.4) !important;
+          box-shadow: 0 4px 18px rgba(179, 54, 42, 0.15) !important;
+        }
+        .card-glass[data-visibility="nachtregistratie"] .icon-wrapper {
+          color: #b3362a !important;
+        }
       `}</style>
       <div className="md:-mt-16 mt-[-2rem] relative z-30 space-y-8 md:space-y-12">
 
@@ -87,6 +101,21 @@ export default function Home() {
               )}
             </>
           );
+
+          if ((insight as any).visibility === "nachtregistratie") {
+            return (
+              <Link
+                key={index}
+                href={`/b/${booking?.id}/nachtregistratie`}
+                className="card card-glass clickable h-full m-0"
+                data-hide-mobile={insight.hideOnMobile ? "true" : undefined}
+                data-visibility="nachtregistratie"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                {cardContent}
+              </Link>
+            );
+          }
 
           if (hasDetail) {
             return (

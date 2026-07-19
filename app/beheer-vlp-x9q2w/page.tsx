@@ -5,8 +5,9 @@ import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
     updateChatbotContext, updateTranslations, updateExpiredPageContent, updateGames,
-    verifyAdminPin
+    verifyAdminPin, updateNachtregistratieSettings
 } from "../actions/adminActions";
+import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -16,6 +17,7 @@ import RichTextEditor from "../components/RichTextEditor";
 const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: string }> = {
     checkin:  { bg: "#eff8ff", border: "#3b82f6", label: "🏠 T/m aankomstdag" },
     checkout: { bg: "#fff7ed", border: "#f97316", label: "🧳 Vertrekdag" },
+    nachtregistratie: { bg: "#fdecea", border: "#b3362a", label: "📋 Nachtregistratieformulier" },
 };
 
 function SortableItem({ id, children, accent }: { id: string, children: React.ReactNode, accent?: string }) {
@@ -91,7 +93,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [aiMaxChars, setAiMaxChars] = useState(4000);
 
     // Bookings states
-    const [bookings, setBookings] = useState<{ id: string, guestName: string, checkIn: string, checkOut: string, language?: string, aliases?: string[] }[]>([]);
+    const [bookings, setBookings] = useState<{ id: string, guestName: string, checkIn: string, checkOut: string, language?: string, nachtregistratie?: any }[]>([]);
     const [newGuestName, setNewGuestName] = useState("");
     const [newCheckIn, setNewCheckIn] = useState("");
     const [newCheckOut, setNewCheckOut] = useState("");
@@ -99,6 +101,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [newBookingNumber, setNewBookingNumber] = useState("");
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValues, setEditValues] = useState<{ checkIn: string, checkOut: string, language: string, bookingNumber: string }>({ checkIn: "", checkOut: "", language: "nl", bookingNumber: "" });
+    const [expandedRegId, setExpandedRegId] = useState<string | null>(null);
+    const [bookingFilter, setBookingFilter] = useState<"nieuw" | "verlopen">("nieuw");
+    const [nrSettings, setNrSettings] = useState({ verhuurderNaam: "", verhuurderTelefoon: "", staanplaats: "", campingEmail: "" });
 
     // CSV import
     const [csvRows, setCsvRows] = useState<{ name: string, checkIn: string, checkOut: string, language: string, isDuplicate?: boolean, overrideDuplicate?: boolean }[]>([]);
@@ -130,6 +135,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setVideos(data.videos || []);
             setOmgeving(((data as any).omgeving || (data as any).restaurants || []).map((tip: any) => ({ ...tip, widgetCode: tip.widgetCode || "" })));
             setBookings(data.bookings || []);
+            if ((data as any).nachtregistratieSettings) setNrSettings((data as any).nachtregistratieSettings);
             setChatbotContext(data.chatbotContext || "");
             setExpiredPageContent((data as any).expiredPageContent || "");
             if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
@@ -598,17 +604,39 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     )}
                                 </div>
 
+                                {/* Filter: nieuw / verlopen */}
+                                <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
+                                    {(["nieuw", "verlopen"] as const).map(f => {
+                                        const count = bookings.filter(b => (new Date(b.checkOut + "T12:00:00") < new Date()) === (f === "verlopen")).length;
+                                        return (
+                                            <button key={f} onClick={() => setBookingFilter(f)} style={{ padding: "6px 14px", borderRadius: "20px", border: bookingFilter === f ? "1px solid #4A5D23" : "1px solid #ddd", backgroundColor: bookingFilter === f ? "#4A5D23" : "white", color: bookingFilter === f ? "white" : "#666", fontSize: "0.82rem", fontWeight: "bold", cursor: "pointer" }}>
+                                                {f === "nieuw" ? "Nieuw" : "Verlopen"} ({count})
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                    {[...bookings].sort((a, b) => a.checkOut.localeCompare(b.checkOut)).map((booking) => {
+                                    {[...bookings].sort((a, b) => a.checkOut.localeCompare(b.checkOut)).filter(b => (new Date(b.checkOut + "T12:00:00") < new Date()) === (bookingFilter === "verlopen")).map((booking) => {
                                         const shareUrl = `${window.location.origin}/b/${booking.id}`;
                                         const isEditing = editingId === booking.id;
                                         const isExpired = new Date(booking.checkOut + "T12:00:00") < new Date();
+                                        const reg = (booking as any).nachtregistratie;
+                                        const regStatus: "leeg" | "ingevuld" | "verstuurd" = !reg ? "leeg" : reg.status;
+                                        const regBadge = {
+                                            leeg: { label: "Formulier leeg", bg: "#f0f0f0", color: "#888" },
+                                            ingevuld: { label: "Ingevuld", bg: "#fef3c7", color: "#92400e" },
+                                            verstuurd: { label: "Verstuurd ✓", bg: "#dcfce7", color: "#166534" },
+                                        }[regStatus];
+                                        const isRegExpanded = expandedRegId === booking.id;
                                         return (
                                             <div key={booking.id} style={{ padding: "12px", backgroundColor: isExpired && !isEditing ? "#fafafa" : "white", borderRadius: "8px", border: isEditing ? "1px solid #4A5D23" : isExpired ? "1px solid #e0e0e0" : "1px solid #eee", opacity: isExpired && !isEditing ? 0.75 : 1, transition: "opacity 0.2s" }}>
                                                 {/* Header: naam + actieknoppen */}
                                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: isEditing ? "12px" : "4px" }}>
-                                                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                                                        <button onClick={() => setExpandedRegId(isRegExpanded ? null : booking.id)} title="Nachtregistratieformulier" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.9rem", color: "#4A5D23", padding: "0 2px", transform: isRegExpanded ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>▶</button>
                                                         <strong style={{ color: isExpired ? "#999" : "#333" }}>{booking.guestName}</strong>
+                                                        <span style={{ fontSize: "0.7rem", backgroundColor: regBadge.bg, color: regBadge.color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>{regBadge.label}</span>
                                                         {isExpired && !isEditing && <span style={{ fontSize: "0.7rem", backgroundColor: "#f0f0f0", color: "#999", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>Verlopen</span>}
                                                     </div>
                                                     <div style={{ display: "flex", gap: "8px", flexShrink: 0, marginLeft: "10px" }}>
@@ -655,18 +683,59 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <span style={{ fontSize: "0.85rem", color: isExpired ? "#aaa" : "#777" }}>{booking.checkIn} t/m {booking.checkOut}</span>
                                                         {booking.language && booking.language !== "nl" && <span style={{ fontSize: "0.8rem", color: "#888", marginLeft: "10px" }}>{booking.language === "en" ? "🇬🇧" : "🇩🇪"}</span>}
                                                         <div style={{ fontSize: "0.85rem", color: isExpired ? "#bbb" : "#4A5D23", marginTop: "4px", wordBreak: "break-all", textDecoration: isExpired ? "line-through" : "none" }}>{shareUrl}</div>
-                                                        {booking.aliases && booking.aliases.length > 0 && (
-                                                            <div style={{ fontSize: "0.75rem", color: "#999", marginTop: "2px", wordBreak: "break-all" }}>
-                                                                Oude link{booking.aliases.length > 1 ? "s" : ""} (werkt nog): {booking.aliases.map(a => `/b/${a}`).join(", ")}
-                                                            </div>
-                                                        )}
                                                     </div>
+                                                )}
+                                                {isRegExpanded && (
+                                                    <NachtregistratieAdminPanel
+                                                        key={`${booking.id}-${regStatus}`}
+                                                        booking={booking as any}
+                                                        onSaved={refreshBookings}
+                                                        setToast={setSaveMessage}
+                                                    />
                                                 )}
                                             </div>
                                         )
                                     })}
                                     {bookings.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen boekingen gevonden.</p>}
                                 </div>
+                            </div>
+                        </details>
+
+                        {/* Sectie: Nachtregistratie instellingen */}
+                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📋 Nachtregistratie</summary>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
+                                <p style={{ fontSize: "0.85rem", color: "#666" }}>Vaste verhuurdergegevens voor het nachtregistratieformulier van 't Veluws Hof. Deze staan niet op het gastformulier, maar gaan mee in de PDF naar de camping.</p>
+                                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                    <div style={{ flex: "2 1 220px" }}>
+                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Naam verhuurder</label>
+                                        <input type="text" value={nrSettings.verhuurderNaam} onChange={e => setNrSettings(s => ({ ...s, verhuurderNaam: e.target.value }))} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                    </div>
+                                    <div style={{ flex: "1 1 150px" }}>
+                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Telefoonnummer</label>
+                                        <input type="text" value={nrSettings.verhuurderTelefoon} onChange={e => setNrSettings(s => ({ ...s, verhuurderTelefoon: e.target.value }))} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                    </div>
+                                </div>
+                                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                    <div style={{ flex: "1 1 220px" }}>
+                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Staanplaats accommodatie</label>
+                                        <input type="text" value={nrSettings.staanplaats} onChange={e => setNrSettings(s => ({ ...s, staanplaats: e.target.value }))} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                    </div>
+                                    <div style={{ flex: "1 1 220px" }}>
+                                        <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>E-mailadres camping (ontvanger)</label>
+                                        <input type="email" value={nrSettings.campingEmail} onChange={e => setNrSettings(s => ({ ...s, campingEmail: e.target.value }))} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
+                                    </div>
+                                </div>
+                                <button onClick={async () => {
+                                    setIsSaving(true);
+                                    setSaveMessage("⏳ Opslaan...");
+                                    const res = await updateNachtregistratieSettings(nrSettings);
+                                    setIsSaving(false);
+                                    setSaveMessage(res.success ? "✅ Nachtregistratie-instellingen opgeslagen!" : "❌ " + res.error);
+                                    if (res.success) setTimeout(() => setSaveMessage(""), 3000);
+                                }} disabled={isSaving} style={{ alignSelf: "flex-start", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>
+                                    Opslaan
+                                </button>
                             </div>
                         </details>
 
@@ -740,6 +809,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             <option value="always">👁 Altijd</option>
                                                             <option value="checkin">🏠 T/m aankomstdag</option>
                                                             <option value="checkout">🧳 Vertrekdag (+ avond ervoor)</option>
+                                                            <option value="nachtregistratie">📋 Nachtregistratieformulier</option>
                                                         </select>
                                                     </div>
 

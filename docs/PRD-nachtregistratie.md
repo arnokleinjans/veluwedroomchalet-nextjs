@@ -1,6 +1,6 @@
 # PRD — Nachtregistratie
 
-**Status:** concept, akkoord Arno nodig · **Datum:** 19-07-2026
+**Status:** gebouwd en lokaal getest (19-07-2026, avond) — nog niet gedeployed. Camping-e-mailadres staat op testadres akleinjans@me.com totdat Arno het echte receptie-adres invult in beheer → Nachtregistratie. · **Datum:** 19-07-2026
 
 ## 1. Doel & context
 
