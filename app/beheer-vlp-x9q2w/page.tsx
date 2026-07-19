@@ -8,6 +8,7 @@ import {
     verifyAdminPin
 } from "../actions/adminActions";
 import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
+import { formatDatumNL } from "../utils/toeristenbelasting";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -580,7 +581,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                                         </button>
                                                                     )}
                                                                 </td>
-                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{row.checkIn} - {row.checkOut}</td>
+                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{formatDatumNL(row.checkIn)} - {formatDatumNL(row.checkOut)}</td>
                                                                 <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{row.language.toUpperCase()}</td>
                                                                 <td style={{ padding: "8px", textAlign: "right" }}>
                                                                     <button onClick={() => setCsvRows(r => r.filter((_, j) => j !== i))} style={{ background: "none", border: "none", color: "#c00", cursor: "pointer", fontSize: "0.85rem", opacity: isIgnored ? 0.5 : 1 }}>✕</button>
@@ -682,7 +683,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        <span style={{ fontSize: "0.85rem", color: isExpired ? "#aaa" : "#777" }}>{booking.checkIn} t/m {booking.checkOut}</span>
+                                                        <span style={{ fontSize: "0.85rem", color: isExpired ? "#aaa" : "#777" }}>{formatDatumNL(booking.checkIn)} t/m {formatDatumNL(booking.checkOut)}</span>
                                                         {booking.language && booking.language !== "nl" && <span style={{ fontSize: "0.8rem", color: "#888", marginLeft: "10px" }}>{booking.language === "en" ? "🇬🇧" : "🇩🇪"}</span>}
                                                         <div style={{ fontSize: "0.85rem", color: isExpired ? "#bbb" : "#4A5D23", marginTop: "4px", wordBreak: "break-all", textDecoration: isExpired ? "line-through" : "none" }}>{shareUrl}</div>
                                                     </div>

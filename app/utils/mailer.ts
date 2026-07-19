@@ -27,14 +27,15 @@ export async function verstuurNachtregistratieMail(
         `Hierbij het ingevulde nachtregistratieformulier voor onze verhuur:`,
         ``,
         `Huurder: ${reg.huurderNaam}`,
-        `Periode: ${periode}`,
+        `Aankomstdatum: ${formatDatumNL(reg.aankomst)}`,
+        `Vertrekdatum: ${formatDatumNL(reg.vertrek)}`,
         `Aantal personen: ${reg.aantalPersonen}`,
         `Bedrag park-/servicekosten: ${formatBedrag(reg.bedrag)}`,
         ``,
         reg.opmerkingen ? `Opmerkingen: ${reg.opmerkingen}` : ``,
         ``,
         `Met vriendelijke groet,`,
-        `Veluwe Droom Chalet, Arno Kleinjans`,
+        `Veluwe Droom Chalet, Kitty van der Pijll`,
     ].filter((r, i, arr) => !(r === `` && arr[i - 1] === ``)).join("\n");
 
     await getTransport().sendMail({
