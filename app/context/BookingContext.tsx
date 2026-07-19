@@ -9,6 +9,7 @@ export type BookingInfo = {
     checkOut: string;
     language: string;
     keyCode?: string;
+    aliases?: string[];
 };
 
 const BookingContext = createContext<{ booking: BookingInfo, appData: any } | null>(null);

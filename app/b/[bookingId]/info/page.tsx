@@ -1,5 +1,6 @@
 // app/b/[bookingId]/info/page.tsx
 import { getTranslatedAppData } from "../../../utils/db";
+import { findBooking } from "../../../utils/findBooking";
 import InfoClient from "./InfoClient";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,7 @@ export default async function Info({ params }: { params: { bookingId: string } }
     const appData = await getTranslatedAppData(bookingId);
 
     // 2. Find specific booking context
-    const booking = appData.bookings.find((b: any) => b.id === bookingId) || null;
+    const booking = findBooking(appData.bookings, bookingId);
 
     // 3. Pass serialized data JSON to the React client handler
     return <InfoClient appData={appData} booking={booking} basePath={`/b/${bookingId}`} />;

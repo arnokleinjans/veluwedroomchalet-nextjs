@@ -138,17 +138,38 @@ export async function updateAiSettings(aiPrompt: string, aiMaxChars: number) {
     return await saveToKV(updatedData);
 }
 
-export async function addBooking(guestName: string, checkIn: string, checkOut: string, language: string = "nl") {
+function normalizeBookingId(raw: string): string {
+    return raw.trim().toUpperCase();
+}
+
+// Controleert of een id al in gebruik is als boekingsnummer óf als oude alias.
+function isBookingIdTaken(bookings: any[], id: string, excludeId?: string): boolean {
+    return bookings.some((b: any) => {
+        if (excludeId && b.id === excludeId) return false;
+        return b.id?.toUpperCase() === id ||
+            (Array.isArray(b.aliases) && b.aliases.some((a: string) => (a || "").toUpperCase() === id));
+    });
+}
+
+export async function addBooking(guestName: string, checkIn: string, checkOut: string, language: string = "nl", bookingNumber?: string) {
     noStore();
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
-    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const safeNamePart = guestName.split(' ')[0].replace(/[^a-zA-Z]/g, '').toUpperCase();
-    const newId = `${safeNamePart}-${randomSuffix}`;
-
     if (!updatedData.bookings) {
         updatedData.bookings = [];
+    }
+
+    let newId: string;
+    if (bookingNumber && bookingNumber.trim()) {
+        newId = normalizeBookingId(bookingNumber);
+        if (isBookingIdTaken(updatedData.bookings, newId)) {
+            return { success: false, error: `Boekingsnummer ${newId} is al in gebruik.` };
+        }
+    } else {
+        const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const safeNamePart = guestName.split(' ')[0].replace(/[^a-zA-Z]/g, '').toUpperCase();
+        newId = `${safeNamePart}-${randomSuffix}`;
     }
 
     updatedData.bookings.push({
@@ -162,16 +183,33 @@ export async function addBooking(guestName: string, checkIn: string, checkOut: s
     return await saveToKV(updatedData);
 }
 
-export async function updateBooking(id: string, checkIn: string, checkOut: string, language: string) {
+export async function updateBooking(id: string, checkIn: string, checkOut: string, language: string, bookingNumber?: string) {
     noStore();
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
     if (!updatedData.bookings) return { success: false, error: "Geen boekingen gevonden." };
 
-    updatedData.bookings = updatedData.bookings.map((b: any) =>
-        b.id === id ? { ...b, checkIn, checkOut, language } : b
-    );
+    let newId: string | null = null;
+    if (bookingNumber && bookingNumber.trim() && normalizeBookingId(bookingNumber) !== id.toUpperCase()) {
+        newId = normalizeBookingId(bookingNumber);
+        if (isBookingIdTaken(updatedData.bookings, newId, id)) {
+            return { success: false, error: `Boekingsnummer ${newId} is al in gebruik.` };
+        }
+    }
+
+    updatedData.bookings = updatedData.bookings.map((b: any) => {
+        if (b.id !== id) return b;
+        const updated = { ...b, checkIn, checkOut, language };
+        if (newId) {
+            // Oude code als alias bewaren zodat een al gedeelde link blijft werken.
+            const aliases = (b.aliases || []).concat(b.id)
+                .filter((a: string, i: number, arr: string[]) => a !== newId && arr.indexOf(a) === i);
+            updated.id = newId;
+            updated.aliases = aliases;
+        }
+        return updated;
+    });
 
     return await saveToKV(updatedData);
 }

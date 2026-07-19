@@ -1,4 +1,5 @@
 import { getAppData } from "../../utils/db";
+import { findBooking } from "../../utils/findBooking";
 import { BookingProvider, BookingInfo } from "../../context/BookingContext";
 import { notFound } from "next/navigation";
 import ClientLayout from "../../components/ClientLayout";
@@ -14,11 +15,10 @@ export default async function BookingLayout({
     params: Promise<{ bookingId: string }>;
 }) {
     const { bookingId: rawId } = await params;
-    const bookingId = rawId.toUpperCase();
     const appData = await getAppData();
 
     // Find the current booking
-    const booking = appData.bookings?.find((b: any) => b.id.toUpperCase() === bookingId);
+    const booking = findBooking(appData.bookings, rawId);
 
     // Fallback if URL is invalid
     if (!booking) {

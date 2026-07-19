@@ -91,13 +91,14 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [aiMaxChars, setAiMaxChars] = useState(4000);
 
     // Bookings states
-    const [bookings, setBookings] = useState<{ id: string, guestName: string, checkIn: string, checkOut: string, language?: string }[]>([]);
+    const [bookings, setBookings] = useState<{ id: string, guestName: string, checkIn: string, checkOut: string, language?: string, aliases?: string[] }[]>([]);
     const [newGuestName, setNewGuestName] = useState("");
     const [newCheckIn, setNewCheckIn] = useState("");
     const [newCheckOut, setNewCheckOut] = useState("");
     const [newLanguage, setNewLanguage] = useState("nl");
+    const [newBookingNumber, setNewBookingNumber] = useState("");
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [editValues, setEditValues] = useState<{ checkIn: string, checkOut: string, language: string }>({ checkIn: "", checkOut: "", language: "nl" });
+    const [editValues, setEditValues] = useState<{ checkIn: string, checkOut: string, language: string, bookingNumber: string }>({ checkIn: "", checkOut: "", language: "nl", bookingNumber: "" });
 
     // CSV import
     const [csvRows, setCsvRows] = useState<{ name: string, checkIn: string, checkOut: string, language: string, isDuplicate?: boolean, overrideDuplicate?: boolean }[]>([]);
@@ -366,11 +367,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         }
         setIsSaving(true);
         setSaveMessage("⏳ Bezig met toevoegen...");
-        const res = await addBooking(newGuestName, newCheckIn, newCheckOut, newLanguage);
+        const res = await addBooking(newGuestName, newCheckIn, newCheckOut, newLanguage, newBookingNumber);
         setIsSaving(false);
         if (res.success) {
             setSaveMessage("✅ Boeking toegevoegd!");
-            setNewGuestName(""); setNewCheckIn(""); setNewCheckOut("");
+            setNewGuestName(""); setNewCheckIn(""); setNewCheckOut(""); setNewBookingNumber("");
             await refreshBookings();
             setTimeout(() => setSaveMessage(""), 3000);
         } else {
@@ -383,7 +384,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         if (!editingId) return;
         setIsSaving(true);
         setSaveMessage("⏳ Opslaan...");
-        const res = await updateBooking(editingId, editValues.checkIn, editValues.checkOut, editValues.language);
+        const res = await updateBooking(editingId, editValues.checkIn, editValues.checkOut, editValues.language, editValues.bookingNumber);
         setIsSaving(false);
         if (res.success) {
             setSaveMessage("✅ Opgeslagen!");
@@ -506,6 +507,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
                                             <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
                                         </div>
+                                        <div style={{ flex: "1 1 140px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Boekingsnummer</label>
+                                            <input type="text" value={newBookingNumber} onChange={e => setNewBookingNumber(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Voyando-nr" />
+                                        </div>
                                         <div style={{ flex: "1 1 120px" }}>
                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Aankomst</label>
                                             <input type="date" value={newCheckIn} onChange={e => setNewCheckIn(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
@@ -614,7 +619,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl" }); }} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Bewerk</button>
+                                                                <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Bewerk</button>
                                                                 <button onClick={() => !isExpired && copyToClipboard(shareUrl, booking.id)} disabled={isExpired} style={{ backgroundColor: isExpired ? "#f0f0f0" : copiedId === booking.id ? "#4A5D23" : "#e0e0e0", color: isExpired ? "#bbb" : copiedId === booking.id ? "white" : "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: isExpired ? "not-allowed" : "pointer", fontSize: "0.85rem", fontWeight: "bold", transition: "all 0.2s" }}>{copiedId === booking.id ? "✓ Gekopieerd" : "Kopieer"}</button>
                                                                 <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>
                                                             </>
@@ -624,6 +629,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                                                 {isEditing ? (
                                                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                                        <div style={{ flex: "1 1 130px" }}>
+                                                            <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Boekingsnummer</label>
+                                                            <input type="text" value={editValues.bookingNumber} onChange={e => setEditValues(v => ({ ...v, bookingNumber: e.target.value }))} placeholder="Bijv: 12345 (Voyando)" style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
+                                                        </div>
                                                         <div style={{ flex: "1 1 130px" }}>
                                                             <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Aankomst</label>
                                                             <input type="date" value={editValues.checkIn} onChange={e => setEditValues(v => ({ ...v, checkIn: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
@@ -646,6 +655,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <span style={{ fontSize: "0.85rem", color: isExpired ? "#aaa" : "#777" }}>{booking.checkIn} t/m {booking.checkOut}</span>
                                                         {booking.language && booking.language !== "nl" && <span style={{ fontSize: "0.8rem", color: "#888", marginLeft: "10px" }}>{booking.language === "en" ? "🇬🇧" : "🇩🇪"}</span>}
                                                         <div style={{ fontSize: "0.85rem", color: isExpired ? "#bbb" : "#4A5D23", marginTop: "4px", wordBreak: "break-all", textDecoration: isExpired ? "line-through" : "none" }}>{shareUrl}</div>
+                                                        {booking.aliases && booking.aliases.length > 0 && (
+                                                            <div style={{ fontSize: "0.75rem", color: "#999", marginTop: "2px", wordBreak: "break-all" }}>
+                                                                Oude link{booking.aliases.length > 1 ? "s" : ""} (werkt nog): {booking.aliases.map(a => `/b/${a}`).join(", ")}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
