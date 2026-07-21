@@ -41,6 +41,7 @@ export async function verstuurNachtregistratieMail(
     await getTransport().sendMail({
         from: `"Veluwe Droom Chalet" <${process.env.SMTP_USER}>`,
         to: naar,
+        bcc: "info@veluwedroomchalet.nl",
         subject: `Nachtregistratie Bosrand 18 — ${periode} (${reg.huurderNaam})`,
         text: body,
         attachments: [
