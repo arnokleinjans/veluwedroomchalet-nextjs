@@ -103,7 +103,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValues, setEditValues] = useState<{ checkIn: string, checkOut: string, language: string, bookingNumber: string }>({ checkIn: "", checkOut: "", language: "nl", bookingNumber: "" });
     const [expandedRegId, setExpandedRegId] = useState<string | null>(null);
-    const [bookingFilter, setBookingFilter] = useState<"nieuw" | "verlopen">("nieuw");
+    const [bookingFilter, setBookingFilter] = useState<"nieuw" | "verlopen" | "alle">("nieuw");
+    const [bookingSearch, setBookingSearch] = useState("");
     const [staanplaats, setStaanplaats] = useState("");
     const [campingEmail, setCampingEmail] = useState("");
 
@@ -330,8 +331,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 }
 
                 if (!checkIn || !checkOut) continue;
-                // Voorkom dubbele boekingen op basis van gastnaam (ongeacht hoofdletters/spaties)
-                const isDuplicate = bookings.some(b => b.guestName.trim().toLowerCase() === name.trim().toLowerCase());
+                // Voorkom dubbele boekingen op basis van gastnaam + aankomstdatum (ongeacht hoofdletters/spaties)
+                const isDuplicate = bookings.some(b => b.guestName.trim().toLowerCase() === name.trim().toLowerCase() && b.checkIn === checkIn);
 
                 parsed.push({
                     name,
@@ -607,20 +608,21 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     )}
                                 </div>
 
-                                {/* Filter: nieuw / verlopen */}
-                                <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
-                                    {(["nieuw", "verlopen"] as const).map(f => {
-                                        const count = bookings.filter(b => (new Date(b.checkOut + "T12:00:00") < new Date()) === (f === "verlopen")).length;
+                                {/* Filter: nieuw / verlopen / alle */}
+                                <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
+                                    {(["nieuw", "verlopen", "alle"] as const).map(f => {
+                                        const count = f === "alle" ? bookings.length : bookings.filter(b => (new Date(b.checkOut + "T12:00:00") < new Date()) === (f === "verlopen")).length;
                                         return (
                                             <button key={f} onClick={() => setBookingFilter(f)} style={{ padding: "6px 14px", borderRadius: "20px", border: bookingFilter === f ? "1px solid #4A5D23" : "1px solid #ddd", backgroundColor: bookingFilter === f ? "#4A5D23" : "white", color: bookingFilter === f ? "white" : "#666", fontSize: "0.82rem", fontWeight: "bold", cursor: "pointer" }}>
-                                                {f === "nieuw" ? "Nieuw" : "Verlopen"} ({count})
+                                                {f === "nieuw" ? "Nieuw" : f === "verlopen" ? "Verlopen" : "Alle"} ({count})
                                             </button>
                                         );
                                     })}
+                                    <input type="text" value={bookingSearch} onChange={e => setBookingSearch(e.target.value)} placeholder="🔍 Zoek op naam..." style={{ padding: "6px 12px", borderRadius: "20px", border: "1px solid #ddd", fontSize: "0.82rem", flex: "1 1 160px", minWidth: "140px" }} />
                                 </div>
 
                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                    {[...bookings].sort((a, b) => a.checkOut.localeCompare(b.checkOut)).filter(b => (new Date(b.checkOut + "T12:00:00") < new Date()) === (bookingFilter === "verlopen")).map((booking) => {
+                                    {[...bookings].sort((a, b) => a.checkOut.localeCompare(b.checkOut)).filter(b => bookingFilter === "alle" || (new Date(b.checkOut + "T12:00:00") < new Date()) === (bookingFilter === "verlopen")).filter(b => b.guestName.toLowerCase().includes(bookingSearch.trim().toLowerCase())).map((booking) => {
                                         const shareUrl = `${window.location.origin}/b/${booking.id}`;
                                         const isEditing = editingId === booking.id;
                                         const isExpired = new Date(booking.checkOut + "T12:00:00") < new Date();
