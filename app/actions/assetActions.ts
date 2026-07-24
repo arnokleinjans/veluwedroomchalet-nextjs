@@ -2,6 +2,7 @@
 
 import fs from "fs";
 import path from "path";
+import { listMediaImages } from "./mediaActions";
 
 // Helper function to safely read files from a public directory
 const getFilesFromDir = (dirName: string): string[] => {
@@ -21,10 +22,16 @@ const getFilesFromDir = (dirName: string): string[] => {
     }
 };
 
-// Fetch all available header images from public/images
+// Fetch all available header images from public/images.
+// Gaat via mediaActions.listMediaImages() zodat een verse GitHub-upload (mediabibliotheek) hier
+// direct in verschijnt, ook vóórdat de Vercel-deploy klaar is en het bestand lokaal op schijf staat.
 export async function fetchAvailableHeaderImages() {
-    // We return the path relative to the public folder (e.g., 'images/file.jpg' or '/images/file.jpg')
-    // Currently the app uses 'images/...' format in defaultAppData
+    try {
+        const images = await listMediaImages();
+        if (images.length > 0) return images.map(img => `images/${img.name}`);
+    } catch {
+        // val terug op de lokale bestandslijst
+    }
     const files = getFilesFromDir("images");
     return files.map(file => `images/${file}`);
 }

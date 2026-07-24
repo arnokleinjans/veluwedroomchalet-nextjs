@@ -1,7 +1,33 @@
 # PRD: Mediabibliotheek in het beheerpaneel
 
-> **Status:** nog niet in uitvoering — plan opgesteld en bewust geparkeerd op 2026-06-12.
-> Aanbevolen bij oppakken: gefaseerd bouwen (1. alleen bekijken + gebruik-check, 2. uploaden, 3. verwijderen).
+> **Status:** **Fase 1, 2 en 3 gebouwd (2026-07-24)** — bekijken, gebruik-check, uploaden
+> (client-side normalisatie) en verwijderen (geblokkeerd bij gebruik) staan alle drie lokaal
+> klaar in het beheerpaneel. `GITHUB_TOKEN`/`GITHUB_REPO` toegevoegd aan `.env.local`
+> (hergebruikt het token uit Zaakmodule — heeft ook push-toegang tot deze repo, bevestigd via de
+> GitHub API). Nog NIET gedeployed/getest met een echte upload-commit (zie onderaan "Wat nog
+> moet gebeuren").
+>
+> **Afwijking t.o.v. het oorspronkelijke plan:** `sanitizeFileName` doet GEEN kebab-case/
+> lowercase-slugify zoals hieronder beschreven (stap 2) — dat zou een ander naamgevingspatroon
+> introduceren dan de rest van het project (bestaande bestanden behouden spaties en hoofdletters,
+> bv. "Restaurant in een oogopslag.webp"). In plaats daarvan wordt dezelfde lichte regel gebruikt
+> die op 2026-07-24 ook in `antigravity-beheer/beheer.py` is doorgevoerd: alleen de eerste letter
+> wordt een hoofdletter, de rest van de naam blijft intact, extensie wordt altijd `.webp`.
+>
+> **Wat er is gebouwd (fase 1):** `app/actions/mediaActions.ts` (`listMediaImages()` +
+> `getImageUsageMap()`) en een nieuwe, lazy-loaded sectie in `page.tsx`. De gebruik-detectie
+> doorzoekt in één `getAppDataFresh()`-call zowel de exacte image-velden
+> (`property.headerImage`, `videos[].thumb`, `omgeving[].image`, `insights[].image`) als de
+> rich-text-velden (`omgeving[].desc`, `insights[].detailContent`, `expiredPageContent`) — en dat
+> voor NL én de losse `translations.en`/`translations.de`-kopieën apart, zodat een taal die uit
+> sync raakt (zoals de `qr.webp`-bug van gisteren) zichtbaar wordt in plaats van gemaskeerd. Een
+> vaste lijst (`HARDCODED_CODE_REFERENCES`) dekt de ~4 relevante hardcoded codebase-verwijzingen
+> (Header.webp/logo/twee db.ts-fallbacks) die geen Redis-content zijn. Getest met een los
+> tsx-script rechtstreeks tegen de live Redis-data: 129 afbeeldingen, 97 ongebruikt/32 gebruikt,
+> `Qr.webp`/`Qr-2.webp`/`Qr-3.webp`/`Deproeftuinhoenderloo.webp` (de bestanden van de
+> hoofdletter-opschoning) komen correct als "in gebruik" naar voren in alle 3 talen.
+>
+> Aanbevolen bij oppakken van fase 2/3: gefaseerd bouwen zoals hieronder beschreven.
 
 ## Context
 
@@ -86,9 +112,22 @@ UI:
 9. iPhone Safari HEIC → slaagt; desktop Chrome HEIC → nette foutmelding.
 
 ## Bestanden
-- `app/actions/mediaActions.ts` (nieuw)
+- `app/actions/mediaActions.ts` (nieuw) — `listMediaImages`, `getImageUsageMap`,
+  `isGithubConfigured`, `uploadMediaImage`, `deleteMediaImage`
 - `app/utils/imageNormalize.ts` (nieuw, client-side)
-- `app/beheer-vlp-x9q2w/page.tsx` (nieuwe sectie)
-- `app/actions/assetActions.ts` (dropdown-merge)
-- `next.config.ts` (bodySizeLimit)
+- `app/beheer-vlp-x9q2w/page.tsx` (nieuwe sectie, ná "⏰ Verlopen Boeking Pagina")
+- `app/actions/assetActions.ts` (`fetchAvailableHeaderImages` gaat nu via `listMediaImages()`)
+- `next.config.ts` (bodySizeLimit: "4mb")
+- `.env.local`: `GITHUB_TOKEN` (hergebruikt uit Zaakmodule) + `GITHUB_REPO=arnokleinjans/veluwedroomchalet-nextjs`
 - Changelog bijwerken in `veluwedroomchalet/CLAUDE.md`
+
+## Wat nog moet gebeuren (bewust niet door Claude zelf gedaan)
+- **Nog geen echte upload/delete tegen de live GitHub-repo getest** — dat zou een echte commit +
+  Vercel-deploy triggeren, en dat valt onder de deploy-regel (nooit zonder expliciete opdracht
+  per keer). De read-kant (lijst + gebruik-check) is wél al met echte productiedata getest.
+  Test uploaden/verwijderen zelf via het beheerpaneel, of geef expliciet opdracht voor een
+  gecontroleerde test met een wegwerpbestand.
+- Vercel-project-instellingen: `GITHUB_TOKEN`/`GITHUB_REPO` moeten ook als env vars in Vercel
+  zelf gezet worden voordat dit in productie werkt (staat nu alleen lokaal in `.env.local`).
+- Overweeg het GitHub-token op termijn te vervangen door een fijnmazig PAT dat alléén bij
+  `veluwedroomchalet-nextjs` kan (het hergebruikte Zaakmodule-token is breed-gescoped).

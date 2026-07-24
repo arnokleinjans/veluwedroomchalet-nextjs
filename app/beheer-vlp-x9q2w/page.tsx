@@ -10,6 +10,8 @@ import {
 import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
 import { formatDatumNL } from "../utils/toeristenbelasting";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
+import { listMediaImages, getImageUsageMap, getImagePreviewMap, isGithubConfigured, uploadMediaImage, deleteMediaImage, MediaImage, ImageUsage } from "../actions/mediaActions";
+import { normalizeImageToWebp } from "../utils/imageNormalize";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -62,8 +64,21 @@ export default function AdminPage() {
 
     // Dropdown assets
     const [availableImages, setAvailableImages] = useState<string[]>([]);
+    const [imagePreviewUrls, setImagePreviewUrls] = useState<Record<string, string>>({});
     const [availableIcons, setAvailableIcons] = useState<string[]>([]);
     const [availableThumbnails, setAvailableThumbnails] = useState<string[]>([]);
+
+    // Mediabibliotheek
+    const [mediaImages, setMediaImages] = useState<MediaImage[]>([]);
+    const [mediaUsage, setMediaUsage] = useState<Record<string, ImageUsage>>({});
+    const [mediaLoaded, setMediaLoaded] = useState(false);
+    const [isLoadingMedia, setIsLoadingMedia] = useState(false);
+    const [mediaGithubOk, setMediaGithubOk] = useState<boolean | null>(null);
+    const [isUploadingMedia, setIsUploadingMedia] = useState(false);
+    const [uploadStatusLines, setUploadStatusLines] = useState<string[]>([]);
+    const [pendingConflict, setPendingConflict] = useState<{ fileName: string; resolve: (mode: "overwrite" | "rename" | "cancel") => void } | null>(null);
+    const [deletingImage, setDeletingImage] = useState<string | null>(null);
+    const [blockedDelete, setBlockedDelete] = useState<{ name: string; locations: string[] } | null>(null);
 
     // Form states
     const [propName, setPropName] = useState("");
@@ -123,6 +138,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         fetchAvailableHeaderImages().then(setAvailableImages);
         fetchAvailableIcons().then(setAvailableIcons);
         fetchAvailableThumbnails().then(setAvailableThumbnails);
+        getImagePreviewMap().then(setImagePreviewUrls);
 
         fetchAdminData().then(data => {
             setPropName(data.property.name);
@@ -229,6 +245,82 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     );
     const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
     const handleSaveExpiredPage = () => runSaveAction(() => updateExpiredPageContent(expiredPageContent), "Verlopen pagina succesvol opgeslagen!");
+
+    const loadMediaLibrary = async (force = false) => {
+        if ((mediaLoaded && !force) || isLoadingMedia) return;
+        setIsLoadingMedia(true);
+        const [images, usage, ghOk] = await Promise.all([listMediaImages(), getImageUsageMap(), isGithubConfigured()]);
+        setMediaImages(images);
+        setMediaUsage(usage);
+        setMediaGithubOk(ghOk);
+        setMediaLoaded(true);
+        setIsLoadingMedia(false);
+    };
+
+    const handleMediaUpload = async (fileList: FileList | null) => {
+        if (!fileList || fileList.length === 0) return;
+        setIsUploadingMedia(true);
+        const lines: string[] = [];
+        setUploadStatusLines([...lines]);
+
+        for (const file of Array.from(fileList)) {
+            lines.push(`⏳ ${file.name} normaliseren...`);
+            setUploadStatusLines([...lines]);
+            try {
+                const { base64 } = await normalizeImageToWebp(file);
+                let result = await uploadMediaImage(file.name, base64, "new");
+
+                if (!result.ok && result.reason === "exists") {
+                    const choice = await new Promise<"overwrite" | "rename" | "cancel">(resolve => {
+                        setPendingConflict({ fileName: file.name, resolve });
+                    });
+                    setPendingConflict(null);
+                    if (choice === "cancel") {
+                        lines.push(`⏭️ ${file.name}: overgeslagen (naam bestaat al)`);
+                        setUploadStatusLines([...lines]);
+                        continue;
+                    }
+                    result = await uploadMediaImage(file.name, base64, choice);
+                }
+
+                if (result.ok) {
+                    lines.push(`✅ ${file.name} → ${result.fileName} (commit onderweg, ±1-2 min tot live)`);
+                } else {
+                    const msg = result.reason === "no-token" ? "GITHUB_TOKEN ontbreekt" : (result.message || result.reason);
+                    lines.push(`❌ ${file.name}: ${msg}`);
+                }
+            } catch (e: any) {
+                lines.push(`❌ ${file.name}: ${e.message || "onbekende fout"}`);
+            }
+            setUploadStatusLines([...lines]);
+        }
+
+        setIsUploadingMedia(false);
+        await loadMediaLibrary(true);
+        fetchAvailableHeaderImages().then(setAvailableImages);
+        getImagePreviewMap().then(setImagePreviewUrls);
+    };
+
+    const handleDeleteMedia = async (name: string) => {
+        const usage = mediaUsage[name];
+        if (usage && usage.used) {
+            setBlockedDelete({ name, locations: usage.locations });
+            return;
+        }
+        if (!confirm(`"${name}" verwijderen? Dit gaat als een commit naar GitHub en is niet ongedaan te maken vanuit dit scherm.`)) return;
+
+        setDeletingImage(name);
+        const result = await deleteMediaImage(name);
+        setDeletingImage(null);
+
+        if (result.ok) {
+            await loadMediaLibrary(true);
+        } else if (result.reason === "in-use") {
+            setBlockedDelete({ name, locations: result.locations || [] });
+        } else {
+            alert(`Verwijderen mislukt: ${result.reason === "no-token" ? "GITHUB_TOKEN ontbreekt" : (result.message || result.reason)}`);
+        }
+    };
 
     const handleSaveAll = async () => {
         setIsSaving(true);
@@ -728,7 +820,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Header Afbeelding (bovenaan de app)</label>
                                     <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                                         {headerImage && (
-                                            <img src={`/${headerImage}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                                            <img src={imagePreviewUrls[headerImage] || `/${headerImage}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
                                         )}
                                         <select value={headerImage} onChange={e => setHeaderImage(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
                                             <option value="">-- Geen afbeelding --</option>
@@ -821,7 +913,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
                                                         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                                                             {item.image && (
-                                                                <img src={`/${item.image}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                                                                <img src={imagePreviewUrls[item.image || ""] || `/${item.image}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
                                                             )}
                                                             <select value={item.image || ""} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], image: e.target.value }; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
                                                                 <option value="">-- Geen afbeelding --</option>
@@ -935,7 +1027,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                     <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Thumbnail (uit `/public/images`)</label>
                                                     <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                                                         {vid.thumb && (
-                                                            <img src={`/${vid.thumb}`} alt="Preview" style={{ width: "80px", height: "80px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
+                                                            <img src={imagePreviewUrls[vid.thumb] || `/${vid.thumb}`} alt="Preview" style={{ width: "80px", height: "80px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
                                                         )}
                                                         <select value={vid.thumb} onChange={e => { const n = [...videos]; n[idx].thumb = e.target.value; setVideos(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none" }}>
                                                             <option value="">-- Geen thumbnail --</option>
@@ -991,7 +1083,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Afbeelding</label>
                                                             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                                                                 {tip.image && (
-                                                                    <img src={`/${tip.image}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                                                                    <img src={imagePreviewUrls[tip.image] || `/${tip.image}`} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
                                                                 )}
                                                                 <select value={tip.image || ""} onChange={e => { const n = [...omgeving]; n[idx].image = e.target.value; setOmgeving(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
                                                                     <option value="">-- Geen afbeelding --</option>
@@ -1079,6 +1171,116 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                 <button onClick={handleSaveExpiredPage} disabled={isSaving} style={{ marginTop: "10px", alignSelf: "flex-end", backgroundColor: "#333", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
                             </div>
                         </details>
+
+                        {/* Sectie: Mediabibliotheek */}
+                        <details
+                            style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}
+                            onToggle={(e) => { if ((e.target as HTMLDetailsElement).open) loadMediaLibrary(); }}
+                        >
+                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🖼️ Mediabibliotheek</summary>
+                            <div style={{ marginTop: "15px" }}>
+                                {isLoadingMedia && <p style={{ fontSize: "0.85rem", color: "#666" }}>⏳ Laden...</p>}
+                                {mediaLoaded && (
+                                    <>
+                                        {mediaGithubOk === false && (
+                                            <p style={{ fontSize: "0.85rem", color: "#b3362a", backgroundColor: "#fdecea", padding: "10px", borderRadius: "8px", marginBottom: "15px" }}>
+                                                ⚠️ GITHUB_TOKEN ontbreekt — bekijken werkt, uploaden en verwijderen zijn uitgeschakeld.
+                                            </p>
+                                        )}
+                                        <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "10px" }}>
+                                            {mediaImages.length} afbeelding(en) in public/images. Na uploaden/verwijderen duurt het ±1-2 min voordat de wijziging live op de site staat.
+                                        </p>
+
+                                        {mediaGithubOk && (
+                                            <div style={{ marginBottom: "15px" }}>
+                                                <label style={{ display: "inline-block", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", cursor: isUploadingMedia ? "not-allowed" : "pointer", fontWeight: "bold", opacity: isUploadingMedia ? 0.6 : 1 }}>
+                                                    📤 {isUploadingMedia ? "Bezig met uploaden..." : "Afbeeldingen uploaden"}
+                                                    <input
+                                                        type="file"
+                                                        multiple
+                                                        accept="image/*,.heic,.heif"
+                                                        disabled={isUploadingMedia}
+                                                        onChange={(e) => { handleMediaUpload(e.target.files); e.target.value = ""; }}
+                                                        style={{ display: "none" }}
+                                                    />
+                                                </label>
+                                                {uploadStatusLines.length > 0 && (
+                                                    <div style={{ marginTop: "10px", fontSize: "0.78rem", color: "#444", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px" }}>
+                                                        {uploadStatusLines.map((line, i) => <div key={i}>{line}</div>)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "12px" }}>
+                                            {mediaImages.map(img => {
+                                                const usage = mediaUsage[img.name];
+                                                const isUnused = usage && !usage.used;
+                                                return (
+                                                    <div key={img.name} style={{ position: "relative", border: `2px solid ${isUnused ? "#4A5D23" : "#eee"}`, borderRadius: "8px", padding: "8px", backgroundColor: isUnused ? "#f2f7ef" : "#fff" }}>
+                                                        {!img.isLive && (
+                                                            <span style={{ position: "absolute", top: "6px", left: "6px", backgroundColor: "rgba(0,0,0,0.65)", color: "#fff", fontSize: "0.62rem", padding: "2px 6px", borderRadius: "10px" }}>⏳ wordt gepubliceerd</span>
+                                                        )}
+                                                        <img src={img.previewUrl} alt={img.name} loading="lazy" style={{ width: "100%", height: "90px", objectFit: "cover", borderRadius: "4px", marginBottom: "6px", backgroundColor: "#eee" }} />
+                                                        <div style={{ fontSize: "0.72rem", wordBreak: "break-all", fontWeight: "bold" }}>{img.name}</div>
+                                                        <div style={{ fontSize: "0.68rem", color: "#999" }}>{img.sizeKB} KB</div>
+                                                        <div style={{ marginTop: "4px" }}>
+                                                            {isUnused ? (
+                                                                mediaGithubOk ? (
+                                                                    <button
+                                                                        onClick={() => handleDeleteMedia(img.name)}
+                                                                        disabled={deletingImage === img.name}
+                                                                        style={{ width: "100%", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "6px", padding: "4px 0", fontSize: "0.7rem", cursor: "pointer", fontWeight: "bold" }}
+                                                                    >
+                                                                        {deletingImage === img.name ? "⏳" : "🗑️ Verwijderen"}
+                                                                    </button>
+                                                                ) : (
+                                                                    <div style={{ fontSize: "0.7rem", color: "#4A5D23", fontWeight: "bold" }}>🟢 Niet gebruikt</div>
+                                                                )
+                                                            ) : (
+                                                                <details>
+                                                                    <summary style={{ display: "list-item", listStylePosition: "inside", width: "100%", boxSizing: "border-box", backgroundColor: "#eee", color: "#b3362a", border: "none", borderRadius: "6px", padding: "4px 6px", fontSize: "0.7rem", cursor: "pointer", fontWeight: "bold" }}>
+                                                                        In gebruik ({usage?.locations.length || 0})
+                                                                    </summary>
+                                                                    <ul style={{ fontSize: "0.65rem", color: "#666", paddingLeft: "16px", margin: "4px 0 0" }}>
+                                                                        {usage?.locations.map((loc, i) => <li key={i}>{loc}</li>)}
+                                                                    </ul>
+                                                                </details>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </details>
+
+                        {pendingConflict && (
+                            <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+                                <div style={{ background: "#fff", borderRadius: "12px", padding: "24px", maxWidth: "420px" }}>
+                                    <p style={{ marginBottom: "16px" }}>Er bestaat al een afbeelding met (ongeveer) de naam <strong>{pendingConflict.fileName}</strong>. Wat wil je doen?</p>
+                                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                        <button onClick={() => pendingConflict.resolve("overwrite")} style={{ backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "6px", padding: "8px 14px", cursor: "pointer", fontWeight: "bold" }}>Overschrijven</button>
+                                        <button onClick={() => pendingConflict.resolve("rename")} style={{ backgroundColor: "#4A5D23", color: "white", border: "none", borderRadius: "6px", padding: "8px 14px", cursor: "pointer", fontWeight: "bold" }}>Hernoemen</button>
+                                        <button onClick={() => pendingConflict.resolve("cancel")} style={{ backgroundColor: "#999", color: "white", border: "none", borderRadius: "6px", padding: "8px 14px", cursor: "pointer", fontWeight: "bold" }}>Annuleren</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {blockedDelete && (
+                            <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+                                <div style={{ background: "#fff", borderRadius: "12px", padding: "24px", maxWidth: "440px" }}>
+                                    <p style={{ color: "#b3362a", fontWeight: "bold", marginBottom: "8px" }}>🔴 "{blockedDelete.name}" is nog in gebruik</p>
+                                    <ul style={{ fontSize: "0.85rem", color: "#666", paddingLeft: "18px" }}>
+                                        {blockedDelete.locations.map((loc, i) => <li key={i}>{loc}</li>)}
+                                    </ul>
+                                    <button onClick={() => setBlockedDelete(null)} style={{ marginTop: "12px", backgroundColor: "#333", color: "white", border: "none", borderRadius: "6px", padding: "8px 16px", cursor: "pointer", fontWeight: "bold" }}>Sluiten</button>
+                                </div>
+                            </div>
+                        )}
 
 
                         {/* Sectie: Gameroom */}
