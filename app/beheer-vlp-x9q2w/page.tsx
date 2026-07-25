@@ -262,7 +262,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const loadMediaLibrary = async (force = false) => {
         if ((mediaLoaded && !force) || isLoadingMedia) return;
         setIsLoadingMedia(true);
-        const [images, usage, ghOk] = await Promise.all([listMediaImages(), getImageUsageMap(), isGithubConfigured()]);
+        // Eerst de lijst, daarna de gebruik-check op precies díe lijst: anders kunnen beide
+        // een eigen (net andere) momentopname van GitHub krijgen en mist een tegel zijn usage.
+        const [images, ghOk] = await Promise.all([listMediaImages(), isGithubConfigured()]);
+        const usage = await getImageUsageMap(images.map(i => i.name));
         setMediaImages(images);
         setMediaUsage(usage);
         setMediaGithubOk(ghOk);
@@ -1251,7 +1254,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "12px" }}>
                                             {mediaImages.map(img => {
                                                 const usage = mediaUsage[img.name];
-                                                const isUnused = usage && !usage.used;
+                                                const usageKnown = !!usage;
+                                                const isUnused = usageKnown && !usage.used;
                                                 return (
                                                     <div key={img.name} style={{ position: "relative", border: `2px solid ${isUnused ? "#4A5D23" : "#eee"}`, borderRadius: "8px", padding: "8px", backgroundColor: isUnused ? "#f2f7ef" : "#fff" }}>
                                                         {!img.isLive && (
@@ -1286,15 +1290,17 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                                 ) : (
                                                                     <div style={{ fontSize: "0.7rem", color: "#4A5D23", fontWeight: "bold" }}>🟢 Niet gebruikt</div>
                                                                 )
-                                                            ) : (
+                                                            ) : usageKnown ? (
                                                                 <details>
                                                                     <summary style={{ display: "list-item", listStylePosition: "inside", width: "100%", boxSizing: "border-box", backgroundColor: "#eee", color: "#b3362a", border: "none", borderRadius: "6px", padding: "4px 6px", fontSize: "0.7rem", cursor: "pointer", fontWeight: "bold" }}>
-                                                                        In gebruik ({usage?.locations.length || 0})
+                                                                        In gebruik ({usage.locations.length})
                                                                     </summary>
                                                                     <ul style={{ fontSize: "0.65rem", color: "#666", paddingLeft: "16px", margin: "4px 0 0" }}>
-                                                                        {usage?.locations.map((loc, i) => <li key={i}>{loc}</li>)}
+                                                                        {usage.locations.map((loc, i) => <li key={i}>{loc}</li>)}
                                                                     </ul>
                                                                 </details>
+                                                            ) : (
+                                                                <div style={{ fontSize: "0.7rem", color: "#999", fontWeight: "bold" }}>⏳ Status laden...</div>
                                                             )}
                                                         </div>
                                                     </div>

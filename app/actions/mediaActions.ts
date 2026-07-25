@@ -123,12 +123,16 @@ function baseNameMatches(value: string | undefined | null, filename: string): bo
     return value.split("/").pop() === filename;
 }
 
-export async function getImageUsageMap(): Promise<Record<string, ImageUsage>> {
+// `imageNames` meegeven zodat de aanroeper dezelfde momentopname gebruikt als voor de tegels.
+// Zonder dat deed deze functie een eigen listMediaImages()-call; vlak na een upload/verwijder-commit
+// kon die net een andere lijst opleveren, waardoor een tegel geen usage-entry had en de UI
+// "In gebruik (0)" toonde. Scheelt bovendien een dubbele GitHub-API-call.
+export async function getImageUsageMap(imageNames?: string[]): Promise<Record<string, ImageUsage>> {
     const data = await getAppDataFresh() as any;
-    const images = await listMediaImages();
+    const names = imageNames ?? (await listMediaImages()).map(i => i.name);
 
     const usageMap: Record<string, string[]> = {};
-    for (const img of images) usageMap[img.name] = [];
+    for (const name of names) usageMap[name] = [];
 
     const addUsage = (filename: string, label: string) => {
         if (usageMap[filename] && !usageMap[filename].includes(label)) {
@@ -138,8 +142,7 @@ export async function getImageUsageMap(): Promise<Record<string, ImageUsage>> {
 
     const scanLanguageBlock = (block: any, langSuffix: string) => {
         if (!block) return;
-        for (const img of images) {
-            const filename = img.name;
+        for (const filename of names) {
 
             if (baseNameMatches(block.property?.headerImage, filename)) {
                 addUsage(filename, `Header afbeelding${langSuffix}`);
@@ -180,8 +183,8 @@ export async function getImageUsageMap(): Promise<Record<string, ImageUsage>> {
     }
 
     const result: Record<string, ImageUsage> = {};
-    for (const img of images) {
-        result[img.name] = { used: usageMap[img.name].length > 0, locations: usageMap[img.name] };
+    for (const name of names) {
+        result[name] = { used: usageMap[name].length > 0, locations: usageMap[name] };
     }
     return result;
 }
