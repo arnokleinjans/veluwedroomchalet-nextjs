@@ -1,0 +1,1290 @@
+{
+  "accessCode": "VELUWE2026",
+  "bookings": [
+    {
+      "id": "LUDWIG-3MYM",
+      "guestName": "Ludwig",
+      "checkIn": "2026-04-12",
+      "checkOut": "2026-04-13",
+      "language": "de",
+      "keyCode": ""
+    },
+    {
+      "id": "ANNKATHRIN-4VKM",
+      "guestName": "Annkathrin Luger",
+      "checkIn": "2026-05-08",
+      "checkOut": "2026-05-10",
+      "language": "de",
+      "keyCode": "12334"
+    },
+    {
+      "id": "SUZANNE-IJOU",
+      "guestName": "Suzanne Van Der Sluijs",
+      "checkIn": "2026-05-01",
+      "checkOut": "2026-05-03",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "SANDRA-UNLN",
+      "guestName": "Sandra Buijs",
+      "checkIn": "2026-04-27",
+      "checkOut": "2026-05-01",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "ERIK-Y5MA",
+      "guestName": "Erik & Tharsini Holman",
+      "checkIn": "2026-04-24",
+      "checkOut": "2026-04-27",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "52677",
+      "guestName": "E. Karthaus",
+      "checkIn": "2026-12-31",
+      "checkOut": "2027-01-02",
+      "language": "nl",
+      "keyCode": "",
+      "aliases": [
+        "E-XVSX"
+      ]
+    },
+    {
+      "id": "52684",
+      "guestName": "Jessie Bruls",
+      "checkIn": "2026-09-04",
+      "checkOut": "2026-09-11",
+      "language": "nl",
+      "keyCode": "",
+      "aliases": [
+        "JESSIE-3GBI"
+      ]
+    },
+    {
+      "id": "52723",
+      "guestName": "Annelies Deckers",
+      "checkIn": "2026-08-25",
+      "checkOut": "2026-08-29",
+      "language": "nl",
+      "keyCode": "",
+      "aliases": [
+        "ANNELIES-PKJK"
+      ]
+    },
+    {
+      "id": "LAURA-2S5A",
+      "guestName": "Laura Witte",
+      "checkIn": "2026-07-19",
+      "checkOut": "2026-07-25",
+      "language": "nl",
+      "keyCode": "",
+      "nachtregistratie": {
+        "status": "ingevuld",
+        "betaalwijze": "receptie",
+        "huurderNaam": "Laura Witte",
+        "adres": "De Balg 10",
+        "telefoon": "06-28219430",
+        "email": "",
+        "aantalPersonen": 2,
+        "aankomst": "2026-07-19",
+        "vertrek": "2026-07-25",
+        "bedrag": 41.25,
+        "opmerkingen": "Huurder betaalt de toeristenbelasting bij aankomst zelf bij de receptie",
+        "ingevuldOp": "2026-07-19T17:13:09.745Z"
+      }
+    },
+    {
+      "id": "ISABELLE-5AL5",
+      "guestName": "Isabelle Schoorl",
+      "checkIn": "2026-07-13",
+      "checkOut": "2026-07-16",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "ELINE-LYHV",
+      "guestName": "Eline Slot",
+      "checkIn": "2026-07-10",
+      "checkOut": "2026-07-12",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "WOUTER-M3V9",
+      "guestName": "Wouter Klene",
+      "checkIn": "2026-06-26",
+      "checkOut": "2026-06-28",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "KATHY-D5SN",
+      "guestName": "Kathy De Bruin",
+      "checkIn": "2026-06-19",
+      "checkOut": "2026-06-21",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "BEPPIE-K3P7",
+      "guestName": "Beppie Hendriks",
+      "checkIn": "2026-06-15",
+      "checkOut": "2026-06-19",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "DAISY-PVTX",
+      "guestName": "Daisy van der Horst",
+      "checkIn": "2026-06-05",
+      "checkOut": "2026-06-07",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "JELLE-T2IE",
+      "guestName": "Jelle Kramer",
+      "checkIn": "2026-05-29",
+      "checkOut": "2026-05-31",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "JANINE-WEX5",
+      "guestName": "Janine van Vlimmeren-Dries",
+      "checkIn": "2026-05-16",
+      "checkOut": "2026-05-17",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "REMCO-D4N3",
+      "guestName": "Remco Doedee",
+      "checkIn": "2026-05-14",
+      "checkOut": "2026-05-16",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "JANNIE-RI7P",
+      "guestName": "Jannie Dekker",
+      "checkIn": "2026-05-11",
+      "checkOut": "2026-05-14",
+      "language": "nl",
+      "keyCode": ""
+    },
+    {
+      "id": "MARCEL-421V",
+      "guestName": "Marcel Loos",
+      "checkIn": "2026-04-20",
+      "checkOut": "2026-04-24",
+      "language": "nl"
+    },
+    {
+      "id": "MEHMET-GHW7",
+      "guestName": "Mehmet Akbal",
+      "checkIn": "2026-05-04",
+      "checkOut": "2026-05-07",
+      "language": "nl"
+    },
+    {
+      "id": "KITTY-8VD8",
+      "guestName": "Kitty van der Pijll",
+      "checkIn": "2026-05-03",
+      "checkOut": "2026-05-04",
+      "language": "nl"
+    },
+    {
+      "id": "ANNEKE-EC9R",
+      "guestName": "Anneke Heijboer",
+      "checkIn": "2026-05-18",
+      "checkOut": "2026-05-22",
+      "language": "nl"
+    },
+    {
+      "id": "NICOLE-0FAJ",
+      "guestName": "Nicole Leise",
+      "checkIn": "2026-05-22",
+      "checkOut": "2026-05-25",
+      "language": "nl"
+    },
+    {
+      "id": "IRA-1M5E",
+      "guestName": "Ira en Antonia",
+      "checkIn": "2026-05-25",
+      "checkOut": "2026-05-29",
+      "language": "nl"
+    },
+    {
+      "id": "PATRICK-M22M",
+      "guestName": "Patrick & Barbara",
+      "checkIn": "2026-06-12",
+      "checkOut": "2026-06-14",
+      "language": "nl"
+    },
+    {
+      "id": "CELINE-GD9J",
+      "guestName": "Celine",
+      "checkIn": "2026-05-21",
+      "checkOut": "2030-05-21",
+      "language": "nl"
+    },
+    {
+      "id": "ANJA-XSEV",
+      "guestName": "Anja Schruba",
+      "checkIn": "2026-05-31",
+      "checkOut": "2026-06-05",
+      "language": "de"
+    },
+    {
+      "id": "LYNN-Q6VW",
+      "guestName": "Lynn Hofstetter",
+      "checkIn": "2026-06-07",
+      "checkOut": "2026-06-09",
+      "language": "nl"
+    },
+    {
+      "id": "CLARA-FEUG",
+      "guestName": "Clara Granda",
+      "checkIn": "2026-06-21",
+      "checkOut": "2026-06-24",
+      "language": "nl"
+    },
+    {
+      "id": "EVA-MI3O",
+      "guestName": "Eva Zevenbergen",
+      "checkIn": "2026-06-29",
+      "checkOut": "2026-07-02",
+      "language": "nl"
+    },
+    {
+      "id": "ANTOINET-I2AO",
+      "guestName": "Antoinet Kersten",
+      "checkIn": "2026-06-24",
+      "checkOut": "2026-06-26",
+      "language": "nl"
+    },
+    {
+      "id": "ANNE-WZ8G",
+      "guestName": "Anne Hermans",
+      "checkIn": "2026-07-03",
+      "checkOut": "2026-07-05",
+      "language": "nl"
+    },
+    {
+      "id": "PIM-L3QF",
+      "guestName": "Pim Rijkes",
+      "checkIn": "2026-07-07",
+      "checkOut": "2026-07-10",
+      "language": "nl"
+    },
+    {
+      "id": "MARCO-JAZ7",
+      "guestName": "Marco Scholten",
+      "checkIn": "2026-07-18",
+      "checkOut": "2026-07-19",
+      "language": "nl"
+    },
+    {
+      "id": "MARINA-UVZ9",
+      "guestName": "Marina Ierokhina",
+      "checkIn": "2026-07-17",
+      "checkOut": "2026-07-18",
+      "language": "en"
+    },
+    {
+      "id": "53074",
+      "guestName": "Karin Ram-De Man",
+      "checkIn": "2026-07-25",
+      "checkOut": "2026-07-31",
+      "language": "nl",
+      "nachtregistratie": {
+        "status": "ingevuld",
+        "betaalwijze": "receptie",
+        "huurderNaam": "Karin Ram-De Man",
+        "adres": "Ouverturelaan 115",
+        "telefoon": "0628786580",
+        "email": "info@yoga-mudra.nl",
+        "aantalPersonen": 2,
+        "aankomst": "2026-07-25",
+        "vertrek": "2026-07-31",
+        "bedrag": 41.25,
+        "opmerkingen": "Huurder betaalt de toeristenbelasting bij aankomst zelf bij de receptie\n",
+        "ingevuldOp": "2026-07-19T18:33:13.511Z",
+        "postcode": "3208CM",
+        "woonplaats": "Spijkenisse"
+      }
+    },
+    {
+      "id": "54188",
+      "guestName": "Sandra Buijs",
+      "checkIn": "2026-08-08",
+      "checkOut": "2026-08-09",
+      "language": "nl"
+    },
+    {
+      "id": "53679",
+      "guestName": "Monique Pellikaan",
+      "checkIn": "2026-08-10",
+      "checkOut": "2026-08-14",
+      "language": "nl"
+    },
+    {
+      "id": "53102",
+      "guestName": "Maud Baeckens",
+      "checkIn": "2026-08-14",
+      "checkOut": "2026-08-16",
+      "language": "nl"
+    },
+    {
+      "id": "55602",
+      "guestName": "Wendy Koelewijn",
+      "checkIn": "2026-08-16",
+      "checkOut": "2026-08-19",
+      "language": "nl"
+    },
+    {
+      "id": "53021",
+      "guestName": "Jolanda Rietbergen",
+      "checkIn": "2026-08-03",
+      "checkOut": "2026-08-08",
+      "language": "nl",
+      "nachtregistratie": {
+        "status": "verstuurd",
+        "betaalwijze": "overmaken",
+        "huurderNaam": "Jolanda Rietbergen",
+        "adres": "Jacob Catsstraat 319",
+        "postcode": "8265XS",
+        "woonplaats": "Kampen",
+        "telefoon": "06-48116832",
+        "email": "jolanda29_@hotmail.com",
+        "aantalPersonen": 2,
+        "aankomst": "2026-08-03",
+        "vertrek": "2026-08-08",
+        "bedrag": 35,
+        "opmerkingen": "Verhuurder stort de toeristenbelasting op rekening van het Veluws Hof",
+        "ingevuldOp": "2026-07-21T10:17:36.754Z",
+        "verstuurdOp": "2026-07-21T10:17:48.183Z"
+      }
+    },
+    {
+      "id": "53816",
+      "guestName": "Alice Bauducel",
+      "checkIn": "2026-08-19",
+      "checkOut": "2026-08-22",
+      "language": "en"
+    },
+    {
+      "id": "55796",
+      "guestName": "Martijn Hardebol",
+      "checkIn": "2026-08-22",
+      "checkOut": "2026-08-23",
+      "language": "nl"
+    },
+    {
+      "id": "53954",
+      "guestName": "Cesare Tarricone",
+      "checkIn": "2026-08-23",
+      "checkOut": "2026-08-25",
+      "language": "en"
+    },
+    {
+      "id": "55645",
+      "guestName": "Sandra Kobesen",
+      "checkIn": "2026-08-29",
+      "checkOut": "2026-08-31",
+      "language": "nl"
+    },
+    {
+      "id": "54852",
+      "guestName": "C.K. De Haan",
+      "checkIn": "2026-08-31",
+      "checkOut": "2026-09-02",
+      "language": "nl"
+    },
+    {
+      "id": "53193",
+      "guestName": "Erica van Schijndel",
+      "checkIn": "2026-09-12",
+      "checkOut": "2026-09-13",
+      "language": "nl"
+    },
+    {
+      "id": "54164",
+      "guestName": "Patricia eilers",
+      "checkIn": "2026-09-13",
+      "checkOut": "2026-09-25",
+      "language": "nl"
+    },
+    {
+      "id": "53664",
+      "guestName": "Esra Kır",
+      "checkIn": "2026-09-25",
+      "checkOut": "2026-08-27",
+      "language": "nl"
+    }
+  ],
+  "property": {
+    "name": "Veluwe Droom Chalet",
+    "headerImage": "images/Bos 1.webp",
+    "wifi": {
+      "network": "Wegwezen",
+      "password": "BomenZijnFijn2026"
+    },
+    "host": {
+      "name": "Arno & Kitty",
+      "phone": "+31682287283",
+      "avatar": "https://ui-avatars.com/api/?name=Arno&background=4A5D23&color=fff&rounded=true"
+    },
+    "subtitle": "Welkom @naamgast",
+    "keyCode": "8352",
+    "staanplaats": "Bosrand 18 / Klavergraslaan",
+    "campingEmail": "info@veluwshof.nl"
+  },
+  "rules": [
+    {
+      "title": "Afvalscheidingkje",
+      "desc": "Groenbak achter het schuurtje. Papier in de blauwe bak. Restafval in de grijze bakje"
+    },
+    {
+      "title": "test",
+      "desc": "test..."
+    }
+  ],
+  "videos": [
+    {
+      "title": "Sleutelkastje",
+      "subtitle": "Waar ligt de sleutel?",
+      "thumb": "images/Sleutelkastje.webp",
+      "url": "https://www.youtube.com/embed/E6U7YRUr8AI",
+      "leafStyle": "leaf-oak",
+      "leafRotate": 206,
+      "leafTranslateX": 35,
+      "leafTranslateY": 12
+    }
+  ],
+  "restaurants": [
+    {
+      "name": "Bar het suffertje",
+      "desc": "testbar",
+      "url": "https://www.nu.nl/"
+    },
+    {
+      "name": "Pannenkoekenboerderij De Boswachter",
+      "desc": "Heerlijk voor de kinderen. 5 minuten fietsen.",
+      "url": "https://www.nu.nl/"
+    },
+    {
+      "name": "Nieuwe Tip",
+      "desc": "Tip",
+      "url": "https://www.nu.nl/"
+    }
+  ],
+  "insights": [
+    {
+      "title": "Nachtregistratie",
+      "subtitle": "Recreatiepark 't Veluws Hof vraagt om een nachtregistratie vóór uw aankomst. Vul de gegevens alsnog in en controleer ze — wij sturen het formulier daarna door naar het recreatiepark.",
+      "icon": "icons/clipboard.svg",
+      "action": "none",
+      "detailContent": "<p></p>",
+      "image": "",
+      "widgetCode": "",
+      "visibility": "nachtregistratie"
+    },
+    {
+      "icon": "icons/clock.svg",
+      "title": "Inchecken",
+      "subtitle": "Inchecken kan op @aankomst tussen 15.00 uur en 22.00 uur en gaat contactloos. Lees hier de belangrijke instructies met betrekking tot de aankomst.",
+      "action": "none",
+      "detailContent": "<h3>Hartelijk welkom in Hoenderloo en in het Veluwe Droom Chalet!</h3><p></p><p>Bij aankomst bij de hoofdingang van Bospark ’t Veluws Hof kunt u uw <strong>auto parkeren op de centrale parkeerplaats</strong>. Wij verzoeken u vervolgens om zich te <strong>melden bij de receptie</strong>. Uw komst is daar al bekend; wij hebben uw gegevens vooraf geregistreerd.</p><p>Bij de receptie betaalt u de <strong>toeristenbelasting</strong>. Op uw verzoek kan de medewerker van de receptie u op de plattegrond van het park aanwijzen waar het Veluwe Droom Chalet te vinden is (Bosrand 18). De <strong>routebeschrijving</strong> vanaf de receptie naar ons chalet staat overigens ook uitgebreid in deze web-app.</p><p>Vervolgens loopt u te voet naar het chalet. In het schuurtje bij het chalet hangt een <strong>sleutelkastje</strong> waarin de sleutel zich bevindt. De <strong>sleutelcode</strong> is <span style=\"color: rgb(102, 102, 102); font-size: 13.6px;\">@sleutelcode</span></p><p></p><img src=\"/images/Parkeerkaart.jpg\" alt=\"Parkeerkaart.jpg\" width=\"50%\" style=\"width: 50%; float: right; margin-left: 14px; margin-bottom: 8px;\"><p>Binnen in het chalet ligt op de eettafel het <strong>kaartje voor de slagboom</strong>. Met dit kaartje kunt u daarna met uw auto het park oprijden en doorrijden tot aan het chalet. Het is toegestaan om 1 auto naast het chalet te parkeren.</p><p>Bij verlies of beschadiging van zowel de sleutel als de slagboomkaart zijn wij genoodzaakt kosten in rekening te brengen.<br></p><img src=\"/images/Check in NL transparant.webp\" alt=\"Check in NL transparant.webp\"><p></p><p>Wij wensen u een prettig verblijf!<br></p>",
+      "image": "images/Checkin banner.png",
+      "widgetCode": "",
+      "visibility": "checkin"
+    },
+    {
+      "title": "Uitchecken",
+      "subtitle": "Vandaag is het alweer tijd om uit te checken bij Veluwe Droom Chalet. We hopen dat jullie een heerlijk verblijf hebben gehad en met mooie herinneringen naar huis gaan.\n\nDe check-outtijd is uiterlijk 11:00. Laat het ons gerust weten als er nog iets is waar we bij kunnen helpen. Lees de vertrekinstructies voor meer informatie.",
+      "icon": "icons/clock.svg",
+      "action": "none",
+      "detailContent": "<img src=\"/images/Check out NL transparant.webp\" alt=\"Check out NL transparant.webp\" style=\"text-align: center;\"><p></p>",
+      "image": "",
+      "widgetCode": "",
+      "visibility": "checkout"
+    },
+    {
+      "title": "Zo vind je ons chalet",
+      "subtitle": "Hier vind je een uitgebreide omschrijving over hoe je ons Chalet aan de Bosrand 18 kunt vinden.\nVoor de meer visueel ingestelden onder ons, hebben we ook een plattegrond van het park toegevoegd die sowieso handig is om bij de hand te hebben.",
+      "icon": "icons/map.svg",
+      "action": "none",
+      "detailContent": "<p>Rij langs de <strong>receptie</strong> en sla bij het <strong>zwembad rechtsaf</strong>. Ga dat straatje rechtdoor tot je bij de <strong>Blauwgraslaan</strong> komt. Sla daar <strong>rechtsaf</strong>.</p><p>Een stukje verderop sla je <strong>linksaf</strong> de <strong>Helmgraslaan</strong> in.</p><p>Volg de Helmgraslaan en sla <strong>linksaf</strong> naar de <strong>Klavergraslaan</strong>. Ons chalet is vervolgens het <strong>7e chalet aan je rechterhand</strong>.</p><p>Bij de ingang hangt een bordje met <strong>Bosrand 18</strong>.</p><p></p><img src=\"/images/Plattegrond.webp\" alt=\"Plattegrond.webp\" style=\"text-align: center;\"><p></p>",
+      "image": "",
+      "widgetCode": "",
+      "visibility": "checkin"
+    },
+    {
+      "icon": "icons/key.svg",
+      "title": "Code sleutelkastje",
+      "subtitle": "Het sleutelkastje hangt in het schuurtje. Klik hier voor de code van het sleutelkastje. Graag bij vertrek de sleutel weer terughangen in het sleutelkastje en het deurtje vergrendelen.",
+      "action": "none",
+      "detailContent": "<h3></h3><p>@sleutelcode</p><p></p>",
+      "widgetCode": "",
+      "image": "images/Sleutelkastje.webp",
+      "visibility": "always"
+    },
+    {
+      "title": "Vertrekinstructies",
+      "subtitle": "Het uitchecken is @vertrek uiterlijk om 11.00 uur en is eveneens contactloos. Lees hier de belangrijke instructies met betrekking tot het vertrek.",
+      "icon": "icons/info.svg",
+      "action": "none",
+      "detailContent": "<p>Wij verzoeken het Veluwe Droom Chalet bij vertrek netjes en volgens onderstaande instructies achter te laten:</p><ul><li><p>Laat het chalet&nbsp;<strong>bezemschoon</strong>&nbsp;achter.</p></li><li><p>Was het gebruikte servies en ruim dit op in de kasten.</p></li><li><p>Leeg de koelkast en verwijder etenswaren en afval.</p></li><li><p>Verzamel het afval en deponeer dit in de daarvoor bestemde containers op het park (achter het Witte Huis).</p></li><li><p>Zet de verwarming terug naar een lage stand (7 graden) en schakel alle elektrische apparaten uit.</p></li><li><p>Sluit ramen en deuren zorgvuldig af.</p></li><li><p>Verlaat eerst met de auto het park en maak hierbij gebruik van de parkeerkaart (en volg dus niet bij het openen van de slagboom snel een andere auto), <strong>anders gaat de slagboom voor de gasten die na jullie komen niet meer open......</strong></p></li><li><p>Loop terug naar het chalet en leg de parkeerkaart op tafel en plaats tot slot de&nbsp;<strong>sleutel in het sleutelkastje</strong>.</p></li></ul><p></p><img src=\"/images/Check out NL transparant.webp\" alt=\"Check out NL transparant.webp\"><p></p><p>Wij verzoeken u het chalet&nbsp;<strong>uiterlijk op het afgesproken tijdstip</strong>&nbsp;te verlaten.</p><p></p><p>Hartelijk dank voor uw verblijf en graag tot ziens in het Veluwe Droom Chalet!</p>",
+      "image": "images/Checkout banner.png",
+      "widgetCode": ""
+    },
+    {
+      "title": "Speciaal voor jullie… ",
+      "subtitle": "Willen jullie nog een keer in het Veluwe Droom Chalet verblijven, boek dan rechtstreeks via onze website en profiteer van 15% korting. De kortingscode is ook overdraagbaar aan familie, vrienden en kennissen",
+      "icon": "icons/star.svg",
+      "action": "none",
+      "detailContent": "<p>Wat fijn dat jullie in het <strong>Veluwe Droom Chalet </strong>verblijven! We hopen dat jullie genieten van de rust, de natuur en jullie verblijf.</p><p>Omdat jullie hier nu zijn, hebben we iets extra’s:✨ <strong>15% korting op een volgend verblijf!</strong></p><p>Willen jullie nog eens terugkomen? Of familie, vrienden of kennissen laten meegenieten van deze fijne plek?</p><p style=\"text-align: left;\">Boek dan rechtstreeks via <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.veluwedroomchalet.nl\"><strong>onze website</strong></a> en gebruik deze kortingscode voor heel 2027: <br><br><strong>Veluwe Droom Voordeel 2027</strong></p><p style=\"text-align: left;\"></p><p>👉 Volg ons ook op Facebook en Instagram voor updates en inspiratie</p><p>Wie weet tot een volgende keer 💚</p>",
+      "image": "",
+      "widgetCode": ""
+    },
+    {
+      "icon": "icons/wifi.svg",
+      "title": "Wifi code",
+      "subtitle": "Wees welkom om gebruik te maken van ons gratis WIFI netwerk. Klik hier voor de QR-code en het wachtwoord.",
+      "action": "wifi-modal",
+      "detailContent": "<h3>Scan de QR-code hieronder om direct met ons netwerk te verbinden.</h3><img src=\"/images/Wifi QR Odido.webp\" alt=\"Wifi QR Odido.webp\" style=\"text-align: center;\"><h3>Voor het geval de barcode niet werkt</h3><p>WiFi naam:<strong> Odido-32B314</strong></p><p>Wachtwoord <strong>TQHK7AAFUTMQ3NBQ</strong></p>",
+      "image": "",
+      "widgetCode": ""
+    },
+    {
+      "title": "QR codes toegang zwembad",
+      "subtitle": "Tijdens jullie verblijf hebben jullie gratis toegang tot het openlucht zwembad van ’t Veluws Hof. Klik hier om te lezen hoe je eenvoudig toegang krijgt met jullie persoonlijke QR-codes.",
+      "icon": "icons/swimmer.svg",
+      "action": "none",
+      "detailContent": "<h3>🏊‍♂️ Toegang tot het zwembad</h3><p>Het openlucht zwembad van Recreatiepark ’t Veluws Hof maakt gebruik van een digitaal toegangssysteem via QR-codes. Om het jullie zo makkelijk mogelijk te maken, hebben wij dit volledig digitaal voor jullie klaargezet.</p><h3>Waar vind ik de QR-codes?</h3><ul><li><p><strong>Direct in deze app:</strong> Je hoeft niet langs de receptie. De persoonlijke QR-codes voor jullie gezelschap staan direct hieronder/klaar in deze app.</p></li><li><p><strong>Scannen bij de entree:</strong> Houd de QR-code simpelweg voor de scanner bij de toegangspoort van het zwembad om binnen te komen.</p></li></ul><h3>Belangrijk om te weten:</h3><ul><li><p><strong>Unieke code per persoon:</strong> Iedere gast heeft een eigen, unieke QR-code nodig om de poort te passeren.</p></li><li><p><strong>Niet overdraagbaar:</strong> De codes zijn strikt persoonlijk en alleen geldig voor de duur van jullie verblijf. Bij misbruik worden ze automatisch geblokkeerd.</p></li><li><p><strong>Visite?</strong> Ontvangen jullie bezoek dat gezellig mee wil zwemmen? Dan kun je als gast bij de receptie van het park een dagpas (QR-code) voor je visite laten maken.</p></li></ul><h3>⚠️ Belangrijke zwembadregels</h3><p>Het park hanteert een aantal strikte regels bij het zwembad om ieders veiligheid en rust te garanderen:</p><ul><li><p><strong>Geen</strong> glaswerk en <strong>geen</strong> alcoholische dranken toegestaan.</p></li><li><p>Het is absoluut <strong>niet</strong> toegestaan om te duiken.</p></li><li><p>Radios, boomboxen of ander versterkt geluid zijn niet toegestaan.</p></li><li><p>Let op de <strong>rookvrije zones</strong>; deze bevinden zich op de ligweiden en rondom het kinderbad.</p></li></ul><p><em>Scroll naar beneden in dit scherm om jullie persoonlijke QR-codes te bekijken.</em> Veel zwemplezier!</p><p></p><img src=\"/images/qr.webp\" alt=\"qr.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-2.webp\" alt=\"qr-2.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-2.webp\" alt=\"qr-2.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-3.webp\" alt=\"qr-3.webp\" style=\"text-align: center;\"><p></p>",
+      "image": "images/Zwembad.webp",
+      "widgetCode": ""
+    },
+    {
+      "icon": "icons/list.svg",
+      "title": "Park-en Chaletregels",
+      "subtitle": "Om het verblijf voor iedereen aangenaam te maken, gelden de volgende park- en chaletregels op Recreatiepark 't Veluws Hof en in het Veluwe Droom Chalet. Klik hier voor de regels",
+      "action": "none",
+      "detailContent": "<p><strong>🏡&nbsp;Huisregels – Veluwe Droom Chalet</strong></p><p>Om het verblijf voor alle gasten prettig, veilig en ontspannen te houden, verzoeken wij u onderstaande huisregels te respecteren. Wij gaan zuinig met ons chalet om, wij gaan er van uit dat u dat ook doet!</p><p><strong>👥&nbsp;Aantal gasten</strong></p><ul><li><p>Het chalet mag uitsluitend worden gebruikt door het&nbsp;<strong>aantal gasten zoals vermeld in de reservering</strong>.</p></li><li><p>Bezoek is toegestaan, echter is&nbsp;<strong>overnachten van extra personen niet toegestaan</strong>&nbsp;zonder voorafgaande toestemming.</p></li></ul><p><strong>🕒&nbsp;Aankomst &amp; vertrek</strong></p><ul><li><p><strong>Check-in</strong>&nbsp;is mogelijk tussen 15.00 en 22.00 uur.</p></li><li><p><strong>Check-out</strong>&nbsp;is mogelijk tussen 7.00 en 11.00 uur.</p></li><li><p>Wij verzoeken u het chalet bij vertrek&nbsp;<strong>netjes en in goede staat</strong>&nbsp;achter te laten.</p></li></ul><p><strong>🚭&nbsp;Roken</strong></p><ul><li><p><strong>Roken is niet toegestaan in het chalet</strong>.</p></li><li><p>Roken buiten is toegestaan, mits gebruik wordt gemaakt van een asbak en er geen overlast ontstaat.</p></li></ul><p><strong>🐶&nbsp;Huisdieren</strong></p><ul><li><p><strong>Maximaal twee honden zijn toegestaan</strong>, uitsluitend indien vooraf aangemeld.</p></li><li><p>Op het park zijn honden&nbsp;<strong>alleen aangelijnd toegestaan</strong>.</p></li><li><p>Wij verzoeken u uw hond&nbsp;<strong>uitsluitend buiten het park uit te laten</strong>.</p></li><li><p>Eventuele ongelukjes dienen&nbsp;<strong>direct en zorgvuldig te worden opgeruimd</strong>.</p></li><li><p>Huisdieren zijn&nbsp;<strong>niet toegestaan op bedden en meubels</strong>.</p></li><li><p>Honden mogen&nbsp;<strong>niet alleen worden achtergelaten in het chalet</strong>.</p></li><li><p>U dient ervoor te zorgen dat uw huisdier&nbsp;<strong>geen (geluids)overlast</strong>&nbsp;veroorzaakt voor andere gasten of omwonenden.</p></li></ul><p><strong>🔇&nbsp;Rust &amp; omgeving</strong></p><ul><li><p>Het chalet is gelegen op een rustig vakantiepark.</p></li><li><p>Tussen&nbsp;<strong>23.00 uur en 07.00 uur</strong>&nbsp;geldt de nachtrust.</p></li><li><p>Geluidsoverlast, harde muziek en storend gedrag zijn niet toegestaan.</p></li><li><p>Feesten en bijeenkomsten met een feestelijk karakter zijn niet toegestaan.</p></li></ul><p><strong>🎆&nbsp;Vuurwerk</strong></p><ul><li><p>Het&nbsp;<strong>afsteken van vuurwerk is ten strengste verboden</strong>, zowel&nbsp;<strong>in en rondom het chalet als op het gehele park</strong>, ongeacht datum of gelegenheid.</p></li><li><p>Dit verbod geldt uitdrukkelijk ook tijdens de jaarwisseling.</p></li></ul><p><strong>🔥&nbsp;Open vuur &amp; veiligheid</strong></p><ul><li><p><strong>Open vuur is in welke vorm dan ook niet toegestaan</strong>, zowel&nbsp;<strong>in het chalet als op het park</strong>.<br>Hieronder vallen onder andere: kaarsen, vuurkorven, barbecues, kampvuren en andere open vlammen.</p></li><li><p>Ramen en deuren dienen bij afwezigheid&nbsp;<strong>gesloten</strong>&nbsp;te worden.</p></li></ul><p><strong>🧼&nbsp;Gebruik, schade &amp; aansprakelijkheid</strong></p><ul><li><p>U dient het chalet, de inventaris en de buitenruimte&nbsp;<strong>zorgvuldig en overeenkomstig de bestemming</strong>&nbsp;te gebruiken.</p></li><li><p>Eventuele schade, breuk of vermissing dient&nbsp;<strong>onverwijld te worden gemeld</strong>.</p></li><li><p>Schade die tijdens het verblijf ontstaat, kan worden verhaald via het boekingsplatform en/of de borgregeling.</p></li></ul><p><strong>🗑️&nbsp;Afval</strong></p><ul><li><p>Afval dient&nbsp;<strong>gescheiden</strong>&nbsp;te worden en te worden gedeponeerd in de daarvoor bestemde containers op het park.</p></li><li><p>Het achterlaten van afval in of rondom het chalet is niet toegestaan.</p></li></ul><p><strong>⚠️&nbsp;Aansprakelijkheid</strong></p><ul><li><p>Het&nbsp;<strong>betreden van het park</strong>, het&nbsp;<strong>gebruik van parkfaciliteiten</strong>&nbsp;en/of&nbsp;<strong>deelname aan activiteiten of evenementen</strong>op het park geschiedt&nbsp;<strong>volledig op eigen risico</strong>.</p></li><li><p>Wij aanvaarden&nbsp;<strong>geen aansprakelijkheid</strong>&nbsp;voor beschadiging, verlies, vermissing en/of diefstal van persoonlijke eigendommen in, bij of rondom het chalet en/of op het park.</p></li></ul><p><strong>🛠️&nbsp;Parkregels</strong></p><ul><li><p>Gasten zijn verplicht zich te houden aan de&nbsp;<strong>geldende parkregels</strong>.</p></li><li><p>Aanwijzingen van parkbeheer of parkmedewerkers dienen&nbsp;<strong>onmiddellijk te worden opgevolgd</strong>.</p></li></ul><p>💛&nbsp;<strong>Wij danken u voor het naleven van deze huisregels.</strong><br>Zo blijft Veluwe Droom Chalet een veilige, rustige en prettige plek voor alle gasten.</p>",
+      "widgetCode": ""
+    },
+    {
+      "title": "'t Veluws Hof",
+      "subtitle": "Hier vindt u informatie over Bospark ‘t Veluws Hof en haar faciliteiten, waaronder: receptie, supermarkt, restaurant, snackbar, bowling, midgetgolf, fietsverhuur en zwembad",
+      "icon": "icons/reception.svg",
+      "action": "none",
+      "detailContent": "<p><strong>De receptie</strong> van het park is direct bij de entree.</p><p>De openingstijden zijn:</p><p>Maandag tot en met vrijdag van 9.00 tot 17.00 uur.</p><p>Zaterdag van 10.00 tot 16.30 uur.</p><p>Zondag van 12.00 tot 16.00 uur.</p><p>De receptie is bereikbaar onder telefoon: <strong>055-3781777</strong>.</p><p>Bij brand of EHBO altijd de receptie waarschuwen!</p><hr><p>De <strong>wasserette</strong> is van 1 april tot 1 oktober dagelijks geopend van 10.00 tot 21.00 uur en is voorzien van 2 wasmachines en 2 drogers. Het wasmiddel zit al in de machine en kan niet los worden toegevoegd. Betaling alleen met <strong>muntgeld</strong>.</p><hr><p>Schuif gezellig aan voor een hapje en drankje. Zowel de <strong>snackbar</strong> als de <strong>bar</strong> zijn geopend van1 april tot 1 oktober.</p><hr><p>Voor een sfeervolle goed uitgeruste <strong>bowlingbaan</strong> hoef je het bospark niet af! <br><br>Met zes moderne bowlingbanen is er volop ruimte voor een ontspannen potje plezier – of je nu komt met <strong>vrienden, familie of voor een kinderfeestje</strong>.</p><p></p><p>Voor kinderen is er extra fun met <strong>disco</strong> bowlen: muziek, lichteffecten en een echte discobal maken het helemaal af. Dankzij automatische bumpers, lichtere ballen en handige rekjes kan iedereen meedoen en scoren.</p><p></p><p>Je huurt een baan per 55 minuten (vanaf het hele uur . Reserveren kan eenvoudig telefonisch via 055 - 378 1666 of tijdens de openingstijden op locatie.</p><blockquote><p>Kortom: plezier gegarandeerd – en wie weet gooi jij die perfecte strike!</p></blockquote><p></p>",
+      "image": "images/Luchtfoto Veluws Hof en omgeving.webp",
+      "widgetCode": ""
+    },
+    {
+      "title": "Handleidingen",
+      "subtitle": "Klik hier voor handleidingen van de meest gebruikte apparatuur in het chalet.",
+      "icon": "icons/tv.svg",
+      "action": "none",
+      "detailContent": "<h3>👨‍🍳 Snelstartgids: Etna Combi-Oven</h3><p>Je maaltijd is slechts een paar klikken verwijderd. Gebruik dit stappenplan om direct aan de slag te gaan.</p><h3>1. De Magnetron (Opwarmen) 🔄</h3><ul><li><p><strong>Activeren:</strong> Druk op het <strong>Wiebertje (◊)</strong>.</p></li><li><p><strong>Functie:</strong> Draai de <strong>linker knop</strong> naar het magnetron-icoon (de golfjes). Je ziet bovenaan <strong>900W </strong>staan.</p></li><li><p><strong>Vermogen:</strong> Pas het wattage (<strong>W</strong>) aan met de <strong>rechter draaiknop</strong>.</p></li><li><p><strong>Tijd:</strong> Druk op het <strong>klok-icoontje</strong> en stel de tijd in met de <strong>rechter draaiknop</strong>.</p></li><li><p><strong>Start:</strong> Druk op <strong>START</strong>.</p></li></ul><h3>2. De Oven (Bakken) 🍕</h3><ul><li><p><strong>Activeren:</strong> Druk op het <strong>Wiebertje (◊)</strong>.</p></li><li><p><strong>Functie:</strong> Draai de <strong>linker knop</strong> naar de ovenstand (bijv. hetelucht ✪).</p></li><li><p><strong>Temperatuur:</strong> Stel de gewenste <strong>°C</strong> in met de <strong>rechter draaiknop</strong>.</p></li><li><p><strong>Start:</strong> Druk op <strong>START</strong>. De oven begint direct met voorverwarmen.</p></li></ul><p></p><h3>🛑 Volledig Uitschakelen</h3><p>Klaar met koken? Zo zet je de oven weer in de ruststand:</p><ol><li><p>Druk op <strong>STOP</strong>.</p></li><li><p>Druk op het <strong>Wiebertje (◊)</strong> om het programma volledig te beëindigen.</p></li></ol><blockquote><p>⚠️ <strong>Belangrijk:</strong> Gebruik <strong>nooit</strong> metaal of aluminiumfolie in de magnetronstand. Dit kan de oven onherstelbaar beschadigen.</p></blockquote><p></p><p><strong>Eet smakelijk!</strong> 🍽️</p><hr><img src=\"/images/Philips afstandsbediening 2.png\" alt=\"Philips afstandsbediening 2.png\" style=\"float: right; margin-left: 14px; margin-bottom: 8px;\"><p style=\"text-align: left;\"><strong>Hoe werkt de tv?</strong></p><ul><li><p>Pak de afstandsbediening en druk stevig op de powerknop in het midden om de tv aan te zetten. De knoppen werken goed, maar vragen iets meer druk dan je misschien gewend bent.</p></li><li><p>De tv start automatisch op een zender. Met de plus- en minknop kun je eenvoudig door de zenders en programma’s bladeren om iets te kiezen wat je wilt kijken.</p></li><li><p>Klaar met kijken of ga je weg? Vergeet dan niet de tv weer uit te zetten.</p></li></ul><p></p><p><strong>Hoe werkt Netflix?</strong></p><ul><li><p>Druk op de grote rode Netflix-knop op de afstandsbediening om de app te openen.</p></li><li><p>Om Netflix te gebruiken heb je een eigen account nodig. Het werkt het makkelijkst als je Netflix al op je mobiele telefoon hebt geïnstalleerd.</p></li><li><p>Kies op de tv voor ‘Sign in’. Er verschijnt nu een scherm met een QR-code. Open de camera op je telefoon en scan deze code. Je wordt automatisch doorgestuurd naar Netflix.</p></li><li><p>Kies op je telefoon je profiel. Je ziet vervolgens een code die overeenkomt met de code op de tv. Bevestig het inloggen en je bent klaar om te kijken.</p></li><li><p>Ga je weg? Vergeet dan niet om weer uit te loggen, zodat anderen geen gebruik maken van jouw account.</p></li></ul><p></p><p><strong>Hoe log je uit bij Netflix?</strong></p><ul><li><p>Open Netflix op de tv en kies een willekeurig profiel.</p></li><li><p>Ga vervolgens linksboven in beeld naar jouw profiel. Klik hierop en kies voor ‘Ondersteuning’.</p></li><li><p>Scroll daarna helemaal naar beneden en kies voor ‘Uitloggen’.</p></li><li><p>Je krijgt de vraag of je zeker weet dat je wilt uitloggen. Kies ‘Ja’ om te bevestigen.</p></li><li><p>Je ziet nu weer het inlogscherm. Je bent succesvol uitgelogd.</p></li><li><p>Wil je terug naar de gewone tv? Druk dan op de knop met het pijltje naar rechts (onder de knop van Rakuten TV). In beeld verschijnt ‘Inputs’. Kies hier voor ‘DTV’ om weer tv te kijken.</p></li></ul><p></p><p><strong>Hoe werkt YouTube?</strong></p><ul><li><p>Druk rechtsboven op de afstandsbediening op de grote YouTube-knop om de app te openen.</p></li><li><p>Je ziet automatisch het account van Veluwe Droom Chalet. We vragen je om geen eigen account toe te voegen, maar dit account te gebruiken.</p></li><li><p>Wil je terug naar de gewone tv? Druk dan op de knop met het pijltje naar rechts (onder de knop van Rakuten TV). In beeld verschijnt ‘Inputs’. Kies hier voor ‘DTV’ om weer tv te kijken.</p></li></ul><p></p><p><strong>Hoe werkt Spotify?</strong></p><ul><li><p>Druk op de afstandsbediening op de knop met het huisje om de Smart TV te openen. Hier zie je verschillende apps. We vragen je om hier niets aan toe te voegen of te verwijderen.</p></li><li><p>Open vervolgens de Spotify-app. Krijg je de melding ‘Update needed’? Kies dan voor ‘Close’ om deze te sluiten.</p></li><li><p>Er is een Spotify-account beschikbaar: Veluwe Droom Chalet. Maak hier gerust gebruik van en voeg eventueel je eigen playlist toe. We vragen je wel om dit account niet te verwijderen van de TV.</p></li><li><p>Wil je terug naar de gewone TV zenders? Druk dan op de knop met het pijltje naar rechts (onder de knop van Rakuten TV). In beeld verschijnt ‘Inputs’. Kies hier voor ‘DTV’.</p></li></ul><p></p>",
+      "image": "",
+      "widgetCode": ""
+    },
+    {
+      "title": "Gameroom",
+      "subtitle": "Speel een spelletje",
+      "icon": "icons/gamepad.svg",
+      "action": "none",
+      "detailContent": "<h3>Even ontspannen? We hebben vier games voor je klaarstaan!</h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\">🎮 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/tetram\"><span style=\"color: rgb(74, 93, 35);\">Tetram</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Waar <strong>Tetris</strong> gespeeld wordt met de houten blokken van <strong>Tangram</strong></span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>🚀 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/rocketman\"><span style=\"color: rgb(74, 93, 35);\">Rocket Man</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Vlieg er even tussenuit met de space versie van <strong>Flappy bird</strong></span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>🎲 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/yahtzee\"><span style=\"color: rgb(74, 93, 35);\">Yahtzee</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Je kunt hier alleen maar ook (maximaal) met <strong>4 personen </strong>Yahtzee spelen</span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>👾 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/pacman\"><span style=\"color: rgb(74, 93, 35);\">Veluwe Pac-Man</span></a></h3><p style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Beleef het bos alvast met </span><span style=\"font-size: 0.8rem;\"><strong>Veluwe</strong> <strong>Pac-Man</strong>, met eekhoorntjes vossen en wilde zwijnen</span></p><p style=\"text-align: center;\"></p><p></p><h3></h3><p></p>",
+      "image": "images/Gameroom banner.jpg",
+      "widgetCode": "",
+      "hideOnMobile": true
+    }
+  ],
+  "chatbotContext": "###EXTRA GEDRAGREGELS:\n- Gebruik veel icoontjes smileys. De mensen gaan vakantie vieren dus het is feest!\n- Ben volledig in je antwoord en verwijs zoveel mogelijk naar deze webapp\n- Voor Wifi code en het sleutelkastje plus code wijs naar deze webapp. Ga geen codes verzinnen!!!!\n\n###Kernwaarden voor de AI-bot (Tone of Voice):\nFocus op de natuurlijke pracht van de Veluwe (\"proef de smaken van de Veluwe\").\nNadruk op ontspanning, rust en een \"warm gevoel\".\n\n###Aankomst\n- Meld je vooraf aan bij de receptie voor het afdragen van de toeristenbelasting en in te schrijven bij receptie.\n- Slagboompas en sleutels liggen in het sleutelkastje\n\n###Context\nJij zit in het laatste menu-item van een webapp genaamd webapp.veluwuwedroomchalet.nl met een persoonlijke prefix dat er zo uitziet /b/[NAAM BEZOEKER]-CODE. Deze persoonlijke link wordt naar de bezoeker gestuurd en kan de bezoeker tijdens verblijf gebruiken.\n\nHeel veel informatie staat al in deze webapp. Verwijs hier zonodig naar. Dit is het overzicht:\nMenu items: Home, Instructievideos, Omgeving, Digitale concierge (jij).\n\nVoor vragen over onder andere de Wifi code en het sleutelkastje (plus code) kun je naar Home verwijzen. Dit is alles wat onder Home staat:\n#Home items:\nLeuk dat je bij ons verblijft!\nInchecken kan op 15 juni 2026 tussen 15.00 uur en 22.00 uur en gaat contactloos. Het sleutelkastje hangt in het schuurtje. Het uitchecken is 19 juni 2026 uiterlijk om 11.00 uur en is eveneens contactloos.\n\nSleutelkastje\nHet sleutelkastje hangt in het schuurtje. Klik hier voor de code van het sleutelkastje. Graag bij vertrek de sleutel weer terughangen in het sleutelkastje en het deurtje vergrendelen.\n\nPark-en Chaletregels\nOm het verblijf voor iedereen aangenaam te maken, gelden de volgende park- en chaletregels op Recreatiepark 't Veluws Hof en in het Veluwe Droom Chalet. Klik hier voor de regels\n\nWifi\nWees welkom om gebruik te maken van ons gratis WIFI netwerk. Klik hier voor de code en het wachtwoord.\n\nOpeningstijden Receptie\nDe receptie van het park is direct bij de entree.\nDe openingstijden zijn:\nMaandag tot en met vrijdag van 9.00 tot 17.00 uur.\nZaterdag van 10.00 tot 16.30 uur.\nZondag van 12.00 tot 16.00 uur.\n\nDe receptie is bereikbaar onder telefoon: 055-3781777.\nBij brand of EHBO altijd de receptie waarschuwen!\n\nWasserette\nDe wasserette is van 1 april tot 1 oktober dagelijks geopend van 10.00 tot 21.00 uur en is voorzien van 2 wasmachines en 2 drogers. Het wasmiddel zit al in de machine en kan niet los worden toegevoegd. Betaling alleen met muntgeld.\n\nHuisvuil\nIedereen geniet toch van een schone omgeving. Daarom vragen wij je het huisvuil zelf te deponeren bij:\nBlauwgraslaan, aan de achterzijde van het witte huis en/of\nHet kampeerterrein, C-veld.\nHartelijk dank!\n\nRestaurant de Ruggestee\nOp Recreatiepark 't Veluws Hof bevindt zich Restaurant de Ruggestee; een echte aanrader! U kunt hier heerlijk culinair genieten.\nHet restaurant is geopend op donderdag tot en met zondag vanaf 12.00 uur.\nDe keuken is geopend tot 20.00 uur.\nTijdens vakanties zijn er aangepaste (verruimde) openingstijden. Informeer vooral naar deze verruimde openingstijden bij onze Digitale Concierge.\n\nSnackbar De Friterie en bar Het Witte Huis\nRecreatiepark 't Veluws Hof heeft - naast een culinair restaurant - ook snackbar De Friterie en kantine/bar Het Witte Huis. Deze zijn gedurende het campingseizoen - van maart tot oktober - geopend.\n\nBowling\nOp zoek naar een gezellig én actief uitje tijdens je verblijf? Bij De Ruggestee zit je altijd goed. Voor een sfeervolle goed uitgeruste bowlingbaan hoef je het bospark niet af! De De bowling is geopend van woensdag tot en met zondag van 12.00 tot 20.00 uur. Vooraf te reserveren via telefoon 055-3781666\n\nGameroom met Tetris, yahtzee , pacman, rocketman. DIT MENU ITEM IS ER NIET OP MOBIEL!\nDeze \"gameroom\" zijn leuke spelletjes die je online op een laptop kunt spelen.\n\n#Instructievideos\nSleutelkastje-Nog meer uitleg maar dan een video\n\n#Omgeving\nVeel info over de bezienswaardigheden zoals :\n\nDe Ruggestee\n0,27 km\nHet Nationale Park De Hoge Veluwe\n3,6 km\nDe Apenheul\n14,6 km\nPaleis Het Loo\n16,7 km\nJulianatoren\n18,1 km\nBurgers' Zoo\n18,5 km\nNederlands Openluchtmuseum\n19,1 km\nKröller-Müller Museum\n8,3 km\nOntdek Apeldoorn\n14,5 km\n\n## DEEL 1: PARKREGELS & PARKINFORMATIE\n\n---\n\n### Algemene informatie\n- Recreatiepark 't Veluws Hof is gelegen in Hoenderloo op de Veluwe\n- Het park bestaat sinds 1976 en viert in 2026 het 50-jarig jubileum\n- Motto: \"100% genieten van de Veluwe\" / \"Natuurlijk ontspannen... recreëren\"\n\n### Contact & noodgevallen\nRecreatiepark 't Veluws Hof\nhttps://www.veluwshof.nl\nKrimweg 152-154\n7351 TM Hoenderloo\nE-mail: info@veluwshof.nl\n- **Receptie**: 055-3781777\n- **E-mail**: info@veluwshof.nl\n- **Noodgeval (brand/EHBO)**: altijd receptie waarschuwen: 055-3781777\n- **Politie/Brandweer/Ambulance**: 112\n- **Politie (geen spoed)**: 0900-8844\n- **Spoedeisende hulp**: Gelre ziekenhuizen Apeldoorn, 055-5818181, Albert Schweitzerlaan 31\n- **Huisartsenpost (geen spoed)**: 0900-6009000, Albert Schweitzerlaan 31, Apeldoorn\n- **Huisartsenpraktijk Hoenderloo**: 055-3781280, Heldringsweg 1, Hoenderloo (apotheekhoudend)\n- **Tandarts**: Centrum voor tandheelkunde Beekbergen, 055-5061599, Arnhemseweg 507\n- **Dierenkliniek**: AniCura Apeldoorn, 055-3550830, Laan van Spitsbergen 50\n- **Dierenambulance**: 088-8113003 (24 uur per dag)\n\n### Openingstijden receptie\n- **November t/m eind maart**:\n  - Maandag t/m vrijdag: 09.00 - 17.00 uur\n  - Zaterdag: 10.00 - 16.30 uur\n  - Zondag: 12.00 - 16.00 uur\n- **Eind maart, april, mei, juni, september en oktober**:\n  - Maandag t/m zaterdag: 09.00 - 17.00 uur\n  - Zondag: 10.00 - 17.00 uur\n- **Juli en augustus**:\n  - Alle dagen: 09.00 - 18.00 uur\n  - Vrijdag: tot 19.00 uur\n\nBuiten openingstijden is de receptie in geval van nood telefonisch bereikbaar. Bij de receptie kunt u terecht voor fietsroutes, brochures over bezienswaardigheden en pretparken, fietsen huren en gasflessen kopen.\n\n### Algemene parkregels\n- Maximale snelheid op het terrein: **5 km/u**\n- Tussen 23.00 en 07.00 uur is gemotoriseerd verkeer verboden; de ingaande boom is geblokkeerd\n- Er is **1 auto per plaats** toegestaan. Parkeer op uw eigen plaats of de aangegeven parkeerplaats\n- Scooters en brommers zijn alleen toegestaan met uitgeschakelde motor\n- **Fatbikes zijn op het gehele terrein niet toegestaan**\n- Barbecueën is toegestaan (bij fase 1), tenzij de brandweer anders beslist. Actuele stand via natuurbrandrisico.nl\n- **Open vuren zijn verboden** (dus ook vuurschalen en vuurkorven)\n- Gebruik van alle faciliteiten en activiteiten zijn op eigen risico\n- Elektrisch verwarmen is niet toegestaan (kampeerders zijn aangesloten op 10A)\n\n### Parkreglement (uitgebreid)\n0. In alle gevallen waarin dit reglement niet voorziet beslist de directie\n1. Huisvuil naar perscontainers brengen. Blad- en tuinafval op de compostberg achter het C-veld of in de groene afvalbakken\n2. Honden aangelijnd; bij een ongelukje opruimen. Kat niet loslopen i.v.m. wilde katten\n3. Alle vervoersmiddelen max. 5 km/u (stapvoets). Bromfietsers/scooters alleen met uitgeschakelde motor. Fatbikes niet toegestaan\n4. Tussen 23.00 en 07.00 uur gemotoriseerd verkeer verboden. 1 auto per plaats\n5. Geen aanhangers of iets van dien aard (tijdelijk) achter laten anders dan op uw eigen plek\n6. Open vuur in welke vorm dan ook is niet toegestaan. Barbecueën wel, met emmer water/zand bij de hand\n7. Bomen zagen of snoeien alleen door parkmedewerkers\n8. Sproeien is toegestaan, maar in de zomer niet tussen 16.00 en 20.00 uur\n9. Caravan niet elektrisch verwarmen of buitenlampen >80 Watt en/of 1100 Lumen\n10. Geen handelswaar verkopen zonder toestemming directie\n11. (Her)plaatsen van schuurtjes, aanbouwen, veranda's, hekjes alleen met schriftelijke toestemming directie\n12. In mei t/m augustus niet bouwen of verbouwen aan caravan. Geen (tuin)gereedschap, hogedrukspuiten of bladblazers\n13. Bij verkoop caravan: keuringsrapport op eigen kosten. 3% provisie aan park (min. €100)\n14. Recht op maatregelen bij wangedrag\n15. Jaarplaats (okt t/m sept) opzeggen vóór 1 september (schriftelijk)\n16. Geen reclame-uitingen (borden, vlaggen, sportclubs)\n17. Geen zwembad of kinderbadje plaatsen, ook niet voor korte termijn\n18. Geen zwembaden, trampolines ingraven\n19. Aanvullende Recron voorwaarden gratis bij receptie\n\n### Regels voor hondenbezitters\n- Honden zijn alleen **aangelijnd** toegestaan op het park\n- Laat uw hond alleen **buiten** het park uit; bij een ongelukje direct opruimen\n- Speciale bakken met poepzakjes verspreid over het terrein\n- Honden **niet toegestaan** in sanitairgebouwen, supermarkt, horeca en zwembad\n- Hond niet alleen achterlaten in tent of caravan\n- Geen (geluids)overlast veroorzaken\n- Kampeerterrein afrastering: voorzijde min. 1,5m van de weg, zijkanten min. 0,5m van erfscheiding\n- Alleen dunne pinnen met afrasteringsnet, geen (grote) palen met vast gaas\n\n### Wasserette\n- Geopend gedurende het seizoen, dagelijks tot 21.00 uur\n- 2 wasmachines en 2 drogers\n- Wasmiddel zit al in de machine (kan niet los worden toegevoegd)\n- Betalen met **muntgeld**\n\n### WiFi\n-Gratis \n\n### Midgetgolf\n- Bij de receptie tijdens openingstijden\n- Golfstick, golfballetje en scoreblad: **€1,50 per balletje** (waarvan €0,50 borg)\n\n### Tennisbaan\n- Huur bij receptie tijdens openingstijden: **€5,00 per uur**\n- Rackets en ballen gratis te leen\n\n### Fietsverhuur\n- Fietsen te huur bij receptie of via rooth66.nl / veluwshof.nl\n- Bij 7 dagen huur: 15% korting\n- E-bikes, fietsen met 7 versnellingen, kinderfietsen en MTB's beschikbaar\n- Reserveren gewenst om teleurstelling te voorkomen\n\n### Wandel-/fietsroutes\n- Gratis wandelnetwerkkaart en fietsroute boekje bij de receptie\n- Mountainbikers: Zandenwoud route met 3 lussen tot max. 58 km\n\n### Brief- en pakketpost\n- Briefpost in postvakken aan buitenzijde receptie\n- Brievenbus voor versturen naast het gashok bij receptie\n- Pakketpost niet groter dan een verhuisdoos; anders bij afhaalpunt laten leveren\n- Pakketpost wordt buiten bij receptie verzameld, alleen op te halen tijdens openingstijden\n- Beperkte opslagruimte; niet verantwoordelijk voor ontvangst/vermissing\n\n### TV aanwezig met alle zenders\n\n### Gasfles\n- Campinggaz flessen bij de supermarkt\n\n### Huisvuil\n- Containers bij: Blauwgraslaan (achterzijde Witte Huis), Wildzwijnlaan (nabij chalet Krekel), kampeerterrein C-veld\n- Glas en papier: achterzijde supermarkt, Blauwgraslaan (achterzijde Witte Huis), kampeerterrein C-veld\n\n### Kindertrein\n- Voor kinderen t/m 11 jaar die zelfstandig kunnen zitten\n- Opstapplaatsen: hoek D-kampeerplaatsen, sanitairgebouw Sportveld, hoek Eiklaan/Marmottenlaan, sanitairgebouw Wildzwijnlaan, hoek Wildzwijnlaan/Hertenlaan\n- Herkenbaar aan bord met Flora en het treintje\n\n### Zwembad\n- Openings-/sluitingstijden bij ingang zwembad (variëren per seizoen en weer)\n- Waterverwarming afhankelijk van weerstemperatuur\n- Verboden in/om zwembad: huisdieren, fietsen, glaswerk, alcohol, duiken, rennen, muziek, (voet)ballen, storend gedrag\n- Kinderen zonder zwemdiploma altijd begeleid door volwassene\n- Toezichthouder voor gedragsregels, geen toezicht op zwemmers\n- Alleen toegankelijk voor gasten van 't Veluws Hof, betreden op eigen risico\n\n### Jeu de Boules\n- Elke middag om 14.00 uur (en bij langer licht ook om 19.00 uur, bij droog weer)\n- In de zomermaanden op diverse zaterdagmiddagen toernooien vanaf 14.00 uur\n- Kosten: €3,00 p.p. inclusief koffie/thee. Frisdrank tegen kleine vergoeding\n- Data via flyers bij receptie, supermarkt en Jeu de Boulesbaan\n\n---\n\n## DEEL 2: ACTIVITEITEN & EVENEMENTEN SEIZOEN 2026\n\n---\n\n### Terugkerende wekelijkse activiteiten (zomerseizoen juli-augustus)\n\n**Dagelijks terugkerend:**\n- **10.00 uur** - Kinderclub bij het theater (dansen, spelen, knutselen)\n- **14.00 uur** - Sport en Spel bij het sportveld\n- **16.30 uur** - Kindertrein naar het Schatertheater (langs opstapplaatsen)\n- **17.00 uur** - Schatertheater met Mik en Mak\n\n**Wekelijks terugkerend:**\n- **Maandag 13.00**: Jeugdfestijn, gratis patat voor jeugd 12-18 jaar bij de Friterie (vóór 13.00 uur)\n- **Maandag 21.00**: Discozwemmen met licht en geluid (tot 22.00 uur, mits weer het toelaat)\n- **Dinsdag 10.00**: Kinderbingo bij het theater (tip: neem een potlood mee)\n- **Dinsdag 19.00**: Bootcamp & Boksen bij sportveld (begeleid door The Gym)\n- **Dinsdag 19.00/20.00**: Peddelen in het zwembad (kinderen 5-11 jaar, minimaal diploma A)\n- **Woensdag 10.00**: Huifkartocht door de bossen (€9,00 p.p., opgeven bij receptie, vertrek 09.45)\n- **Woensdag 19.00/19.30**: Bingo op de Brink (openlucht) of in het Witte Huis\n- **Donderdag 11.00**: Aqua Joggen in het zwembad (13 jaar en ouder)\n- **Donderdag 14.45**: Gratis patat kaartjes uitdelen (om 15.00 kinderfestijn bij de Friterie, tot 12 jaar)\n- **Donderdag 20.00**: Marshmallows roosteren bij het theater (jeugd 13-17 jaar eigen plek)\n- **Donderdag 20.00**: Jeugdavond voor 12+, Witte Huis\n- **Vrijdag 19.30**: Bingo op de Brink (openlucht)\n- **Vrijdag**: Italiaanse avond in de Ruggestee (3 juli t/m 28 augustus) - pizza's en Italiaanse gerechten (ook om af te halen), reguliere kaart vervalt\n- **Zaterdag 10.00**: Meet & Greet met Mik, Mak en Foxy bij Schatertheater\n- **Zaterdag 11.00**: Aqua Joggen (13+)\n- **Zaterdag 19.30**: Bingo (wisselend locatie)\n- **Zondag 11.00**: Sport en Spel\n- **Zondag 12.00**: Competitie bowlen in de Ruggestee (iedereen welkom)\n- **Zondag 14.00**: Ibiza hairwraps bij theater (haar €5,- / glitter tattoo €1,-)\n- **Zondag 17.00**: Schatertheater met Science experimenten van Mik en Mak\n- **Zondag 19.00**: Sport en Spel\n- **Zondag 21.00**: Avondspel bij sportveld\n\n---\n\n### 28 maart - 19 april (Pasen)\n\n**Zaterdag 28 maart**\n- 19.30 - Bingo in het Witte Huis (8 ronden + 2 extra ronden, hoofdprijs geldbedrag)\n\n**Zaterdag 4 april**\n- 13.00-15.00 - Drumtastic workshop bij het Schatertheater (opgeven bij receptie)\n- 19.30 - Bingo in het Witte Huis\n\n#### Steengrill actie (Paasweekend 3-6 april)\n- In de Ruggestee, vrijdag 3 t/m maandag 6 april\n- Menu: stokbrood met kruidenboter, rundvlees- en rauwkostsalade, kipfilet, hamburger, biefstuk, saté, varkensfilet, friet met mayonaise, knoflook- en satésaus, lente dessert\n- **€34,50 p.p. / kinderen t/m 12 jaar €24,00 p.p.**\n- Reserveren bij de Ruggestee\n\n**Zaterdag 4 april (Paasweekend)**\n- 10.00 - Meet & Greet met Mik en Foxy bij Schatertheater\n- 13.00 - Drumtastic workshop bij Schatertheater (tot 15.00)\n- 16.30 - Trein naar Schatertheater\n- 17.00 - Schatertheater met Mik en Mak\n- 19.30 - Bingo in het Witte Huis\n- 20.00 - Jeugdavond 12+, Witte Huis\n\n#### Paaseieren zoeken\n- **Zondag 5 april (1e Paasdag) om 14.00 uur**\n- Verzamelen op het sportveld\n- Kinderen t/m 11 jaar (t/m 6 jaar apart zoekgebied)\n\n**Zondag 5 april (1e Paasdag)**\n- 10.00 - Kinderclub bij theater (dansen, spelen, eieren schilderen)\n- 14.00 - Paaseieren zoeken\n- 16.30 - Trein naar Schatertheater\n- 17.00 - Schatertheater\n- 20.00 - Marshmallows roosteren (jeugd 13-17 jaar eigen plek)\n\n#### Paasbrunch\n- **Maandag 6 april (2e Paasdag) om 11.00 uur** in de Ruggestee\n- Inclusief 3 ronden bingo\n- Soep, diverse koude en warme gerechten (vlees, vis, vegetarisch), broodjes, beleg, mini desserts, koffie, thee en sapjes\n- **€24,95 p.p. / kinderen t/m 12 jaar €15,95 p.p.**\n- Reserveren vóór donderdag 2 april bij receptie of via info@veluwshof.nl\n\n**Maandag 6 april (2e Paasdag)**\n- 10.00 - Kinderclub bij theater\n- 11.00 - Paasbrunch in de Ruggestee\n- 14.00 - Sport en Spel bij sportveld\n- 16.30 - Trein naar Schatertheater\n- 17.00 - Schatertheater, minidisco met Mik en Mak\n\n**Zaterdag 11 + 18 april**\n- 19.30 - Bingo in het Witte Huis\n\n**Zondag 12 + 19 april**\n- 12.00 - Competitie bowlen in de Ruggestee\n\n---\n\n### 25 - 30 april (Meivakantie)\n\n#### Grote opening zwembad en nieuwe glijbanen\n- **Zaterdag 25 april vanaf 12.00 uur**\n\n**Zaterdag 25 april**\n- 10.00 - Kinderclub bij theater\n- 12.00 - Opening zwembad en nieuwe glijbanen\n- 16.30 - Trein naar Schatertheater\n- 17.00 - Schatertheater met Mik en Mak\n- 19.00 - Sport en Spel bij sportveld\n- 19.30 - Bingo in het Witte Huis\n\n**Zondag 26 april**\n- 10.00 - Kinderclub\n- 14.00 - Ibiza hairwraps (€5,- / glitter tattoo €1,-)\n- 16.30 - Trein\n- 17.00 - Schatertheater\n- 20.00 - Jeugdavond 12+, Witte Huis\n\n**Maandag 27 april (Koningsdag)**\n- 10.00 - Kinderclub\n- 14.00 - Sport en Spel\n- 16.30 - Trein\n- 17.00 - Schatertheater, minidisco\n- 19.00 - Avondspel bij sportveld\n\n#### Natuurexcursie - Avondwandeling\n- **Dinsdag 28 april, 20.00 uur** vanaf het theater\n- Wandelen met natuurexpert, na afloop koffie/thee\n\n#### Insecten workshop (8+)\n- **Dinsdag 28 april, 12.00 uur** bij het theater\n- Onderzoek met loep, kennismaken met insecten\n\n**Dinsdag 28 april**\n- 10.00 - Kinderbingo\n- 12.00 - Insectenworkshop 8+\n- 14.00 - Sport en Spel\n- 16.30 - Trein\n- 17.00 - Schatertheater\n- 19.00 - Bootcamp & Boksen (The Gym)\n- 20.00 - Jeugdavond 12+, Witte Huis\n- 20.00 - Natuurexcursie avondwandeling\n\n#### Huifkartocht\n- **Woensdag 29 april, 10.00 uur** - €9,00 p.p., opgeven bij receptie\n\n#### Peddelen\n- **Woensdag 29 april, 19.00 uur** bij het zwembad (kinderen 5-11 jaar, diploma A)\n\n**Woensdag 29 april**\n- 10.00 - Kinderclub\n- 10.00 - Huifkartocht (€9,00 p.p.)\n- 13.00 - Bowlen 12+, waterballen voor de Ruggestee\n- 16.30 - Trein\n- 17.00 - Schatertheater\n- 19.00 - Peddelen\n\n**Donderdag 30 april**\n- 10.00 - Kinderclub\n- 14.00 - Sport en Spel\n- 14.45 - Gratis patat kaartjes\n- 15.00 - Kinderfestijn bij Friterie (tot 12 jaar)\n- 16.30 - Trein\n- 17.00 - Schatertheater, Science experimenten\n- 20.00 - Jeugdavond 12+, Witte Huis\n\n---\n\n### 2 - 23 mei\n\n**Elke zaterdag 2, 9, 16, 23 mei**\n- 19.30 - Bingo in het Witte Huis\n\n**Elke zondag 3, 10, 17 mei**\n- 12.00 - Competitie bowlen in de Ruggestee\n\n#### Moederdag High Tea\n- **Zondag 10 mei, 12.00-15.00 uur** in de Ruggestee\n- Zoete en hartige lekkernijen, kopje thee\n- **€21,95 p.p.**\n- Reserveren vóór donderdag 7 mei bij de Ruggestee\n\n#### Hemelvaartsweekend (14-17 mei)\n\n##### Aspergemenu\n- Donderdag 14 t/m zondag 17 mei in de Ruggestee\n- Voorgerecht: witte asperges met beenham, ei en sjalotjes\n- Hoofdgerecht: asperges met gebakken kalfsoester en gepofte knoflookboter\n- Nagerecht: aardbeien romanoff\n- **€42,50 p.p.**\n- Reserveren bij de Ruggestee\n\n##### Natuurexcursie - Dauwstappen\n- **Donderdag 14 mei, 07.00 uur** vanaf het theater\n\n**Donderdag 14 mei (Hemelvaartsdag)**\n- 07.00 - Natuurexcursie Dauwstappen\n- 10.00 - Kinderclub\n- 14.00 - Sport en Spel\n- 14.45 - Gratis patat kaartjes\n- 15.00 - Kinderfestijn bij Friterie\n- 16.30 - Trein\n- 17.00 - Schatertheater\n- 19.00 - Avondspel bij sportveld\n\n#### Brocante kleedjesmarkt\n- **Zaterdag 23 mei, 11.00-15.00 uur**\n- Deelname gratis, plaatsnummers vanaf 16 mei bij receptie\n\n#### Pinksterweekend (23-25 mei)\n\n##### Pinkstermarkt\n- **Zondag 24 mei vanaf 10.00 uur** rond de receptie\n\n##### Natuurexcursie - Ochtendwandeling\n- **Zondag 24 mei, 09.00 uur** vanaf het theater\n\n**Zondag 24 mei (1e Pinksterdag)**\n- 09.00 - Natuurexcursie\n- 10.00 - Meet & Greet met Mik, Mak en Foxy\n- 10.00 - Pinkstermarkt\n- 14.00 - Ibiza hairwraps\n- 14.00 - Sport en Spel\n- 16.30 - Trein\n- 17.00 - Schatertheater\n- 20.00 - Jeugdavond 12+\n\n**Maandag 25 mei (2e Pinksterdag)**\n- 10.00 - Kinderclub\n- 14.00 - Sport en Spel\n- 16.30 - Trein\n- 17.00 - Schatertheater\n\n---\n\n### 24 mei - 28 juni\n\n**Zaterdagen 30 mei + 6, 13, 20, 27 juni**\n- 19.30 - Bingo in het Witte Huis\n\n**Zondagen 31 mei + 7, 14, 28 juni**\n- 12.00 - Competitie bowlen in de Ruggestee\n\n#### WK Voetbal 2026 - Nederland groepsfase\n- **14 juni | 22.00 uur** (NL tijd) - Dallas (Nederland - Japan)\n- **20 juni | 19.00 uur** (NL tijd) - Houston (Nederland - Denemarken)\n- **26 juni | 01.00 uur** (NL tijd) - Kansas City (Indonesië - Nederland)\n\n---\n\n### 4 - 9 juli (Start zomerprogramma)\n\n#### Italiaanse avond in de Ruggestee\n- **Iedere vrijdagavond van 3 juli t/m 28 augustus**\n- Italiaanse gerechten en pizza's (ook om af te halen)\n- De reguliere kaart vervalt deze avond\n\n#### Circus Harlekino\n- **Medio juli - augustus**\n- Nederlands circus met internationale topartisten\n- Bijzondere trucs, gevaarlijke stunts en heel veel gezelligheid\n- Geschikt voor alle leeftijden\n\n#### Aqua Joggen\n- Zaterdag 4 en donderdag 9 juli, vanaf 11.00 uur in het zwembad (13+)\n\n#### Bingo op de Brink\n- Zaterdag 4 juli vanaf 19.30 uur (openlucht)\n\n---\n\n### 11 - 17 juli\n\n#### Palènpa Huttenbouwen\n- **Zaterdag 11 juli, 19.00-21.30 uur** bij het sportveld\n\n#### Natuurexcursie - Avondwandeling\n- **Zaterdag 11 juli, 20.00 uur** vanaf het theater\n\n#### Tennissen (16+)\n- **Zaterdag 11 juli, 15.00 uur** bij de baan\n\n---\n\n### 18 - 23 juli\n\n#### Zomerfeest op het plein (1)\n- **Zaterdag 18 juli vanaf 20.00 uur**\n- Kids dansen en springen met Mik en Mak voorafgaand\n- Coverband **Flame** met energieke, interactieve show vol muzikale hoogtepunten\n\n#### Discozwemmen\n- Maandag 20 juli om 21.00 uur\n\n---\n\n### 25 - 30 juli\n\n#### Color Obstacle Run\n- **Zaterdag 25 juli, 19.00-20.30 uur** bij het sportveld\n- Kleurrijk (hard)loop spektakel, ondergedompeld in vrolijke kleuren\n\n#### Live muziek op het terras\n- **Zondag 26 juli, 17.30-21.30 uur** op het terras van de Ruggestee\n- **Hans Freie** - easy listening, meezingers, hits uit de jaren '70, '80, '90 en nu\n\n#### Natuurexcursie - Ochtendwandeling\n- Zaterdag 25 juli, 09.00 uur\n\n#### Shanty en gezeligheidskoor Ermeluiden\n- **Dinsdag 28 juli, 19.45-21.30 uur** op het plein bij het theater\n\n---\n\n### 31 juli - 4 augustus\n\n#### Pub Quiz\n- **Vrijdag 31 juli, 20.00 uur** in het Witte Huis\n- Teams tot 5 personen, 7 rondes van 10 vragen\n- Vragen over film, muziek, games, sport, topografie en nieuws\n\n#### Zomermarkt\n- **Zaterdag 1 augustus vanaf 10.00 uur** rond de receptie\n\n#### Dino Adventure\n- **Zaterdag 1 augustus, 19.00-21.30 uur** bij het sportveld\n- Avonturenspringkussen Dino met obstakels, stormbaan en 12 meter hoge klimtoren\n\n---\n\n### 5 - 8 augustus\n\n#### Darttoernooi in het Witte Huis (14+)\n- **Woensdag 5 augustus, 14.00 uur** (inschrijven vanaf 13.00)\n- **€7,50 p.p.** (Vol=Vol, alleen recreanten)\n\n#### Darttoernooi (8-13 jaar)\n- **Dinsdag 4 augustus, 13.00 uur** (inschrijven vanaf 12.00)\n- Deelname gratis\n\n#### Buikschuifbaan\n- **Woensdag 5 augustus, 19.00 uur** op het sportveld\n\n#### Zeskamp\n- **Zaterdag 8 augustus, 19.00 uur**\n- Ouderwetse zeskamp voor leeftijd 12-99 jaar\n- Inschrijven bij receptie t/m zaterdag 12 uur (groepsnaam + aantal, min. 5 personen)\n\n#### Natuurexcursie - Ochtendwandeling\n- Zaterdag 8 augustus, 09.00 uur\n\n---\n\n### 9 - 14 augustus\n\n#### Live muziek op het terras\n- **Zondag 9 augustus, 17.30-21.30 uur** - Hans Freie op terras Ruggestee\n\n---\n\n### 15 - 20 augustus\n\n#### Zomerfeest op het plein (2)\n- **Zaterdag 15 augustus vanaf 20.00 uur**\n- Kids dansen met Mik en Mak voorafgaand\n- Coverband **Fuse** met vlammende medleys en energieke live show\n\n---\n\n### 22 - 28 augustus\n\n#### Autogezelligheidsrit\n- **Zaterdag 22 augustus vanaf 09.00 uur**\n- Puzzelrit over de Veluwe met diverse opdrachten\n- **€15,00 per auto**\n- Opgeven vóór vrijdag 21 augustus bij receptie (vol=vol), daar starttijd ontvangen\n\n#### Mega stormbaan\n- **Zaterdag 22 augustus, 19.00 uur** bij het sportveld\n\n#### Tennissen (16+)\n- Zaterdag 22 augustus, 15.00 uur\n\n---\n\n### 29 augustus - 24 oktober (Naseizoen)\n\n**Zaterdagen 29 aug + 5, 12, 19, 26 sep + 3, 10, 17 okt**\n- 19.30 - Bingo in het Witte Huis (of op de Brink)\n\n**Zondagen 30 aug + 6, 20, 27 sep + 4 okt (afsluiting)**\n- 12.00 - Competitie bowlen in de Ruggestee\n\n---\n\n### Herfstvakantie (17 - 24 oktober)\n\n#### Halloween optocht\n- **Zaterdag 17 oktober, 19.30 uur**\n- Verzamelen bij het sportcourt\n- Lampionnen aan, griezelen over het terrein richting Halloween disco bij Schatertheater\n- Verkleed in een griezelige outfit en kom lekker dansen!\n\n#### Natuurexcursie - Ochtendwandeling\n- **Zaterdag 17 oktober, 08.00 uur** vanaf het theater\n\n**Zaterdag 17 oktober**\n- 08.00 - Natuurexcursie\n- 10.00 - Meet & Greet met Mik en Mak\n- 12.00 - Kinderclub in het Witte Huis\n- 14.00 - Sport en Spel\n- 16.30 - Trein\n- 17.00 - Schatertheater\n- 19.30 - Bingo in het Witte Huis\n- 19.30 - Halloween lampion optocht\n- 20.00 - Halloween disco bij Schatertheater\n\n#### Pompoen knutselen\n- **Zondag 18 oktober, 12.00 uur** bij het theater\n- Opgeven vóór woensdag 14 oktober bij receptie\n\n**Zondag 18 oktober**\n- 10.00 - Kinderclub in Witte Huis\n- 12.00 - Pompoen knutselen\n- 14.00 - Ibiza hairwraps\n- 16.30 - Trein\n- 17.00 - Schatertheater, Science experimenten\n\n#### Insecten workshop (8+)\n- **Dinsdag 20 oktober, 12.00 uur** bij het theater\n\n#### Huifkartocht\n- **Woensdag 21 oktober, 10.00 uur** - €9,00 p.p.\n\n**Donderdag 22 oktober**\n- 10.00 - Kinderclub in Witte Huis\n- 12.00 - Sport en Spel\n- 14.45 - Gratis patat kaartjes\n- 15.00 - Kinderfestijn bij Friterie\n- 16.30 - Trein\n- 17.00 - Schatertheater, minidisco afscheid Mik en Mak\n\n#### Herfstbingo in de Ruggestee\n- **Zaterdag 24 oktober, 15.00 uur** (zaal open 14.45)\n- Luxe buffet inclusief voor- en nagerecht\n- 8 bingo ronden met leuke prijzen + extra verloting\n- **€39,95 p.p. / kinderen tot 12 jaar €19,95** (exclusief drankjes)\n- Opgeven t/m 11 oktober bij receptie, via info@veluwshof.nl of 055-3781777\n\n---\n\n### Highlights overzicht seizoen 2026\n\n| Evenement | Datum | Tijd | Kosten |\n|---|---|---|---|\n| Steengrill actie Pasen | 3-6 april | hele dag | €34,50 p.p. / kind €24,00 |\n| Paaseieren zoeken | 5 april | 14.00 | Gratis |\n| Paasbrunch | 6 april | 11.00 | €24,95 p.p. / kind €15,95 |\n| Opening zwembad + glijbanen | 25 april | 12.00 | - |\n| Moederdag High Tea | 10 mei | 12.00-15.00 | €21,95 p.p. |\n| Aspergemenu | 14-17 mei | avond | €42,50 p.p. |\n| Brocante kleedjesmarkt | 23 mei | 11.00-15.00 | Gratis |\n| Zomerfeest met Flame | 18 juli | 20.00 | - |\n| Color Obstacle Run | 25 juli | 19.00-20.30 | - |\n| Live muziek Hans Freie | 26 juli & 9 aug | 17.30-21.30 | - |\n| Pub Quiz | 31 juli | 20.00 | - |\n| Darttoernooi 14+ | 5 augustus | 14.00 | €7,50 p.p. |\n| Zeskamp | 8 augustus | 19.00 | Gratis |\n| Zomerfeest met Fuse | 15 augustus | 20.00 | - |\n| Autogezelligheidsrit | 22 augustus | 09.00 | €15,00/auto |\n| Halloween optocht | 17 oktober | 19.30 | - |\n| Herfstbingo Ruggestee | 24 oktober | 15.00 | €39,95 p.p. / kind €19,95 |\n\n\n\n\n\n\n",
+  "omgeving": [
+    {
+      "name": "De Ruggestee",
+      "desc": "<h3>De Ruggestee: Jouw Veluwse Uitje!</h3><p>Welkom bij De Ruggestee op het Veluws Hof, jouw <em>smaakvolle plekje</em> in het hart van de <strong>Veluwe</strong>! Tussen de <em>rustgevende bossen</em> vind je dit gastvrije restaurant met een <em>warme ambiance</em>, perfect voor vakantiegangers en natuurliefhebbers.</p><p>Geniet van heerlijke gerechten, van een ontspannen <strong>lunch</strong> tot een uitgebreid <strong>diner</strong>. De menukaart wisselt met de seizoenen en biedt opties als buffet, BBQ of steengrill. Het gezellige restaurant met sfeervolle haard nodigt uit om te proeven en te ontspannen.</p><ul><li><p><strong>Activiteiten</strong>: Beleef een gezellige middag met <strong>bowling</strong> of daag vrienden uit bij het poolbiljart en dartbord in de <strong>pub</strong>.</p></li><li><p><strong>Openingstijden</strong>: Donderdag t/m zondag, vanaf 12:00 uur. De keuken sluit om 20.00 uur.</p></li></ul><p><em>Laat je verrassen door de smaken en gezelligheid van de Veluwe bij De Ruggestee!</em></p>",
+      "url": "https://www.ruggestee.nl/",
+      "image": "images/Restaurant.webp",
+      "adres": "De Smaak van Hoenderloo krimweg",
+      "widgetCode": "",
+      "distance": "0,27",
+      "walkTime": "4",
+      "bikeTime": "1",
+      "carTime": "1"
+    },
+    {
+      "name": "De Proeftuin",
+      "desc": "<h3>De ProefTuin Hoenderloo</h3><p>Op zoek naar een gezellige plek om te lunchen, borrelen of dineren midden in de natuur? Dan is De ProefTuin in Hoenderloo een aanrader. Hier geniet je van heerlijke Italiaanse gerechten, waaronder ambachtelijke pizza’s uit de houtoven, verse pasta’s en huisgemaakte specialiteiten. <span style=\"color: rgb(74, 93, 35);\">De pizzabakker van De ProefTuin is in 2026 zelfs uitgeroepen tot <strong>Nederlands kampioen pizzabakken!</strong></span></p><p>Voor gezinnen is dit een ideale tussenstop. Terwijl de kinderen zich vermaken in de speel- en crosstuin of een potje minigolf spelen, kun je zelf ontspannen op het ruime terras met uitzicht op het groen. Ook starten er prachtige wandelroutes in de directe omgeving, waaronder het bekende Plaggenstekerspad.</p><p>Of je nu zin hebt in een kop koffie met gebak, een uitgebreide lunch of een gezellige avond uit na een dag op de Veluwe: bij De ProefTuin combineer je lekker eten met ontspanning en plezier voor jong en oud. Een fijne plek om even neer te strijken tijdens jullie verblijf in het Veluwe Droom Chalet.</p><p>💡 <strong>Tip:</strong> Reserveer vooraf als je in het weekend of tijdens vakantieperiodes wilt eten. Deze populaire locatie trekt veel bezoekers.</p><p></p>",
+      "image": "images/deproeftuinhoenderloo.webp",
+      "url": "https://deproeftuinhoenderloo.nl",
+      "adres": "De Krim 4 7351 BL Hoenderloo",
+      "widgetCode": "",
+      "distance": "2,2",
+      "walkTime": "30",
+      "bikeTime": "7",
+      "carTime": "4"
+    },
+    {
+      "name": "Het Nationale Park De Hoge Veluwe",
+      "desc": "<h3>Ontdek Nationaal Park De Hoge Veluwe: Natuur, Kunst &amp; Cultuur!</h3><p>Laat je betoveren door <em>de perfecte mix van ongerepte natuur, fascinerende kunst en rijke cultuur</em> in dit unieke nationale park. Dwaal door uitgestrekte heidevelden, stuifzandlandschappen en dichte bossen. Hier spot je de <strong>'big four'</strong>: edelhert, wild zwijn, moeflon en ree!</p><p>Verken het park op je eigen tempo met de <strong>gratis witte fietsen</strong>, of geniet van prachtige wandelroutes die je langs de mooiste plekjes voeren. Ga mee met de boswachter voor extra avontuur en spot bijzondere flora en fauna.</p><p>Naast de overweldigende natuur, biedt De Hoge Veluwe ook een dosis cultuur. Bezoek het wereldberoemde <strong>Kröller-Müller Museum</strong> met topstukken van Van Gogh en Picasso, en bewonder het architectonische meesterwerk Jachthuis Sint-Hubertus, ontworpen door Berlage.</p><ul><li><p><strong>Natuur:</strong> Wilde dieren, actieve stuifzanden en heidevelden.</p></li><li><p><strong>Cultuur:</strong> Kunst in het Kröller-Müller Museum en architectuur van Jachthuis Sint-Hubertus.</p></li><li><p><strong>Actief:</strong> Fietsen (gratis!), wandelen en interactieve games.</p></li></ul><p>Met zoveel te zien en te doen, is het Nationaal Park De Hoge Veluwe ideaal voor een onvergetelijke vakantie!</p>",
+      "image": "images/Bekende gebouw Nationaal Park Hoge Veluwe.webp",
+      "url": "https://hogeveluwe.nl/",
+      "adres": "Hoenderloo, Houtkampweg 13",
+      "widgetCode": "",
+      "distance": "3,6",
+      "walkTime": "",
+      "bikeTime": "11",
+      "carTime": "6"
+    },
+    {
+      "name": "Kröller-Müller Museum",
+      "desc": "<h3>Kröller-Müller Museum: Kunst &amp; Natuur op de Veluwe</h3><p>Ontdek het <em>prachtige</em> <strong>Kröller-Müller Museum</strong>, een unieke plek waar kunst en natuur samenkomen, middenin het <em>uitgestrekte</em> Park De Hoge Veluwe.</p><p>Laat u verrassen door een van de <strong>grootste Vincent van Gogh-collecties ter wereld</strong>, aangevuld met topstukken van moderne meesters:</p><ul><li><p><strong>Claude Monet</strong>, <strong>Georges Seurat</strong>, <strong>Pablo Picasso</strong>, <strong>Piet Mondriaan</strong></p></li><li><p>En fascinerende werken uit de bewegingen <em>De Stijl</em> en het <em>Futurisme</em>.</p></li></ul><p>Wandel door de <em>indrukwekkende</em> <strong>beeldentuin</strong> met sculpturen van onder andere <strong>Barbara Hepworth</strong> en <strong>Jean Dubuffet</strong>. Bewonder ook de bijzondere architectuur van de museumgebouwen en paviljoens.</p><p>Een <em>perfecte dag </em>om te genieten en heerlijk tot rust te komen. Plan uw bezoek en laat u onderdompelen in een wereld van schoonheid!</p>",
+      "image": "images/Kroller Moller.webp",
+      "url": "https://krollermuller.nl/",
+      "adres": "Houtkampweg 6  6731 AW Otterlo",
+      "widgetCode": "",
+      "distance": "8,3",
+      "walkTime": "",
+      "bikeTime": "27",
+      "carTime": "13"
+    },
+    {
+      "name": "Ontdek Apeldoorn",
+      "desc": "<h3>Ontdek Apeldoorn: Jouw Ideale Vakantiebestemming!</h3><p>Welkom in Apeldoorn, een <em>dynamische stad midden in het groen</em>. Hier vind je alles om <strong>royaal te genieten</strong>, of je nu komt voor rust, avontuur of cultuur.</p><p>Laat je verrassen door de veelzijdigheid van Apeldoorn:</p><ul><li><p>Verken de <strong>adembenemende natuur</strong> in en rondom de stad. Ideaal voor wandelaars en fietsers!</p></li><li><p>Duik in het <em>rijke culturele aanbod</em>: van evenementen tot tentoonstellingen.</p></li><li><p>Ontdek de <strong>leukste winkelhotspots</strong>, gezellige koopzondagen en levendige warenmarkten.</p></li><li><p>Stel je eigen <em>Apeldoorn bucketlist</em> samen voor onvergetelijke uitjes en ervaringen.</p></li></ul><p>Apeldoorn wacht op je om ontdekt te worden. Kom en beleef het zelf!</p>",
+      "image": "images/Apeldoorn IIII.webp",
+      "url": "https://www.apeldoorn.nl/",
+      "adres": "",
+      "widgetCode": "",
+      "distance": "14,5",
+      "walkTime": "",
+      "bikeTime": "37",
+      "carTime": "16"
+    },
+    {
+      "name": "De Apenheul",
+      "desc": "<h3>Apenheul: Ga op Avontuur tussen de Apen!</h3><p>Bereid je voor op <em>een dag vol speelse ontdekkingen</em> in <strong>Apenheul</strong>, de plek waar apen vrij rondlopen en jij dichtbij komt! Het perfecte uitje voor het hele gezin.</p><ul><li><p>Beklim de nieuwe <strong>11 meter hoge uitkijktoren</strong> voor een <em>spectaculair uitzicht</em> op de grootste gorillafamilie van Nederland. Een unieke kijkervaring!</p></li><li><p>Wandel door het vernieuwde leefgebied en sta oog in oog met wel 60 <em>razendsnelle doodshoofdaapjes</em> die om je heen klauteren.</p></li><li><p>Spot alle <strong>34 apensoorten</strong> met de gratis speurkaart – een leuke uitdaging voor jong en oud!</p></li></ul><p><strong>Praktische info:</strong> Apenheul is dagelijks geopend vanaf 10:00 uur.</p>",
+      "image": "images/Apenheul.webp",
+      "url": "https://www.apenheul.nl/",
+      "adres": "J.C. Wilslaan 21 7313 HK Apeldoorn",
+      "widgetCode": "",
+      "distance": "14,6",
+      "walkTime": "",
+      "bikeTime": "",
+      "carTime": "16"
+    },
+    {
+      "name": "Paleis Het Loo",
+      "desc": "<h3>Ontdek Paleis Het Loo: Koninklijke Pracht en Oranje-geschiedenis!</h3><p>Stap binnen in de <em>betoverende wereld</em> van <strong>Paleis Het Loo</strong> en duik <strong>350 jaar</strong> diep in de fascinerende <strong>Oranje-geschiedenis</strong>. Van Willem van Oranje tot Willem-Alexander: hier ontdek je het verhaal van de Nederlandse koninklijke familie in hun voormalige zomerresidentie.</p><ul><li><p>Verken de <strong>prachtige paleiskamers</strong> en volg de koninklijke paleisroutes.</p></li><li><p>Wandel door de <em>indrukwekkende</em> <strong>paleistuin</strong>, een juweel van barokke landschapsarchitectuur.</p></li><li><p>Geniet van een <em>sfeervolle</em> <strong>High Tea</strong> in de Prins Hendrik Garage (vanaf 17 april).</p></li><li><p>Bezoek de <strong>tentoonstelling 'De Grote Trap: als muren konden praten'</strong> en laat je meeslepen door verborgen verhalen. Nu te zien tot 30 augustus 2026.</p></li></ul><p>Een bezoek aan Paleis Het Loo is een <em>leuke ervaring</em> voor jong en oud.</p>",
+      "image": "images/Paleis het Loo.webp",
+      "url": "https://paleishetloo.nl/",
+      "adres": "Koninklijk Park 16, Apeldoorn",
+      "widgetCode": "",
+      "distance": "16,7",
+      "walkTime": "",
+      "bikeTime": "",
+      "carTime": "19"
+    },
+    {
+      "name": "💜 Wandeltips: ontdek de prachtige heide rondom ’t Leesten🌿🥾",
+      "desc": "<p>Wie bij ons verblijft in Veluwe Droom Chalet, komt voor rust, natuur en het echte Veluwegevoel. En dat gevoel vind je niet alleen rondom het chalet… op korte rijafstand liggen de mooiste wandelgebieden die ieder seizoen weer iets bijzonders laten zien.</p><p>Een absolute aanrader is <em>’t Leesten</em>, vlak bij Apeldoorn. Vanaf het chalet rijd je er in ongeveer 20 minuten naartoe en stap je direct een prachtig stukje Veluwe binnen.</p><p>’t Leesten is een afwisselend natuurgebied met uitgestrekte bossen, open heidevelden, zandpaden en mooie vergezichten. Vooral vanaf <em>half augustus tot begin september</em>, wanneer de heide volop in bloei staat, verandert het landschap in een zee van paars. Een wandeling hier voelt even alsof je ver weg bent, terwijl je eigenlijk gewoon in Nederland bent.</p><p>Er zijn verschillende wandelroutes uitgezet, waardoor er voor iedere wandelaar iets te vinden is. Een korte wandeling om even de natuur op te zoeken, of juist een langere tocht waarbij je steeds weer nieuwe plekken ontdekt. Onderweg kom je misschien wel een ree tegen, hoor je de vogels in het bos of zie je de typische Veluwse vergezichten over de heide.</p><p>Een mooie combinatie is om vanaf ’t Leesten richting <em>Hoog Buurlo en de Buurlose Heide</em> te wandelen. Dit gebied staat bekend om de rust, de prachtige heidevelden en de schaapskooi. Ook de <em>Deelerheide</em> en de <em>Posbank</em> behoren tot de bekende parels in de omgeving, maar ’t Leesten is misschien wel één van die plekken die veel mensen nog niet kennen.</p><p>En dat maakt de Veluwe zo bijzonder: je hoeft geen uren te reizen voor een vakantiegevoel. Soms ligt het gewoon om de hoek. Een rustig bospad, een bankje met uitzicht over de heide en even helemaal niets hoeven… precies waar een verblijf bij Veluwe Droom Chalet om draait. 💚</p><p>📍 Tip: bezoek ’t Leesten vroeg in de ochtend of aan het einde van de middag. Dan is het vaak extra rustig en is de kans op het spotten van wild het grootst.</p>",
+      "image": "images/Het Leesten.webp",
+      "url": "",
+      "adres": "",
+      "widgetCode": "",
+      "distance": "",
+      "walkTime": "",
+      "bikeTime": "",
+      "carTime": "20"
+    },
+    {
+      "name": "Julianatoren",
+      "desc": "<h3>Kinderpretpark Julianatoren: Plezier voor de Kleintjes!</h3><p>Op zoek naar een <em>fantastische dag</em> vol avontuur en vrolijkheid? Bij <strong>Kinderpretpark Julianatoren</strong> beleven kinderen tot 10 jaar de tijd van hun leven! Dit park is dé plek voor onvergetelijke momenten met de hele familie, midden in de natuur.</p><p>Ontdek meer dan <strong>50 te gekke attracties</strong>, van spannende achtbanen tot betoverende draaimolens, allemaal perfect afgestemd op jonge avonturiers. Laat je verrassen door de <em>spetterende shows</em> van de geliefde mascottes Jul &amp; Julia en geniet van speciale, seizoensgebonden evenementen die het hele jaar door voor extra magie zorgen.</p><ul><li><p>Meer dan <strong>50 kindvriendelijke attracties</strong>.</p></li><li><p><em>Spectaculaire shows</em> met Jul, Julia en vrienden.</p></li><li><p>Regelmatig <strong>leuke evenementen</strong>, zoals paaspret en zomerfestiviteiten.</p></li></ul><p>Julianatoren staat garant voor een <em>sprankelende ervaring</em> en volop speelplezier. Een <strong>absolute aanrader</strong> voor je familievakantie!</p>",
+      "url": "https://www.julianatoren.nl/",
+      "adres": "Kinderpretpark Julianatoren Amersfoortseweg 35 Apeldoorn",
+      "image": "images/Koningin Juliantoren.webp",
+      "widgetCode": "",
+      "distance": "18,1",
+      "walkTime": "",
+      "bikeTime": "",
+      "carTime": "21"
+    },
+    {
+      "name": "Burgers' Zoo",
+      "desc": "<h3>Ontdek de Wereld in Burgers' Zoo, Arnhem!</h3><p>Stap binnen in de <em>indrukwekkende</em> wereld van Burgers' Zoo, waar je geen gewone dierentuin vindt, maar <strong>unieke ecodisplays</strong>! Hier worden natuurgebieden tot in detail nagebootst, waardoor dieren vaak in grote vrijheid leven te midden van honderden plantensoorten. Een <em>onvergetelijke reis</em> rond de wereld wacht op je!</p><ul><li><p>Verken de <strong>Bush</strong>, een tropisch regenwoud vol leven.</p></li><li><p>Duik in de onderwaterwereld van de <strong>Ocean</strong>, met haaien en roggen.</p></li><li><p>Trek door de droge landschappen van de <strong>Desert</strong>.</p></li><li><p>Ga op <em>spannende tocht</em> door de <strong>Safari</strong> en de Aziatische <strong>Rimba</strong>.</p></li><li><p>Ontdek de <em>bijzondere</em> mangrovebossen in de <strong>Mangrove</strong>.</p></li></ul><p>Burgers' Zoo is een <strong>perfect dagje uit</strong>.</p>",
+      "image": "images/Burgers Zoo.webp",
+      "url": "https://www.burgerszoo.nl/",
+      "adres": "Antoon van Hooffplein 1 6816 SH Arnhem",
+      "widgetCode": "",
+      "distance": "18,5",
+      "walkTime": "",
+      "bikeTime": "",
+      "carTime": "22"
+    },
+    {
+      "name": "Nederlands Openluchtmuseum",
+      "desc": "<h3>Ontdek de Nederlandse Geschiedenis in het Openluchtmuseum!</h3><p>Reis terug in de tijd in het <strong>Nederlands Openluchtmuseum</strong> in Arnhem, waar geschiedenis <em>springlevend</em> wordt! Dit unieke museum neemt je mee op een boeiende ontdekkingstocht door vierhonderd jaar Nederlandse verhalen. Van historische gebouwen en voorwerpen tot persoonlijke herinneringen, er is voor iedereen iets te beleven. Ontdek waar jij én anderen vandaan komen!</p><p>Wat kun je verwachten?</p><ul><li><p>Duik in verhalen van <strong>vroeger en nu</strong>, met aandacht voor diverse achtergronden.</p></li><li><p>Kinderen kunnen <strong>zelf aan de slag</strong> met leuke, interactieve activiteiten.</p></li><li><p>Stap aan boord van <em>historische trams</em> en ontdek hoe techniek en transport onze geschiedenis hebben gevormd.</p></li><li><p>Bewonder indrukwekkende landschapsmodelbanen of <strong>bouw je eigen treinbaan</strong>!</p></li></ul><p>Het museum is <strong>dagelijks geopend vanaf 10:00 uur</strong>.</p>",
+      "image": "images/Nederlands Openluchtmuseum 2.webp",
+      "url": "https://www.openluchtmuseum.nl/nl/",
+      "adres": "Hoeferlaan 4 6816 SG Arnhem",
+      "widgetCode": "",
+      "distance": "19,1",
+      "walkTime": "",
+      "bikeTime": "",
+      "carTime": "23"
+    }
+  ],
+  "aiPrompt": "Je bent een perfecte assistent die websites samenvat voor een vakantie-app. Maak een aantrekkelijke, beknopte samenvatting in HTML-opmaak geschikt voor vakantiegasten.\n\nGebruik deze HTML-elementen:\n- <h3> voor kopjes\n- <p> voor alinea's\n- <ul><li> voor opsommingen\n- <strong> voor belangrijke woorden\n- <em> voor sfeervolle beschrijvingen\n\nHoud het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nederlands.",
+  "aiMaxChars": 15000,
+  "translations": {
+    "en": {
+      "property": {
+        "name": "Veluwe Droom Chalet",
+        "subtitle": "Welcome @naamgast",
+        "host": {
+          "name": "Arno & Kitty",
+          "phone": "+31682287283"
+        }
+      },
+      "videos": [
+        {
+          "title": "Key box",
+          "subtitle": "Where is the key?",
+          "thumb": "images/Sleutelkastje.webp",
+          "url": "https://www.youtube.com/embed/E6U7YRUr8AI",
+          "leafStyle": "leaf-oak",
+          "leafRotate": 206,
+          "leafTranslateX": 35,
+          "leafTranslateY": 12
+        }
+      ],
+      "omgeving": [
+        {
+          "name": "De Ruggestee",
+          "desc": "<h3>De Ruggestee: Your Veluwe Getaway!</h3><p>Welcome to De Ruggestee at Veluws Hof, your <em>tasteful spot</em> in the heart of the <strong>Veluwe</strong>! Amidst the <em>soothing forests</em>, you'll find this welcoming restaurant with a <em>warm ambiance</em>, perfect for holidaymakers and nature lovers.</p><p>Enjoy delicious dishes, from a relaxed <strong>lunch</strong> to an extensive <strong>dinner</strong>. The menu changes with the seasons and offers options such as buffet, BBQ, or hot stone grill. The cozy restaurant with a charming fireplace invites you to taste and relax.</p><ul><li><p><strong>Activities</strong>: Enjoy a fun afternoon with <strong>bowling</strong> or challenge friends at the pool table and dartboard in the <strong>pub</strong>.</p></li><li><p><strong>Opening hours</strong>: Thursday to Sunday, from 12:00 PM. The kitchen closes at 8:00 PM.</p></li></ul><p><em>Let yourself be surprised by the flavors and coziness of the Veluwe at De Ruggestee!</em></p>",
+          "url": "https://www.ruggestee.nl/",
+          "image": "images/Restaurant.webp",
+          "adres": "De Smaak van Hoenderloo krimweg",
+          "widgetCode": "",
+          "distance": "0,27",
+          "walkTime": "4",
+          "bikeTime": "1",
+          "carTime": "1"
+        },
+        {
+          "name": "Het Nationale Park De Hoge Veluwe",
+          "desc": "<h3>Discover Hoge Veluwe National Park: Nature, Art &amp; Culture!</h3><p>Be enchanted by <em>the perfect mix of pristine nature, fascinating art, and rich culture</em> in this unique national park. Wander through vast heathlands, shifting sand landscapes, and dense forests. Here you can spot the <strong>'big four'</strong>: red deer, wild boar, mouflon, and roe deer!</p><p>Explore the park at your own pace with the <strong>free white bicycles</strong>, or enjoy beautiful walking routes that lead you past the most scenic spots. Join the ranger for extra adventure and spot special flora and fauna.</p><p>In addition to overwhelming nature, De Hoge Veluwe also offers a dose of culture. Visit the world-renowned <strong>Kröller-Müller Museum</strong> with masterpieces by Van Gogh and Picasso, and admire the architectural masterpiece Hunting Lodge Sint-Hubertus, designed by Berlage.</p><ul><li><p><strong>Nature:</strong> Wild animals, active drifting sands, and heathlands.</p></li><li><p><strong>Culture:</strong> Art in the Kröller-Müller Museum and architecture of Hunting Lodge Sint-Hubertus.</p></li><li><p><strong>Active:</strong> Cycling (free!), hiking, and interactive games.</p></li></ul><p>With so much to see and do, Hoge Veluwe National Park is ideal for an unforgettable holiday!</p>",
+          "image": "images/Bekende gebouw Nationaal Park Hoge Veluwe.webp",
+          "url": "https://hogeveluwe.nl/",
+          "adres": "Hoenderloo, Houtkampweg 13",
+          "widgetCode": "",
+          "distance": "3,6",
+          "walkTime": "",
+          "bikeTime": "11",
+          "carTime": "6"
+        },
+        {
+          "name": "De Apenheul",
+          "desc": "<h3>Apenheul: Go on an Adventure Among the Monkeys!</h3><p>Get ready for <em>a day full of playful discoveries</em> in <strong>Apenheul</strong>, the place where monkeys roam freely and you get up close! The perfect outing for the whole family.</p><ul><li><p>Climb the new <strong>11-meter high observation tower</strong> for a <em>spectacular view</em> of the largest gorilla family in the Netherlands. A unique viewing experience!</p></li><li><p>Walk through the renovated habitat and come face to face with up to 60 <em>lightning-fast squirrel monkeys</em> climbing around you.</p></li><li><p>Spot all <strong>34 monkey species</strong> with the free scavenger hunt map – a fun challenge for young and old!</p></li></ul><p><strong>Practical info:</strong> Apenheul is open daily from 10:00 AM.</p>",
+          "image": "images/Apenheul.webp",
+          "url": "https://www.apenheul.nl/",
+          "adres": "J.C. Wilslaan 21 7313 HK Apeldoorn",
+          "widgetCode": "",
+          "distance": "14,6",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "16"
+        },
+        {
+          "name": "Paleis Het Loo",
+          "desc": "<h3>Discover Paleis Het Loo: Royal Splendor and Orange History!</h3><p>Step into the <em>enchanting world</em> of <strong>Paleis Het Loo</strong> and dive <strong>350 years</strong> deep into the fascinating <strong>Orange history</strong>. From William of Orange to Willem-Alexander: here you discover the story of the Dutch royal family in their former summer residence.</p><ul><li><p>Explore the <strong>beautiful palace rooms</strong> and follow the royal palace routes.</p></li><li><p>Stroll through the <em>impressive</em> <strong>palace garden</strong>, a jewel of Baroque landscape architecture.</p></li><li><p>Enjoy an <em>atmospheric</em> <strong>High Tea</strong> in the Prins Hendrik Garage (from April 17).</p></li><li><p>Visit the <strong>exhibition 'The Grand Staircase: if walls could talk'</strong> and let yourself be carried away by hidden stories. Now on display until August 30, 2026.</p></li></ul><p>A visit to Paleis Het Loo is a <em>fun experience</em> for young and old. </p>",
+          "image": "images/Paleis het Loo.webp",
+          "url": "https://paleishetloo.nl/",
+          "adres": "Koninklijk Park 16, Apeldoorn",
+          "widgetCode": "",
+          "distance": "16,7",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "19"
+        },
+        {
+          "name": "Julianatoren",
+          "desc": "<h3>Julianatoren Children's Amusement Park: Fun for the Little Ones!</h3><p>Looking for a <em>fantastic day</em> full of adventure and joy? At <strong>Julianatoren Children's Amusement Park</strong>, children up to 10 years old will have the time of their lives! This park is the perfect place for unforgettable moments with the whole family, surrounded by nature.</p><p>Discover more than <strong>50 awesome attractions</strong>, from thrilling roller coasters to enchanting carousels, all perfectly suited for young adventurers. Let yourself be surprised by the <em>spectacular shows</em> of the beloved mascots Jul &amp; Julia and enjoy special, seasonal events that provide extra magic throughout the year.</p><ul><li><p>More than <strong>50 child-friendly attractions</strong>.</p></li><li><p><em>Spectacular shows</em> with Jul, Julia and friends.</p></li><li><p>Regular <strong>fun events</strong>, such as Easter fun and summer festivities.</p></li></ul><p>Julianatoren guarantees a <em>sparkling experience</em> and plenty of fun. An <strong>absolute must-see</strong> for your family holiday!</p>",
+          "url": "https://www.julianatoren.nl/",
+          "adres": "Kinderpretpark Julianatoren Amersfoortseweg 35 Apeldoorn",
+          "image": "images/Koningin Juliantoren.webp",
+          "widgetCode": "",
+          "distance": "18,1",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "21"
+        },
+        {
+          "name": "Burgers' Zoo",
+          "desc": "<h3>Discover the World in Burgers' Zoo, Arnhem!</h3><p>Step into the <em>impressive</em> world of Burgers' Zoo, where you won't find an ordinary zoo, but <strong>unique ecodisplays</strong>! Here, natural habitats are meticulously recreated, allowing animals to often live in great freedom amidst hundreds of plant species. An <em>unforgettable journey</em> around the world awaits you!</p><ul><li><p>Explore the <strong>Bush</strong>, a tropical rainforest full of life.</p></li><li><p>Dive into the underwater world of the <strong>Ocean</strong>, with sharks and rays.</p></li><li><p>Journey through the dry landscapes of the <strong>Desert</strong>.</p></li><li><p>Embark on an <em>exciting journey</em> through the <strong>Safari</strong> and the Asian <strong>Rimba</strong>.</p></li><li><p>Discover the <em>special</em> mangrove forests in the <strong>Mangrove</strong>.</p></li></ul><p>Burgers' Zoo is a <strong>perfect day out</strong>.</p>",
+          "image": "images/Burgers Zoo.webp",
+          "url": "https://www.burgerszoo.nl/",
+          "adres": "Antoon van Hooffplein 1 6816 SH Arnhem",
+          "widgetCode": "",
+          "distance": "18,5",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "22"
+        },
+        {
+          "name": "Nederlands Openluchtmuseum",
+          "desc": "<h3>Discover Dutch History in the Open Air Museum!</h3><p>Travel back in time at the <strong>Dutch Open Air Museum</strong> in Arnhem, where history comes <em>alive</em>! This unique museum takes you on a fascinating journey of discovery through four hundred years of Dutch stories. From historical buildings and objects to personal memories, there is something for everyone to experience. Discover where you and others come from!</p><p>What can you expect?</p><ul><li><p>Dive into stories of <strong>past and present</strong>, with attention to diverse backgrounds.</p></li><li><p>Children can <strong>get hands-on</strong> with fun, interactive activities.</p></li><li><p>Step aboard <em>historic trams</em> and discover how technology and transport have shaped our history.</p></li><li><p>Admire impressive landscape model railways or <strong>build your own model railway</strong>!</p></li></ul><p>The museum is <strong>open daily from 10:00 AM</strong>.</p>",
+          "image": "images/Nederlands Openluchtmuseum 2.webp",
+          "url": "https://www.openluchtmuseum.nl/nl/",
+          "adres": "Hoeferlaan 4 6816 SG Arnhem",
+          "widgetCode": "",
+          "distance": "19,1",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "23"
+        },
+        {
+          "name": "Kröller-Müller Museum",
+          "desc": "<h3>Kröller-Müller Museum: Art &amp; Nature in the Veluwe</h3><p>Discover the <em>beautiful</em> <strong>Kröller-Müller Museum</strong>, a unique place where art and nature come together, in the middle of the <em>vast</em> De Hoge Veluwe Park.</p><p>Let yourself be surprised by one of the <strong>largest Vincent van Gogh collections in the world</strong>, complemented by masterpieces from modern masters:</p><ul><li><p><strong>Claude Monet</strong>, <strong>Georges Seurat</strong>, <strong>Pablo Picasso</strong>, <strong>Piet Mondriaan</strong></p></li><li><p>And fascinating works from the movements <em>De Stijl</em> and <em>Futurism</em>.</p></li></ul><p>Stroll through the <em>impressive</em> <strong>sculpture garden</strong> with sculptures by, among others, <strong>Barbara Hepworth</strong> and <strong>Jean Dubuffet</strong>. Also admire the special architecture of the museum buildings and pavilions.</p><p>A <em>perfect day </em>to enjoy and relax. Plan your visit and immerse yourself in a world of beauty!</p>",
+          "image": "images/Kroller Moller.webp",
+          "url": "https://krollermuller.nl/",
+          "adres": "Houtkampweg 6  6731 AW Otterlo",
+          "widgetCode": "",
+          "distance": "8,3",
+          "walkTime": "",
+          "bikeTime": "27",
+          "carTime": "13"
+        },
+        {
+          "name": "Ontdek Apeldoorn",
+          "desc": "<h3>Discover Apeldoorn: Your Ideal Holiday Destination!</h3><p>Welcome to Apeldoorn, a <em>dynamic city surrounded by greenery</em>. Here you'll find everything to <strong>enjoy royally</strong>, whether you come for peace, adventure, or culture.</p><p>Let yourself be surprised by the versatility of Apeldoorn:</p><ul><li><p>Explore the <strong>breathtaking nature</strong> in and around the city. Ideal for hikers and cyclists!</p></li><li><p>Dive into the <em>rich cultural offerings</em>: from events to exhibitions.</p></li><li><p>Discover the <strong>best shopping hotspots</strong>, pleasant Sunday shopping, and lively markets.</p></li><li><p>Create your own <em>Apeldoorn bucket list</em> for unforgettable outings and experiences.</p></li></ul><p>Apeldoorn awaits to be discovered. Come and experience it yourself!</p>",
+          "image": "images/Apeldoorn IIII.webp",
+          "url": "https://www.apeldoorn.nl/",
+          "adres": "",
+          "widgetCode": "",
+          "distance": "14,5",
+          "walkTime": "",
+          "bikeTime": "37",
+          "carTime": "16"
+        },
+        {
+          "name": "De Proeftuin",
+          "desc": "<h3>De ProefTuin Hoenderloo</h3><p>Looking for a cozy place to have lunch, drinks, or dinner amidst nature? Then De ProefTuin in Hoenderloo is highly recommended. Here you can enjoy delicious Italian dishes, including artisanal wood-fired pizzas, fresh pasta, and homemade specialties. <span style=\"color: rgb(74, 93, 35);\">The pizza baker of De ProefTuin was even named Dutch pizza baking champion in 2026!</span></p><p>This is an ideal stopover for families. While the children have fun in the play and cross garden or play a round of mini-golf, you can relax on the spacious terrace with a view of the greenery. Beautiful hiking trails also start in the immediate vicinity, including the famous Plaggenstekerspad.</p><p>Whether you fancy a cup of coffee with cake, an extensive lunch, or a cozy evening out after a day on the Veluwe: at De ProefTuin, you combine delicious food with relaxation and fun for young and old. A nice place to settle down during your stay in the Veluwe Droom Chalet.</p><p>💡 <strong>Tip:</strong> Make a reservation in advance if you want to eat on weekends or during holiday periods. This popular location attracts many visitors.</p><p></p>",
+          "image": "",
+          "url": "https://deproeftuinhoenderloo.nl",
+          "adres": "De Krim 4",
+          "widgetCode": "",
+          "distance": "",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": ""
+        }
+      ],
+      "insights": [
+        {
+          "icon": "icons/clock.svg",
+          "title": "Check-in",
+          "subtitle": "Check-in is possible on @aankomst between 3:00 PM and 10:00 PM and is contactless. Read the important instructions regarding arrival here.",
+          "action": "none",
+          "detailContent": "<h3>A warm welcome to Hoenderloo and the Veluwe Droom Chalet!</h3><p></p><p>Upon arrival at the main entrance of Bospark ’t Veluws Hof, you can <strong>park your car in the central parking lot</strong>. We then kindly ask you to <strong>report to the reception</strong>. Your arrival is already known there; we have registered your details in advance.</p><p>At the reception, you will pay the <strong>tourist tax</strong>. Upon your request, the reception staff can show you on the park map where the Veluwe Droom Chalet is located (Bosrand 18). The <strong>directions</strong> from the reception to our chalet are also extensively detailed in this web app.</p><p>You then walk to the chalet. In the shed near the chalet, there is a <strong>key box</strong> containing the key. The <strong>key code</strong> is <span style=\"color: rgb(102, 102, 102); font-size: 13.6px;\">@sleutelcode</span></p><p></p><img src=\"/images/Parkeerkaart.jpg\" alt=\"Parkeerkaart.jpg\" width=\"50%\" style=\"width: 50%; float: right; margin-left: 14px; margin-bottom: 8px;\"><p>Inside the chalet, on the dining table, you will find the <strong>barrier card</strong>. With this card, you can then drive your car onto the park and continue to the chalet. It is permitted to park 1 car next to the chalet.</p><p>In case of loss or damage to either the key or the barrier card, we will be forced to charge costs.<br></p><img src=\"/images/Check in NL transparant.webp\" alt=\"Check in NL transparant.webp\"><p></p><p>We wish you a pleasant stay!<br></p>",
+          "image": "images/Checkin banner.png",
+          "widgetCode": "",
+          "visibility": "checkin"
+        },
+        {
+          "title": "Check-out",
+          "subtitle": "Today it's time to check out from Veluwe Droom Chalet. We hope you had a wonderful stay and are going home with beautiful memories.\n\nThe check-out time is no later than 11:00 AM. Please let us know if there's anything else we can help with. Read the departure instructions for more information.",
+          "icon": "icons/clock.svg",
+          "action": "none",
+          "detailContent": "<img src=\"/images/Check out NL transparant.webp\" alt=\"Check out NL transparant.webp\" style=\"text-align: center;\"><p></p>",
+          "image": "",
+          "widgetCode": "",
+          "visibility": "checkout"
+        },
+        {
+          "title": "How to find our chalet",
+          "subtitle": "Here you will find a detailed description of how to find our Chalet at Bosrand 18.\nFor the more visually oriented among us, we have also added a map of the park, which is always handy to have.",
+          "icon": "icons/map.svg",
+          "action": "none",
+          "detailContent": "<p>Drive past the <strong>reception</strong> and turn <strong>right at the swimming pool</strong>. Go straight down that street until you reach <strong>Blauwgraslaan</strong>. Turn <strong>right</strong> there.</p><p>A little further on, turn <strong>left</strong> into <strong>Helmgraslaan</strong>.</p><p>Follow Helmgraslaan and turn <strong>left</strong> onto <strong>Klavergraslaan</strong>. Our chalet is then the <strong>7th chalet on your right-hand side</strong>.</p><p>At the entrance, there is a sign with <strong>Bosrand 18</strong>.</p><p></p><img src=\"/images/Plattegrond.webp\" alt=\"Plattegrond.webp\" style=\"text-align: center;\"><p></p>",
+          "image": "",
+          "widgetCode": "",
+          "visibility": "checkin"
+        },
+        {
+          "icon": "icons/key.svg",
+          "title": "Key box code",
+          "subtitle": "The key box is in the shed. Click here for the key box code. Please hang the key back in the key box and lock the door upon departure.",
+          "action": "none",
+          "detailContent": "<h3></h3><p>@sleutelcode</p><p></p>",
+          "widgetCode": "",
+          "image": "images/Sleutelkastje.webp",
+          "visibility": "always"
+        },
+        {
+          "title": "Departure instructions",
+          "subtitle": "Check-out is @vertrek no later than 11:00 AM and is also contactless. Read the important instructions regarding departure here.",
+          "icon": "icons/info.svg",
+          "action": "none",
+          "detailContent": "<p>We kindly request you to leave the Veluwe Droom Chalet tidy upon departure and according to the instructions below:</p><ul><li><p>Leave the chalet&nbsp;<strong>broom clean</strong>.</p></li><li><p>Wash the used dishes and put them away in the cupboards.</p></li><li><p>Empty the refrigerator and remove food items and waste.</p></li><li><p>Collect the waste and dispose of it in the designated containers in the park (behind the White House).</p></li><li><p>Turn the heating down to a low setting (7 degrees) and switch off all electrical appliances.</p></li><li><p>Carefully close all windows and doors.</p></li><li><p>First leave the park by car, using the parking card (and do not quickly follow another car when the barrier opens), <strong>otherwise the barrier will no longer open for guests arriving after you......</strong></p></li><li><p>Walk back to the chalet, place the parking card on the table, and finally put the&nbsp;<strong>key in the key box</strong>.</p></li></ul><p></p><img src=\"/images/Check out NL transparant.webp\" alt=\"Check out NL transparant.webp\"><p></p><p>We kindly ask you to leave the chalet&nbsp;<strong>no later than the agreed time</strong>.</p><p></p><p>Thank you very much for your stay and we hope to see you again at Veluwe Droom Chalet!</p>",
+          "image": "images/Checkout banner.png",
+          "widgetCode": ""
+        },
+        {
+          "title": "Especially for you… ",
+          "subtitle": "If you would like to stay at the Veluwe Droom Chalet again, book directly through our website and receive a 15% discount. The discount code is also transferable to family, friends, and acquaintances.",
+          "icon": "icons/star.svg",
+          "action": "none",
+          "detailContent": "<p>How wonderful that you are staying in the <strong>Veluwe Droom Chalet </strong>! We hope you enjoy the peace, nature, and your stay.</p><p>Because you are here now, we have something extra: ✨ <strong>15% discount on a next stay!</strong></p><p>Would you like to come back again? Or let family, friends, or acquaintances enjoy this lovely place?</p><p style=\"text-align: left;\">Then book directly via <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.veluwedroomchalet.nl\"><strong>our website</strong></a> and use this discount code for all of 2027: <br><br><strong>Veluwe Droom Voordeel 2027</strong></p><p style=\"text-align: left;\"></p><p>👉 Also follow us on Facebook and Instagram for updates and inspiration</p><p>Hopefully see you next time 💚</p>",
+          "image": "",
+          "widgetCode": ""
+        },
+        {
+          "icon": "icons/wifi.svg",
+          "title": "Wifi code",
+          "subtitle": "Feel free to use our free WIFI network. Click here for the QR code and password.",
+          "action": "wifi-modal",
+          "detailContent": "<h3>Scan the QR code below to connect directly to our network.</h3><img src=\"/images/Wifi QR Odido.webp\" alt=\"Wifi QR Odido.webp\" style=\"text-align: center;\"><h3>In case the barcode doesn't work</h3><p>WiFi name:<strong> Odido-32B314</strong></p><p>Password <strong>TQHK7AAFUTMQ3NBQ</strong></p>",
+          "image": "",
+          "widgetCode": ""
+        },
+        {
+          "title": "QR codes swimming pool access",
+          "subtitle": "During your stay, you have free access to the outdoor swimming pool of 't Veluws Hof. Click here to read how to easily get access with your personal QR codes.",
+          "icon": "icons/swimmer.svg",
+          "action": "none",
+          "detailContent": "<h3>🏊‍♂️ Access to the swimming pool</h3><p>The outdoor swimming pool of Recreation Park 't Veluws Hof uses a digital access system via QR codes. To make it as easy as possible for you, we have fully prepared this digitally.</p><h3>Where can I find the QR codes?</h3><ul><li><p><strong>Direct in this app:</strong> You don't need to go to the reception. The personal QR codes for your party are directly below/ready in this app.</p></li><li><p><strong>Scan at the entrance:</strong> Simply hold the QR code in front of the scanner at the swimming pool's entrance gate to enter.</p></li></ul><h3>Important to know:</h3><ul><li><p><strong>Unique code per person:</strong> Each guest needs their own unique QR code to pass the gate.</p></li><li><p><strong>Non-transferable:</strong> The codes are strictly personal and only valid for the duration of your stay. In case of misuse, they will be automatically blocked.</p></li><li><p><strong>Visitors?</strong> Are you receiving visitors who would like to swim along? As a guest, you can have a day pass (QR code) made for your visitors at the park's reception.</p></li></ul><h3>⚠️ Important swimming pool rules</h3><p>The park applies several strict rules at the swimming pool to guarantee everyone's safety and peace:</p><ul><li><p><strong>No</strong> glassware and <strong>no</strong> alcoholic beverages allowed.</p></li><li><p>It is absolutely <strong>not</strong> allowed to dive.</p></li><li><p>Radios, boomboxes, or other amplified sound are not allowed.</p></li><li><p>Note the <strong>smoke-free zones</strong>; these are located on the sunbathing lawns and around the children's pool.</p></li></ul><p><em>Scroll down this screen to view your personal QR codes.</em> Have fun swimming!</p><p></p><img src=\"/images/qr.webp\" alt=\"qr.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-2.webp\" alt=\"qr-2.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-2.webp\" alt=\"qr-2.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-3.webp\" alt=\"qr-3.webp\" style=\"text-align: center;\"><p></p>",
+          "image": "images/Zwembad.webp",
+          "widgetCode": ""
+        },
+        {
+          "icon": "icons/list.svg",
+          "title": "Park and Chalet Rules",
+          "subtitle": "To make the stay pleasant for everyone, the following park and chalet rules apply at Recreation Park 't Veluws Hof and in the Veluwe Droom Chalet. Click here for the rules",
+          "action": "none",
+          "detailContent": "<p><strong>🏡&nbsp;House rules – Veluwe Droom Chalet</strong></p><p>To ensure a pleasant, safe, and relaxed stay for all guests, we ask you to respect the following house rules. We take good care of our chalet, and we assume you will do the same!</p><p><strong>👥&nbsp;Number of guests</strong></p><ul><li><p>The chalet may only be used by the&nbsp;<strong>number of guests as stated in the reservation</strong>.</p></li><li><p>Visitors are allowed, but&nbsp;<strong>overnight stays by extra persons are not permitted</strong>&nbsp;without prior permission.</p></li></ul><p><strong>🕒&nbsp;Arrival &amp; departure</strong></p><ul><li><p><strong>Check-in</strong>&nbsp;is possible between 3:00 PM and 10:00 PM.</p></li><li><p><strong>Check-out</strong>&nbsp;is possible between 7:00 AM and 11:00 AM.</p></li><li><p>We kindly ask you to leave the chalet&nbsp;<strong>tidy and in good condition</strong>&nbsp;upon departure.</p></li></ul><p><strong>🚭&nbsp;Smoking</strong></p><ul><li><p><strong>Smoking is not allowed in the chalet</strong>.</p></li><li><p>Smoking outside is permitted, provided an ashtray is used and no nuisance is caused.</p></li></ul><p><strong>🐶&nbsp;Pets</strong></p><ul><li><p><strong>A maximum of two dogs are allowed</strong>, only if registered in advance.</p></li><li><p>Dogs are&nbsp;<strong>only allowed on a leash</strong>&nbsp;in the park.</p></li><li><p>We kindly ask you to&nbsp;<strong>only walk your dog outside the park</strong>.</p></li><li><p>Any accidents must be&nbsp;<strong>cleaned up immediately and carefully</strong>.</p></li><li><p>Pets are&nbsp;<strong>not allowed on beds and furniture</strong>.</p></li><li><p>Dogs may&nbsp;<strong>not be left alone in the chalet</strong>.</p></li><li><p>You must ensure that your pet&nbsp;<strong>does not cause any (noise) disturbance</strong>&nbsp;to other guests or residents.</p></li></ul><p><strong>🔇&nbsp;Peace &amp; surroundings</strong></p><ul><li><p>The chalet is located on a quiet holiday park.</p></li><li><p>Between&nbsp;<strong>11:00 PM and 07:00 AM</strong>&nbsp;night rest applies.</p></li><li><p>Noise pollution, loud music, and disruptive behavior are not allowed.</p></li><li><p>Parties and gatherings of a festive nature are not permitted.</p></li></ul><p><strong>🎆&nbsp;Fireworks</strong></p><ul><li><p>The&nbsp;<strong>setting off of fireworks is strictly prohibited</strong>, both&nbsp;<strong>in and around the chalet and throughout the entire park</strong>, regardless of date or occasion.</p></li><li><p>This prohibition explicitly also applies during New Year's Eve.</p></li></ul><p><strong>🔥&nbsp;Open fire &amp; safety</strong></p><ul><li><p><strong>Open fire in any form is not permitted</strong>, both&nbsp;<strong>in the chalet and in the park</strong>.<br>This includes: candles, fire pits, barbecues, campfires, and other open flames.</p></li><li><p>Windows and doors must be&nbsp;<strong>closed</strong>&nbsp;when absent.</p></li></ul><p><strong>🧼&nbsp;Use, damage &amp; liability</strong></p><ul><li><p>You must use the chalet, its inventory, and the outdoor area&nbsp;<strong>carefully and according to its intended purpose</strong>.</p></li><li><p>Any damage, breakage, or loss must be&nbsp;<strong>reported immediately</strong>.</p></li><li><p>Damage incurred during the stay may be recovered through the booking platform and/or the deposit arrangement.</p></li></ul><p><strong>🗑️&nbsp;Waste</strong></p><ul><li><p>Waste must be&nbsp;<strong>separated</strong>&nbsp;and deposited in the designated containers in the park.</p></li><li><p>Leaving waste in or around the chalet is not permitted.</p></li></ul><p><strong>⚠️&nbsp;Liability</strong></p><ul><li><p>The&nbsp;<strong>entering of the park</strong>, the&nbsp;<strong>use of park facilities</strong>&nbsp;and/or&nbsp;<strong>participation in activities or events</strong>&nbsp;in the park is done&nbsp;<strong>entirely at your own risk</strong>.</p></li><li><p>We accept&nbsp;<strong>no liability</strong>&nbsp;for damage, loss, disappearance, and/or theft of personal belongings in, near, or around the chalet and/or in the park.</p></li></ul><p><strong>🛠️&nbsp;Park rules</strong></p><ul><li><p>Guests are obliged to comply with the&nbsp;<strong>applicable park rules</strong>.</p></li><li><p>Instructions from park management or park staff must be&nbsp;<strong>followed immediately</strong>.</p></li></ul><p>💛&nbsp;<strong>We thank you for observing these house rules.</strong><br>This way, Veluwe Droom Chalet remains a safe, quiet, and pleasant place for all guests.</p>",
+          "widgetCode": ""
+        },
+        {
+          "title": "'t Veluws Hof",
+          "subtitle": "Here you will find information about Bospark 't Veluws Hof and its facilities, including: reception, supermarket, restaurant, snack bar, bowling, mini golf, bicycle rental, and swimming pool",
+          "icon": "icons/reception.svg",
+          "action": "none",
+          "detailContent": "<p><strong>The reception</strong> of the park is directly at the entrance.</p><p>The opening hours are:</p><p>Monday to Friday from 9:00 AM to 5:00 PM.</p><p>Saturday from 10:00 AM to 4:30 PM.</p><p>Sunday from 12:00 PM to 4:00 PM.</p><p>The reception can be reached by phone: <strong>055-3781777</strong>.</p><p>In case of fire or first aid, always warn the reception!</p><hr><p>The <strong>laundromat</strong> is open daily from April 1 to October 1 from 10:00 AM to 9:00 PM and is equipped with 2 washing machines and 2 dryers. The detergent is already in the machine and cannot be added separately. Payment only with <strong>coins</strong>.</p><hr><p>Join us for a snack and a drink. Both the <strong>snack bar</strong> and the <strong>bar</strong> are open from April 1 to October 1.</p><hr><p>For an atmospheric, well-equipped <strong>bowling alley</strong>, you don't have to leave the forest park! <br><br>With six modern bowling lanes, there's plenty of room for a relaxed game of fun – whether you come with <strong>friends, family, or for a children's party</strong>.</p><p></p><p>For children, there's extra fun with <strong>disco</strong> bowling: music, light effects, and a real disco ball complete the experience. Thanks to automatic bumpers, lighter balls, and handy racks, everyone can join in and score.</p><p></p><p>You rent a lane for 55 minutes (starting on the hour). Reservations can easily be made by phone at 055 - 378 1666 or during opening hours on location.</p><blockquote><p>In short: fun guaranteed – and who knows, you might bowl that perfect strike!</p></blockquote><p></p>",
+          "image": "images/Luchtfoto Veluws Hof en omgeving.webp",
+          "widgetCode": ""
+        },
+        {
+          "title": "Manuals",
+          "subtitle": "Click here for manuals of the most commonly used equipment in the chalet.",
+          "icon": "icons/tv.svg",
+          "action": "none",
+          "detailContent": "<h3>👨‍🍳 Quick Start Guide: Etna Combi-Oven</h3><p>Your meal is just a few clicks away. Use this step-by-step guide to get started right away.</p><h3>1. The Microwave (Heating) 🔄</h3><ul><li><p><strong>Activate:</strong> Press the <strong>Diamond (◊)</strong> button.</p></li><li><p><strong>Function:</strong> Turn the <strong>left knob</strong> to the microwave icon (the wavy lines). You will see <strong>900W </strong>at the top.</p></li><li><p><strong>Power:</strong> Adjust the wattage (<strong>W</strong>) with the <strong>right rotary knob</strong>.</p></li><li><p><strong>Time:</strong> Press the <strong>clock icon</strong> and set the time with the <strong>right rotary knob</strong>.</p></li><li><p><strong>Start:</strong> Press <strong>START</strong>.</p></li></ul><h3>2. The Oven (Baking) 🍕</h3><ul><li><p><strong>Activate:</strong> Press the <strong>Diamond (◊)</strong> button.</p></li><li><p><strong>Function:</strong> Turn the <strong>left knob</strong> to the oven setting (e.g., convection ✪).</p></li><li><p><strong>Temperature:</strong> Set the desired <strong>°C</strong> in with the <strong>right rotary knob</strong>.</p></li><li><p><strong>Start:</strong> Press <strong>START</strong>. The oven immediately begins preheating.</p></li></ul><p></p><h3>🛑 Complete Shutdown</h3><p>Done cooking? This is how you put the oven back into standby mode:</p><ol><li><p>Press <strong>STOP</strong>.</p></li><li><p>Press the <strong>Diamond (◊)</strong> button to completely end the program.</p></li></ol><blockquote><p>⚠️ <strong>Important:</strong> <strong>Never</strong> use metal or aluminum foil in microwave mode. This can cause irreparable damage to the oven.</p></blockquote><p></p><p><strong>Enjoy your meal!</strong> 🍽️</p><hr><img src=\"/images/Philips afstandsbediening 2.png\" alt=\"Philips afstandsbediening 2.png\" style=\"float: right; margin-left: 14px; margin-bottom: 8px;\"><p style=\"text-align: left;\"><strong>How does the TV work?</strong></p><ul><li><p>Grab the remote control and press the power button in the middle firmly to turn on the TV. The buttons work well, but require a bit more pressure than you might be used to.</p></li><li><p>The TV automatically starts on a channel. With the plus and minus buttons, you can easily browse through channels and programs to choose something you want to watch.</p></li><li><p>Finished watching or leaving? Don't forget to turn off the TV again.</p></li></ul><p></p><p><strong>How does Netflix work?</strong></p><ul><li><p>Press the large red Netflix button on the remote control to open the app.</p></li><li><p>To use Netflix, you need your own account. It works best if you already have Netflix installed on your mobile phone.</p></li><li><p>On the TV, select 'Sign in'. A screen with a QR code will now appear. Open the camera on your phone and scan this code. You will be automatically redirected to Netflix.</p></li><li><p>On your phone, choose your profile. You will then see a code that matches the code on the TV. Confirm the login and you are ready to watch.</p></li><li><p>Leaving? Don't forget to log out again, so others don't use your account.</p></li></ul><p></p><p><strong>How to log out of Netflix?</strong></p><ul><li><p>Open Netflix on the TV and choose any profile.</p></li><li><p>Then go to your profile in the top left corner of the screen. Click on it and choose ‘Support’.</p></li><li><p>Then scroll all the way down and choose ‘Log out’.</p></li><li><p>You will be asked if you are sure you want to log out. Choose ‘Yes’ to confirm.</p></li><li><p>You will now see the login screen again. You have successfully logged out.</p></li><li><p>Want to go back to regular TV? Then press the button with the right arrow (below the Rakuten TV button). ‘Inputs’ will appear on the screen. Choose ‘DTV’ here to watch TV again.</p></li></ul><p></p><p><strong>How does YouTube work?</strong></p><ul><li><p>Press the large YouTube button in the top right corner of the remote control to open the app.</p></li><li><p>You will automatically see the Veluwe Droom Chalet account. We ask you not to add your own account, but to use this one.</p></li><li><p>Want to go back to regular TV? Then press the button with the right arrow (below the Rakuten TV button). ‘Inputs’ will appear on the screen. Choose ‘DTV’ here to watch TV again.</p></li></ul><p></p><p><strong>How does Spotify work?</strong></p><ul><li><p>Press the button with the house icon on the remote control to open the Smart TV. Here you will see various apps. We ask you not to add or remove anything here.</p></li><li><p>Then open the Spotify app. Do you get a ‘Update needed’ message? Then choose ‘Close’ to dismiss it.</p></li><li><p>A Spotify account is available: Veluwe Droom Chalet. Feel free to use it and add your own playlist if you wish. We do ask you not to remove this account from the TV.</p></li><li><p>Want to go back to regular TV channels? Then press the button with the right arrow (below the Rakuten TV button). ‘Inputs’ will appear on the screen. Choose ‘DTV’ here.</p></li></ul><p></p>",
+          "image": "",
+          "widgetCode": ""
+        },
+        {
+          "title": "Game room",
+          "subtitle": "Play a game",
+          "icon": "icons/gamepad.svg",
+          "action": "none",
+          "detailContent": "<h3>Need to relax? We have four games ready for you!</h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\">🎮 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/tetram\"><span style=\"color: rgb(74, 93, 35);\">Tetram</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Where <strong>Tetris</strong> is played with the wooden blocks of <strong>Tangram</strong></span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>🚀 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/rocketman\"><span style=\"color: rgb(74, 93, 35);\">Rocket Man</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Escape for a while with the space version of <strong>Flappy bird</strong></span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>🎲 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/yahtzee\"><span style=\"color: rgb(74, 93, 35);\">Yahtzee</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">You can play Yahtzee here alone or with a maximum of <strong>4 people</strong></span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>👾 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/pacman\"><span style=\"color: rgb(74, 93, 35);\">Veluwe Pac-Man</span></a></h3><p style=\"text-align: center;\"><span style=\"font-size: 0.8rem;\">Experience the forest already with </span><span style=\"font-size: 0.8rem;\"><strong>Veluwe</strong> <strong>Pac-Man</strong>, with squirrels, foxes, and wild boars</span></p><p style=\"text-align: center;\"></p><p></p><h3></h3><p></p>",
+          "image": "images/Gameroom banner.jpg",
+          "widgetCode": "",
+          "hideOnMobile": true
+        }
+      ],
+      "expiredPageContent": "<img src=\"/images/Logo.png\" alt=\"Logo.png\" width=\"25%\" style=\"text-align: center; width: 25%;\"><h1 style=\"text-align: center;\"></h1><p style=\"text-align: center;\"></p><p style=\"text-align: center;\"><strong>Dear @naamgast,</strong></p><p style=\"text-align: center;\"></p><p>Thank you for staying at&nbsp;<strong>Veluwe Droom Chalet</strong>&nbsp;and for your trust in us.<br>We hope you enjoyed the chalet and the beautiful surroundings.</p><p>We would greatly appreciate it if you would share your experience by leaving a&nbsp;<strong>review on our website</strong>.<br>As a thank you, we would like to offer you a&nbsp;<strong>return discount of 15% on the total price</strong> in 2027. To do so, please visit <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.veluwedroomchalet.nl\"><strong>our website</strong></a>&nbsp;and use the discount code:</p><p></p><h3 style=\"text-align: center;\">Veluwe Droom Voordeel 2027</h3><p></p><p>Kind regards and hopefully see you again,</p><p><br><strong><em>Arno &amp; Kitty</em></strong><br><strong>Veluwe Droom Chalet </strong><span style=\"color: rgb(44, 62, 45);\">🌿</span></p><hr><p style=\"text-align: center;\"><span style=\"font-size: 0.8rem;\"><em>This guest link is no longer active.</em></span></p>"
+    },
+    "de": {
+      "property": {
+        "name": "Veluwe Droom Chalet",
+        "subtitle": "Willkommen @naamgast",
+        "host": {
+          "name": "Arno & Kitty",
+          "phone": "+31682287283"
+        }
+      },
+      "videos": [
+        {
+          "title": "Schlüsselkasten",
+          "subtitle": "Wo ist der Schlüssel?",
+          "thumb": "images/Sleutelkastje.webp",
+          "url": "https://www.youtube.com/embed/E6U7YRUr8AI",
+          "leafStyle": "leaf-oak",
+          "leafRotate": 206,
+          "leafTranslateX": 35,
+          "leafTranslateY": 12
+        }
+      ],
+      "omgeving": [
+        {
+          "name": "De Ruggestee",
+          "desc": "<h3>De Ruggestee: Ihr Veluwe-Ausflug!</h3><p>Willkommen im De Ruggestee im Veluws Hof, Ihrem <em>geschmackvollen Ort</em> im Herzen der <strong>Veluwe</strong>! Zwischen den <em>beruhigenden Wäldern</em> finden Sie dieses gastfreundliche Restaurant mit einem <em>warmen Ambiente</em>, perfekt für Urlauber und Naturliebhaber.</p><p>Genießen Sie köstliche Gerichte, von einem entspannten <strong>Mittagessen</strong> bis zu einem ausgiebigen <strong>Abendessen</strong>. Die Speisekarte wechselt mit den Jahreszeiten und bietet Optionen wie Buffet, BBQ oder Steingrill. Das gemütliche Restaurant mit stimmungsvollem Kamin lädt zum Probieren und Entspannen ein.</p><ul><li><p><strong>Aktivitäten</strong>: Erleben Sie einen gemütlichen Nachmittag mit <strong>Bowling</strong> oder fordern Sie Freunde am Billardtisch und Dartboard in der <strong>Kneipe</strong> heraus.</p></li><li><p><strong>Öffnungszeiten</strong>: Donnerstag bis Sonntag, ab 12:00 Uhr. Die Küche schließt um 20:00 Uhr.</p></li></ul><p><em>Lassen Sie sich von den Aromen und der Gemütlichkeit der Veluwe im De Ruggestee überraschen!</em></p>",
+          "url": "https://www.ruggestee.nl/",
+          "image": "images/Restaurant.webp",
+          "adres": "De Smaak van Hoenderloo krimweg",
+          "widgetCode": "",
+          "distance": "0,27",
+          "walkTime": "4",
+          "bikeTime": "1",
+          "carTime": "1"
+        },
+        {
+          "name": "Het Nationale Park De Hoge Veluwe",
+          "desc": "<h3>Entdecken Sie den Nationalpark De Hoge Veluwe: Natur, Kunst &amp; Kultur!</h3><p>Lassen Sie sich von <em>der perfekten Mischung aus unberührter Natur, faszinierender Kunst und reicher Kultur</em> in diesem einzigartigen Nationalpark verzaubern. Wandern Sie durch weite Heidelandschaften, Flugsandlandschaften und dichte Wälder. Hier können Sie die <strong>„Big Four“</strong> entdecken: Rothirsch, Wildschwein, Mufflon und Reh!</p><p>Erkunden Sie den Park in Ihrem eigenen Tempo mit den <strong>kostenlosen weißen Fahrrädern</strong> oder genießen Sie wunderschöne Wanderwege, die Sie zu den schönsten Orten führen. Begleiten Sie den Förster für zusätzliche Abenteuer und entdecken Sie besondere Flora und Fauna.</p><p>Neben der überwältigenden Natur bietet die Hoge Veluwe auch eine Portion Kultur. Besuchen Sie das weltberühmte <strong>Kröller-Müller Museum</strong> mit Meisterwerken von Van Gogh und Picasso und bewundern Sie das architektonische Meisterwerk Jagdhaus Sint-Hubertus, entworfen von Berlage.</p><ul><li><p><strong>Natur:</strong> Wildtiere, aktive Flugsandgebiete und Heidelandschaften.</p></li><li><p><strong>Kultur:</strong> Kunst im Kröller-Müller Museum und Architektur des Jagdhauses Sint-Hubertus.</p></li><li><p><strong>Aktiv:</strong> Radfahren (kostenlos!), Wandern und interaktive Spiele.</p></li></ul><p>Mit so viel zu sehen und zu tun, ist der Nationalpark De Hoge Veluwe ideal für einen unvergesslichen Urlaub!</p>",
+          "image": "images/Bekende gebouw Nationaal Park Hoge Veluwe.webp",
+          "url": "https://hogeveluwe.nl/",
+          "adres": "Hoenderloo, Houtkampweg 13",
+          "widgetCode": "",
+          "distance": "3,6",
+          "walkTime": "",
+          "bikeTime": "11",
+          "carTime": "6"
+        },
+        {
+          "name": "De Apenheul",
+          "desc": "<h3>Apenheul: Erleben Sie ein Abenteuer unter Affen!</h3><p>Bereiten Sie sich auf <em>einen Tag voller spielerischer Entdeckungen</em> in <strong>Apenheul</strong> vor, dem Ort, wo Affen frei herumlaufen und Sie ihnen nahe kommen! Der perfekte Ausflug für die ganze Familie.</p><ul><li><p>Erklimmen Sie den neuen <strong>11 Meter hohen Aussichtsturm</strong> für einen <em>spektakulären Blick</em> auf die größte Gorillafamilie der Niederlande. Ein einzigartiges Seherlebnis!</p></li><li><p>Spazieren Sie durch den erneuerten Lebensraum und stehen Sie Auge in Auge mit bis zu 60 <em>blitzschnellen Totenkopfäffchen</em>, die um Sie herum klettern.</p></li><li><p>Entdecken Sie alle <strong>34 Affenarten</strong> mit der kostenlosen Suchkarte – eine lustige Herausforderung für Jung und Alt!</p></li></ul><p><strong>Praktische Info:</strong> Apenheul ist täglich ab 10:00 Uhr geöffnet.</p>",
+          "image": "images/Apenheul.webp",
+          "url": "https://www.apenheul.nl/",
+          "adres": "J.C. Wilslaan 21 7313 HK Apeldoorn",
+          "widgetCode": "",
+          "distance": "14,6",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "16"
+        },
+        {
+          "name": "Paleis Het Loo",
+          "desc": "<h3>Entdecken Sie Paleis Het Loo: Königliche Pracht und Oranier-Geschichte!</h3><p>Treten Sie ein in die <em>zauberhafte Welt</em> von <strong>Paleis Het Loo</strong> und tauchen Sie <strong>350 Jahre</strong> tief in die faszinierende <strong>Oranier-Geschichte</strong> ein. Von Wilhelm von Oranien bis Willem-Alexander: Hier entdecken Sie die Geschichte der niederländischen Königsfamilie in ihrer ehemaligen Sommerresidenz.</p><ul><li><p>Erkunden Sie die <strong>prächtigen Palastzimmer</strong> und folgen Sie den königlichen Palastrouten.</p></li><li><p>Spazieren Sie durch den <em>beeindruckenden</em> <strong>Palastgarten</strong>, ein Juwel der barocken Landschaftsarchitektur.</p></li><li><p>Genießen Sie einen <em>stimmungsvollen</em> <strong>High Tea</strong> in der Prins Hendrik Garage (ab 17. April).</p></li><li><p>Besuchen Sie die <strong>Ausstellung 'Die Große Treppe: wenn Wände sprechen könnten'</strong> und lassen Sie sich von verborgenen Geschichten mitreißen. Jetzt bis zum 30. August 2026 zu sehen.</p></li></ul><p>Ein Besuch im Paleis Het Loo ist ein <em>schönes Erlebnis</em> für Jung und Alt. </p>",
+          "image": "images/Paleis het Loo.webp",
+          "url": "https://paleishetloo.nl/",
+          "adres": "Koninklijk Park 16, Apeldoorn",
+          "widgetCode": "",
+          "distance": "16,7",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "19"
+        },
+        {
+          "name": "Julianatoren",
+          "desc": "<h3>Julianatoren Kinderfreizeitpark: Spaß für die Kleinen!</h3><p>Auf der Suche nach einem <em>fantastischen Tag</em> voller Abenteuer und Fröhlichkeit? Im <strong>Kinderfreizeitpark Julianatoren</strong> erleben Kinder bis 10 Jahre die Zeit ihres Lebens! Dieser Park ist der ideale Ort für unvergessliche Momente mit der ganzen Familie, mitten in der Natur.</p><p>Entdecken Sie über <strong>50 tolle Attraktionen</strong>, von spannenden Achterbahnen bis hin zu bezaubernden Karussells, die alle perfekt auf junge Abenteurer abgestimmt sind. Lassen Sie sich von den <em>spritzigen Shows</em> der beliebten Maskottchen Jul &amp; Julia überraschen und genießen Sie besondere, saisonale Veranstaltungen, die das ganze Jahr über für zusätzliche Magie sorgen.</p><ul><li><p>Mehr als <strong>50 kinderfreundliche Attraktionen</strong>.</p></li><li><p><em>Spektakuläre Shows</em> mit Jul, Julia und Freunden.</p></li><li><p>Regelmäßig <strong>unterhaltsame Veranstaltungen</strong>, wie Osterfreuden und Sommerfestivitäten.</p></li></ul><p>Julianatoren garantiert ein <em>funkelndes Erlebnis</em> und viel Spielspaß. Ein <strong>absolutes Muss</strong> für Ihren Familienurlaub!</p>",
+          "url": "https://www.julianatoren.nl/",
+          "adres": "Kinderpretpark Julianatoren Amersfoortseweg 35 Apeldoorn",
+          "image": "images/Koningin Juliantoren.webp",
+          "widgetCode": "",
+          "distance": "18,1",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "21"
+        },
+        {
+          "name": "Burgers' Zoo",
+          "desc": "<h3>Entdecken Sie die Welt in Burgers' Zoo, Arnheim!</h3><p>Tauchen Sie ein in die <em>beeindruckende</em> Welt von Burgers' Zoo, wo Sie keinen gewöhnlichen Zoo finden, sondern <strong>einzigartige Öko-Displays</strong>! Hier werden Naturgebiete detailgetreu nachgebildet, wodurch Tiere oft in großer Freiheit inmitten Hunderter Pflanzenarten leben. Eine <em>unvergessliche Reise</em> um die Welt erwartet Sie!</p><ul><li><p>Erkunden Sie den <strong>Bush</strong>, einen tropischen Regenwald voller Leben.</p></li><li><p>Tauchen Sie ein in die Unterwasserwelt des <strong>Ozeans</strong>, mit Haien und Rochen.</p></li><li><p>Wandern Sie durch die trockenen Landschaften der <strong>Wüste</strong>.</p></li><li><p>Begeben Sie sich auf eine <em>spannende Reise</em> durch die <strong>Safari</strong> und die asiatische <strong>Rimba</strong>.</p></li><li><p>Entdecken Sie die <em>besonderen</em> Mangrovenwälder in der <strong>Mangrove</strong>.</p></li></ul><p>Burgers' Zoo ist ein <strong>perfekter Tagesausflug</strong>.</p>",
+          "image": "images/Burgers Zoo.webp",
+          "url": "https://www.burgerszoo.nl/",
+          "adres": "Antoon van Hooffplein 1 6816 SH Arnhem",
+          "widgetCode": "",
+          "distance": "18,5",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "22"
+        },
+        {
+          "name": "Nederlands Openluchtmuseum",
+          "desc": "<h3>Entdecken Sie die niederländische Geschichte im Freilichtmuseum!</h3><p>Reisen Sie zurück in die Zeit im <strong>Niederländischen Freilichtmuseum</strong> in Arnheim, wo Geschichte <em>lebendig</em> wird! Dieses einzigartige Museum nimmt Sie mit auf eine fesselnde Entdeckungsreise durch vierhundert Jahre niederländische Geschichten. Von historischen Gebäuden und Gegenständen bis hin zu persönlichen Erinnerungen gibt es für jeden etwas zu erleben. Entdecken Sie, woher Sie und andere kommen!</p><p>Was können Sie erwarten?</p><ul><li><p>Tauchen Sie ein in Geschichten von <strong>früher und heute</strong>, mit Blick auf verschiedene Hintergründe.</p></li><li><p>Kinder können <strong>selbst aktiv werden</strong> mit lustigen, interaktiven Aktivitäten.</p></li><li><p>Steigen Sie in <em>historische Straßenbahnen</em> und entdecken Sie, wie Technik und Transport unsere Geschichte geprägt haben.</p></li><li><p>Bewundern Sie beeindruckende Landschaftsmodellbahnen oder <strong>bauen Sie Ihre eigene Eisenbahnstrecke</strong>!</p></li></ul><p>Das Museum ist <strong>täglich ab 10:00 Uhr geöffnet</strong>.</p>",
+          "image": "images/Nederlands Openluchtmuseum 2.webp",
+          "url": "https://www.openluchtmuseum.nl/nl/",
+          "adres": "Hoeferlaan 4 6816 SG Arnhem",
+          "widgetCode": "",
+          "distance": "19,1",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": "23"
+        },
+        {
+          "name": "Kröller-Müller Museum",
+          "desc": "<h3>Kröller-Müller Museum: Kunst &amp; Natur auf der Veluwe</h3><p>Entdecken Sie das <em>wunderschöne</em> <strong>Kröller-Müller Museum</strong>, einen einzigartigen Ort, wo Kunst und Natur im <em>weitläufigen</em> Park De Hoge Veluwe zusammenkommen.</p><p>Lassen Sie sich von einer der <strong>größten Vincent van Gogh-Sammlungen der Welt</strong> überraschen, ergänzt durch Meisterwerke moderner Künstler:</p><ul><li><p><strong>Claude Monet</strong>, <strong>Georges Seurat</strong>, <strong>Pablo Picasso</strong>, <strong>Piet Mondriaan</strong></p></li><li><p>Und faszinierende Werke aus den Bewegungen <em>De Stijl</em> und <em>Futurismus</em>.</p></li></ul><p>Spazieren Sie durch den <em>beeindruckenden</em> <strong>Skulpturengarten</strong> mit Skulpturen von unter anderem <strong>Barbara Hepworth</strong> und <strong>Jean Dubuffet</strong>. Bewundern Sie auch die besondere Architektur der Museumsgebäude und Pavillons.</p><p>Ein <em>perfekter Tag </em>zum Genießen und Entspannen. Planen Sie Ihren Besuch und tauchen Sie ein in eine Welt der Schönheit!</p>",
+          "image": "images/Kroller Moller.webp",
+          "url": "https://krollermuller.nl/",
+          "adres": "Houtkampweg 6  6731 AW Otterlo",
+          "widgetCode": "",
+          "distance": "8,3",
+          "walkTime": "",
+          "bikeTime": "27",
+          "carTime": "13"
+        },
+        {
+          "name": "Ontdek Apeldoorn",
+          "desc": "<h3>Entdecken Sie Apeldoorn: Ihr ideales Urlaubsziel!</h3><p>Willkommen in Apeldoorn, einer <em>dynamischen Stadt mitten im Grünen</em>. Hier finden Sie alles, um <strong>königlich zu genießen</strong>, ob Sie für Ruhe, Abenteuer oder Kultur kommen.</p><p>Lassen Sie sich von der Vielseitigkeit Apeldoorns überraschen:</p><ul><li><p>Erkunden Sie die <strong>atemberaubende Natur</strong> in und um die Stadt. Ideal für Wanderer und Radfahrer!</p></li><li><p>Tauchen Sie ein in das <em>reiche Kulturangebot</em>: von Veranstaltungen bis zu Ausstellungen.</p></li><li><p>Entdecken Sie die <strong>schönsten Shopping-Hotspots</strong>, gemütliche verkaufsoffene Sonntage und lebendige Wochenmärkte.</p></li><li><p>Stellen Sie Ihre eigene <em>Apeldoorn Bucketlist</em> zusammen für unvergessliche Ausflüge und Erlebnisse.</p></li></ul><p>Apeldoorn wartet darauf, entdeckt zu werden. Kommen Sie und erleben Sie es selbst!</p>",
+          "image": "images/Apeldoorn IIII.webp",
+          "url": "https://www.apeldoorn.nl/",
+          "adres": "",
+          "widgetCode": "",
+          "distance": "14,5",
+          "walkTime": "",
+          "bikeTime": "37",
+          "carTime": "16"
+        },
+        {
+          "name": "De Proeftuin",
+          "desc": "<h3>Die ProefTuin Hoenderloo</h3><p>Suchen Sie einen gemütlichen Ort zum Mittagessen, für Getränke oder Abendessen mitten in der Natur? Dann ist De ProefTuin in Hoenderloo sehr zu empfehlen. Hier genießen Sie köstliche italienische Gerichte, darunter handwerkliche Pizzen aus dem Holzofen, frische Pasta und hausgemachte Spezialitäten. <span style=\"color: rgb(74, 93, 35);\">Der Pizzabäcker von De ProefTuin wurde 2026 sogar zum niederländischen Pizzabackmeister gekürt!</span></p><p>Für Familien ist dies ein idealer Zwischenstopp. Während die Kinder sich im Spiel- und Crossgarten vergnügen oder eine Partie Minigolf spielen, können Sie sich auf der großzügigen Terrasse mit Blick ins Grüne entspannen. Auch starten in der direkten Umgebung wunderschöne Wanderwege, darunter der bekannte Plaggenstekerspad.</p><p>Ob Sie Lust auf eine Tasse Kaffee mit Kuchen, ein ausgedehntes Mittagessen oder einen gemütlichen Abend nach einem Tag auf der Veluwe haben: Bei De ProefTuin verbinden Sie gutes Essen mit Entspannung und Spaß für Jung und Alt. Ein schöner Ort, um während Ihres Aufenthalts im Veluwe Droom Chalet eine Pause einzulegen.</p><p>💡 <strong>Tipp:</strong> Reservieren Sie im Voraus, wenn Sie am Wochenende oder in den Ferienzeiten essen möchten. Dieser beliebte Ort zieht viele Besucher an.</p><p></p>",
+          "image": "",
+          "url": "https://deproeftuinhoenderloo.nl",
+          "adres": "De Krim 4",
+          "widgetCode": "",
+          "distance": "",
+          "walkTime": "",
+          "bikeTime": "",
+          "carTime": ""
+        }
+      ],
+      "insights": [
+        {
+          "icon": "icons/clock.svg",
+          "title": "Check-in",
+          "subtitle": "Der Check-in ist am @aankomst zwischen 15:00 Uhr und 22:00 Uhr kontaktlos möglich. Lesen Sie hier die wichtigen Anweisungen zur Anreise.",
+          "action": "none",
+          "detailContent": "<h3>Herzlich willkommen in Hoenderloo und im Veluwe Droom Chalet!</h3><p></p><p>Bei Ankunft am Haupteingang des Bosparks ’t Veluws Hof können Sie Ihr <strong>Auto auf dem zentralen Parkplatz parken</strong>. Wir bitten Sie anschließend, sich an der <strong>Rezeption anzumelden</strong>. Ihre Ankunft ist dort bereits bekannt; wir haben Ihre Daten vorab registriert.</p><p>An der Rezeption zahlen Sie die <strong>Kurtaxe</strong>. Auf Ihren Wunsch kann Ihnen der Rezeptionsmitarbeiter auf dem Parkplan zeigen, wo das Veluwe Droom Chalet (Bosrand 18) zu finden ist. Die <strong>Wegbeschreibung</strong> von der Rezeption zu unserem Chalet ist übrigens auch ausführlich in dieser Web-App enthalten.</p><p>Anschließend gehen Sie zu Fuß zum Chalet. Im Schuppen neben dem Chalet befindet sich ein <strong>Schlüsselkasten</strong>, in dem der Schlüssel liegt. Der <strong>Schlüsselcode</strong> ist <span style=\"color: rgb(102, 102, 102); font-size: 13.6px;\">@sleutelcode</span></p><p></p><img src=\"/images/Parkeerkaart.jpg\" alt=\"Parkeerkaart.jpg\" width=\"50%\" style=\"width: 50%; float: right; margin-left: 14px; margin-bottom: 8px;\"><p>Im Chalet, auf dem Esstisch, liegt die <strong>Karte für die Schranke</strong>. Mit dieser Karte können Sie anschließend mit Ihrem Auto in den Park fahren und bis zum Chalet durchfahren. Es ist gestattet, 1 Auto neben dem Chalet zu parken.</p><p>Bei Verlust oder Beschädigung sowohl des Schlüssels als auch der Schrankenkarte sind wir gezwungen, Kosten in Rechnung zu stellen.<br></p><img src=\"/images/Check in NL transparant.webp\" alt=\"Check in NL transparant.webp\"><p></p><p>Wir wünschen Ihnen einen angenehmen Aufenthalt!<br></p>",
+          "image": "images/Checkin banner.png",
+          "widgetCode": "",
+          "visibility": "checkin"
+        },
+        {
+          "title": "Check-out",
+          "subtitle": "Heute ist es wieder Zeit, aus dem Veluwe Droom Chalet auszuchecken. Wir hoffen, Sie hatten einen wunderschönen Aufenthalt und nehmen schöne Erinnerungen mit nach Hause.\n\nDie Check-out-Zeit ist spätestens 11:00 Uhr. Lassen Sie es uns wissen, wenn wir Ihnen noch bei etwas helfen können. Lesen Sie die Abreiseanweisungen für weitere Informationen.",
+          "icon": "icons/clock.svg",
+          "action": "none",
+          "detailContent": "<img src=\"/images/Check out NL transparant.webp\" alt=\"Check out NL transparant.webp\" style=\"text-align: center;\"><p></p>",
+          "image": "",
+          "widgetCode": "",
+          "visibility": "checkout"
+        },
+        {
+          "title": "So finden Sie unser Chalet",
+          "subtitle": "Hier finden Sie eine ausführliche Beschreibung, wie Sie unser Chalet an der Bosrand 18 finden können.\nFür die visuell orientierteren unter uns haben wir auch einen Parkplan hinzugefügt, der sowieso nützlich ist.",
+          "icon": "icons/map.svg",
+          "action": "none",
+          "detailContent": "<p>Fahren Sie an der <strong>Rezeption</strong> vorbei und biegen Sie am <strong>Schwimmbad rechts ab</strong>. Fahren Sie diese Straße geradeaus, bis Sie zur <strong>Blauwgraslaan</strong> kommen. Biegen Sie dort <strong>rechts ab</strong>.</p><p>Ein Stück weiter biegen Sie <strong>links</strong> in die <strong>Helmgraslaan</strong> ein.</p><p>Folgen Sie der Helmgraslaan und biegen Sie <strong>links</strong> in die <strong>Klavergraslaan</strong> ein. Unser Chalet ist dann das <strong>7. Chalet auf Ihrer rechten Seite</strong>.</p><p>Am Eingang hängt ein Schild mit <strong>Bosrand 18</strong>.</p><p></p><img src=\"/images/Plattegrond.webp\" alt=\"Plattegrond.webp\" style=\"text-align: center;\"><p></p>",
+          "image": "",
+          "widgetCode": "",
+          "visibility": "checkin"
+        },
+        {
+          "icon": "icons/key.svg",
+          "title": "Schlüsselkasten Code",
+          "subtitle": "Der Schlüsselkasten hängt im Schuppen. Klicken Sie hier für den Code des Schlüsselkastens. Bitte hängen Sie den Schlüssel bei der Abreise wieder in den Schlüsselkasten und verriegeln Sie die Tür.",
+          "action": "none",
+          "detailContent": "<h3></h3><p>@sleutelcode</p><p></p>",
+          "widgetCode": "",
+          "image": "images/Sleutelkastje.webp",
+          "visibility": "always"
+        },
+        {
+          "title": "Abreiseanweisungen",
+          "subtitle": "Der Check-out ist am @vertrek spätestens um 11:00 Uhr und ebenfalls kontaktlos. Lesen Sie hier die wichtigen Anweisungen zur Abreise.",
+          "icon": "icons/info.svg",
+          "action": "none",
+          "detailContent": "<p>Wir bitten Sie, das Veluwe Droom Chalet bei Abreise ordentlich und gemäß den folgenden Anweisungen zu hinterlassen:</p><ul><li><p>Hinterlassen Sie das Chalet&nbsp;<strong>besenrein</strong>.</p></li><li><p>Waschen Sie das benutzte Geschirr und räumen Sie es in die Schränke.</p></li><li><p>Leeren Sie den Kühlschrank und entfernen Sie Lebensmittel und Abfall.</p></li><li><p>Sammeln Sie den Abfall und entsorgen Sie ihn in den dafür vorgesehenen Containern im Park (hinter dem Weißen Haus).</p></li><li><p>Stellen Sie die Heizung auf eine niedrige Stufe (7 Grad) und schalten Sie alle elektrischen Geräte aus.</p></li><li><p>Schließen Sie Fenster und Türen sorgfältig ab.</p></li><li><p>Verlassen Sie den Park zuerst mit dem Auto und nutzen Sie dabei die Parkkarte (und folgen Sie nicht schnell einem anderen Auto, wenn sich die Schranke öffnet), <strong>sonst öffnet sich die Schranke für die nach Ihnen kommenden Gäste nicht mehr......</strong></p></li><li><p>Gehen Sie zurück zum Chalet, legen Sie die Parkkarte auf den Tisch und legen Sie schließlich den&nbsp;<strong>Schlüssel in den Schlüsselkasten</strong>.</p></li></ul><p></p><img src=\"/images/Check out NL transparant.webp\" alt=\"Check out NL transparant.webp\"><p></p><p>Wir bitten Sie, das Chalet&nbsp;<strong>spätestens zum vereinbarten Zeitpunkt</strong>&nbsp;zu verlassen.</p><p></p><p>Vielen Dank für Ihren Aufenthalt und hoffentlich bis bald im Veluwe Droom Chalet!</p>",
+          "image": "images/Checkout banner.png",
+          "widgetCode": ""
+        },
+        {
+          "title": "Speziell für Sie… ",
+          "subtitle": "Möchten Sie noch einmal im Veluwe Droom Chalet übernachten, buchen Sie direkt über unsere Website und profitieren Sie von 15% Rabatt. Der Rabattcode ist auch auf Familie, Freunde und Bekannte übertragbar.",
+          "icon": "icons/star.svg",
+          "action": "none",
+          "detailContent": "<p>Wie schön, dass Sie im <strong>Veluwe Droom Chalet </strong>wohnen! Wir hoffen, Sie genießen die Ruhe, die Natur und Ihren Aufenthalt.</p><p>Da Sie jetzt hier sind, haben wir etwas Besonderes für Sie: ✨ <strong>15% Rabatt auf einen nächsten Aufenthalt!</strong></p><p>Möchten Sie noch einmal wiederkommen? Oder Familie, Freunde oder Bekannte diesen schönen Ort genießen lassen?</p><p style=\"text-align: left;\">Buchen Sie dann direkt über <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.veluwedroomchalet.nl\"><strong>unsere Website</strong></a> und nutzen Sie diesen Rabattcode für das ganze Jahr 2027: <br><br><strong>Veluwe Droom Voordeel 2027</strong></p><p style=\"text-align: left;\"></p><p>👉 Folgen Sie uns auch auf Facebook und Instagram für Updates und Inspirationen</p><p>Wer weiß, bis zum nächsten Mal 💚</p>",
+          "image": "",
+          "widgetCode": ""
+        },
+        {
+          "icon": "icons/wifi.svg",
+          "title": "WLAN Code",
+          "subtitle": "Nutzen Sie gerne unser kostenloses WLAN-Netzwerk. Klicken Sie hier für den QR-Code und das Passwort.",
+          "action": "wifi-modal",
+          "detailContent": "<h3>Scannen Sie den QR-Code unten, um sich direkt mit unserem Netzwerk zu verbinden.</h3><img src=\"/images/Wifi QR Odido.webp\" alt=\"Wifi QR Odido.webp\" style=\"text-align: center;\"><h3>Falls der Barcode nicht funktioniert</h3><p>WLAN Name:<strong> Odido-32B314</strong></p><p>Passwort <strong>TQHK7AAFUTMQ3NBQ</strong></p>",
+          "image": "",
+          "widgetCode": ""
+        },
+        {
+          "title": "QR-Codes für den Schwimmbadzugang",
+          "subtitle": "Während Ihres Aufenthalts haben Sie freien Zugang zum Freibad des 't Veluws Hof. Klicken Sie hier, um zu erfahren, wie Sie mit Ihren persönlichen QR-Codes einfach Zugang erhalten.",
+          "icon": "icons/swimmer.svg",
+          "action": "none",
+          "detailContent": "<h3>🏊‍♂️ Zugang zum Schwimmbad</h3><p>Das Freibad des Recreatiepark ’t Veluws Hof nutzt ein digitales Zugangssystem über QR-Codes. Um es Ihnen so einfach wie möglich zu machen, haben wir dies vollständig digital für Sie vorbereitet.</p><h3>Wo finde ich die QR-Codes?</h3><ul><li><p><strong>Direkt in dieser App:</strong> Sie müssen nicht zur Rezeption. Die persönlichen QR-Codes für Ihre Gruppe stehen direkt hier unten/bereit in dieser App.</p></li><li><p><strong>Scannen am Eingang:</strong> Halten Sie den QR-Code einfach vor den Scanner am Eingangstor des Schwimmbads, um einzutreten.</p></li></ul><h3>Wichtig zu wissen:</h3><ul><li><p><strong>Einzigartiger Code pro Person:</strong> Jeder Gast benötigt einen eigenen, einzigartigen QR-Code, um das Tor zu passieren.</p></li><li><p><strong>Nicht übertragbar:</strong> Die Codes sind streng persönlich und nur für die Dauer Ihres Aufenthalts gültig. Bei Missbrauch werden sie automatisch blockiert.</p></li><li><p><strong>Besuch?</strong> Erhalten Sie Besuch, der gerne mitschwimmen möchte? Dann können Sie als Gast an der Rezeption des Parks eine Tageskarte (QR-Code) für Ihren Besuch erstellen lassen.</p></li></ul><h3>⚠️ Wichtige Schwimmbadregeln</h3><p>Der Park handhabt einige strenge Regeln am Schwimmbad, um die Sicherheit und Ruhe aller zu gewährleisten:</p><ul><li><p><strong>Kein</strong> Glas und <strong>keine</strong> alkoholischen Getränke erlaubt.</p></li><li><p>Es ist absolut <strong>nicht</strong> gestattet zu tauchen.</p></li><li><p>Radios, Boomboxen oder andere verstärkte Geräusche sind nicht gestattet.</p></li><li><p>Beachten Sie die <strong>rauchfreien Zonen</strong>; diese befinden sich auf den Liegewiesen und rund um das Kinderbecken.</p></li></ul><p><em>Scrollen Sie auf diesem Bildschirm nach unten, um Ihre persönlichen QR-Codes anzuzeigen.</em> Viel Badespaß!</p><p></p><img src=\"/images/qr.webp\" alt=\"qr.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-2.webp\" alt=\"qr-2.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-2.webp\" alt=\"qr-2.webp\" style=\"text-align: center;\"><p></p><p></p><img src=\"/images/qr-3.webp\" alt=\"qr-3.webp\" style=\"text-align: center;\"><p></p>",
+          "image": "images/Zwembad.webp",
+          "widgetCode": ""
+        },
+        {
+          "icon": "icons/list.svg",
+          "title": "Park- und Chaletregeln",
+          "subtitle": "Um den Aufenthalt für alle angenehm zu gestalten, gelten die folgenden Park- und Chaletregeln im Recreatiepark 't Veluws Hof und im Veluwe Droom Chalet. Klicken Sie hier für die Regeln",
+          "action": "none",
+          "detailContent": "<p><strong>🏡&nbsp;Hausregeln – Veluwe Droom Chalet</strong></p><p>Um den Aufenthalt für alle Gäste angenehm, sicher und entspannt zu gestalten, bitten wir Sie, die folgenden Hausregeln zu beachten. Wir gehen sorgfältig mit unserem Chalet um, und wir gehen davon aus, dass Sie dies auch tun!</p><p><strong>👥&nbsp;Anzahl der Gäste</strong></p><ul><li><p>Das Chalet darf ausschließlich von der&nbsp;<strong>in der Reservierung angegebenen Gästezahl</strong>&nbsp;genutzt werden.</p></li><li><p>Besuch ist gestattet, jedoch ist die&nbsp;<strong>Übernachtung von zusätzlichen Personen nicht gestattet</strong>&nbsp;ohne vorherige Genehmigung.</p></li></ul><p><strong>🕒&nbsp;Ankunft &amp; Abreise</strong></p><ul><li><p><strong>Check-in</strong>&nbsp;ist zwischen 15:00 und 22:00 Uhr möglich.</p></li><li><p><strong>Check-out</strong>&nbsp;ist zwischen 7:00 und 11:00 Uhr möglich.</p></li><li><p>Wir bitten Sie, das Chalet bei Abreise&nbsp;<strong>ordentlich und in gutem Zustand</strong>&nbsp;zu hinterlassen.</p></li></ul><p><strong>🚭&nbsp;Rauchen</strong></p><ul><li><p><strong>Rauchen ist im Chalet nicht gestattet</strong>.</p></li><li><p>Rauchen im Freien ist gestattet, sofern ein Aschenbecher verwendet wird und keine Belästigung entsteht.</p></li></ul><p><strong>🐶&nbsp;Haustiere</strong></p><ul><li><p><strong>Maximal zwei Hunde sind erlaubt</strong>, ausschließlich bei vorheriger Anmeldung.</p></li><li><p>Im Park sind Hunde&nbsp;<strong>nur angeleint gestattet</strong>.</p></li><li><p>Wir bitten Sie, Ihren Hund&nbsp;<strong>ausschließlich außerhalb des Parks auszuführen</strong>.</p></li><li><p>Eventuelle Missgeschicke müssen&nbsp;<strong>sofort und sorgfältig beseitigt werden</strong>.</p></li><li><p>Haustiere sind&nbsp;<strong>nicht auf Betten und Möbeln gestattet</strong>.</p></li><li><p>Hunde dürfen&nbsp;<strong>nicht allein im Chalet zurückgelassen werden</strong>.</p></li><li><p>Sie müssen sicherstellen, dass Ihr Haustier&nbsp;<strong>keine (Lärm-)Belästigung</strong>&nbsp;für andere Gäste oder Anwohner verursacht.</p></li></ul><p><strong>🔇&nbsp;Ruhe &amp; Umgebung</strong></p><ul><li><p>Das Chalet befindet sich in einem ruhigen Ferienpark.</p></li><li><p>Zwischen&nbsp;<strong>23:00 Uhr und 07:00 Uhr</strong>&nbsp;gilt die Nachtruhe.</p></li><li><p>Lärmbelästigung, laute Musik und störendes Verhalten sind nicht gestattet.</p></li><li><p>Feiern und Zusammenkünfte festlichen Charakters sind nicht gestattet.</p></li></ul><p><strong>🎆&nbsp;Feuerwerk</strong></p><ul><li><p>Das&nbsp;<strong>Abbrennen von Feuerwerk ist strengstens verboten</strong>, sowohl&nbsp;<strong>im und um das Chalet als auch im gesamten Park</strong>, unabhängig von Datum oder Anlass.</p></li><li><p>Dieses Verbot gilt ausdrücklich auch während des Jahreswechsels.</p></li></ul><p><strong>🔥&nbsp;Offenes Feuer &amp; Sicherheit</strong></p><ul><li><p><strong>Offenes Feuer ist in keiner Form gestattet</strong>, weder&nbsp;<strong>im Chalet noch im Park</strong>.<br>Dazu gehören unter anderem: Kerzen, Feuerschalen, Grills, Lagerfeuer und andere offene Flammen.</p></li><li><p>Fenster und Türen müssen bei Abwesenheit&nbsp;<strong>geschlossen</strong>&nbsp;werden.</p></li></ul><p><strong>🧼&nbsp;Nutzung, Schaden &amp; Haftung</strong></p><ul><li><p>Sie müssen das Chalet, das Inventar und den Außenbereich&nbsp;<strong>sorgfältig und entsprechend der Bestimmung</strong>&nbsp;nutzen.</p></li><li><p>Eventuelle Schäden, Brüche oder Verluste müssen&nbsp;<strong>unverzüglich gemeldet werden</strong>.</p></li><li><p>Während des Aufenthalts entstandene Schäden können über die Buchungsplattform und/oder die Kaution geltend gemacht werden.</p></li></ul><p><strong>🗑️&nbsp;Abfall</strong></p><ul><li><p>Abfall muss&nbsp;<strong>getrennt</strong>&nbsp;und in den dafür vorgesehenen Containern im Park entsorgt werden.</p></li><li><p>Das Hinterlassen von Abfall im oder um das Chalet ist nicht gestattet.</p></li></ul><p><strong>⚠️&nbsp;Haftung</strong></p><ul><li><p>Das&nbsp;<strong>Betreten des Parks</strong>, die&nbsp;<strong>Nutzung der Parkeinrichtungen</strong>&nbsp;und/oder die&nbsp;<strong>Teilnahme an Aktivitäten oder Veranstaltungen</strong>&nbsp;im Park erfolgt&nbsp;<strong>vollständig auf eigenes Risiko</strong>.</p></li><li><p>Wir übernehmen&nbsp;<strong>keine Haftung</strong>&nbsp;für Beschädigung, Verlust, Abhandenkommen und/oder Diebstahl persönlicher Gegenstände im, am oder um das Chalet und/oder im Park.</p></li></ul><p><strong>🛠️&nbsp;Parkregeln</strong></p><ul><li><p>Gäste sind verpflichtet, sich an die&nbsp;<strong>geltenden Parkregeln</strong>&nbsp;zu halten.</p></li><li><p>Anweisungen des Parkmanagements oder der Parkmitarbeiter müssen&nbsp;<strong>unverzüglich befolgt werden</strong>.</p></li></ul><p>💛&nbsp;<strong>Wir danken Ihnen für die Einhaltung dieser Hausregeln.</strong><br>So bleibt das Veluwe Droom Chalet ein sicherer, ruhiger und angenehmer Ort für alle Gäste.</p>",
+          "widgetCode": ""
+        },
+        {
+          "title": "'t Veluws Hof",
+          "subtitle": "Hier finden Sie Informationen über den Bospark 't Veluws Hof und seine Einrichtungen, darunter: Rezeption, Supermarkt, Restaurant, Snackbar, Bowling, Minigolf, Fahrradverleih und Schwimmbad",
+          "icon": "icons/reception.svg",
+          "action": "none",
+          "detailContent": "<p><strong>Die Rezeption</strong> des Parks befindet sich direkt am Eingang.</p><p>Die Öffnungszeiten sind:</p><p>Montag bis Freitag von 9:00 bis 17:00 Uhr.</p><p>Samstag von 10:00 bis 16:30 Uhr.</p><p>Sonntag von 12:00 bis 16:00 Uhr.</p><p>Die Rezeption ist telefonisch erreichbar unter: <strong>055-3781777</strong>.</p><p>Im Brand- oder Erste-Hilfe-Fall immer die Rezeption benachrichtigen!</p><hr><p>Die <strong>Waschküche</strong> ist vom 1. April bis 1. Oktober täglich von 10:00 bis 21:00 Uhr geöffnet und verfügt über 2 Waschmaschinen und 2 Trockner. Das Waschmittel befindet sich bereits in der Maschine und kann nicht separat hinzugefügt werden. Zahlung nur mit <strong>Münzgeld</strong>.</p><hr><p>Kommen Sie gemütlich auf einen Snack und ein Getränk vorbei. Sowohl die <strong>Snackbar</strong> als auch die <strong>Bar</strong> sind vom 1. April bis 1. Oktober geöffnet.</p><hr><p>Für eine stimmungsvolle, gut ausgestattete <strong>Bowlingbahn</strong> müssen Sie den Waldpark nicht verlassen! <br><br>Mit sechs modernen Bowlingbahnen gibt es reichlich Platz für eine entspannte Runde Spaß – egal ob Sie mit <strong>Freunden, Familie oder für einen Kindergeburtstag</strong> kommen.</p><p></p><p>Für Kinder gibt es zusätzlichen Spaß mit <strong>Disco</strong> Bowling: Musik, Lichteffekte und eine echte Discokugel machen es komplett. Dank automatischer Bumper, leichterer Bälle und praktischer Gestelle kann jeder mitmachen und punkten.</p><p></p><p>Sie mieten eine Bahn für 55 Minuten (ab der vollen Stunde). Reservierungen können einfach telefonisch unter 055 - 378 1666 oder während der Öffnungszeiten vor Ort vorgenommen werden.</p><blockquote><p>Kurz gesagt: Spaß garantiert – und wer weiß, vielleicht gelingt Ihnen der perfekte Strike!</p></blockquote><p></p>",
+          "image": "images/Luchtfoto Veluws Hof en omgeving.webp",
+          "widgetCode": ""
+        },
+        {
+          "title": "Anleitungen",
+          "subtitle": "Klicken Sie hier für Anleitungen der meistgenutzten Geräte im Chalet.",
+          "icon": "icons/tv.svg",
+          "action": "none",
+          "detailContent": "<h3>👨‍🍳 Kurzanleitung: Etna Kombi-Backofen</h3><p>Ihr Essen ist nur wenige Klicks entfernt. Verwenden Sie diese Schritt-für-Schritt-Anleitung, um sofort loszulegen.</p><h3>1. Die Mikrowelle (Aufwärmen) 🔄</h3><ul><li><p><strong>Aktivieren:</strong> Drücken Sie die <strong>Raute (◊)</strong>.</p></li><li><p><strong>Funktion:</strong> Drehen Sie den <strong>linken Knopf</strong> auf das Mikrowellen-Symbol (die Wellen). Oben sehen Sie <strong>900W </strong>.</p></li><li><p><strong>Leistung:</strong> Passen Sie die Wattzahl (<strong>W</strong>) mit dem <strong>rechten Drehknopf</strong> an.</p></li><li><p><strong>Zeit:</strong> Drücken Sie das <strong>Uhr-Symbol</strong> und stellen Sie die Zeit mit dem <strong>rechten Drehknopf</strong> ein.</p></li><li><p><strong>Start:</strong> Drücken Sie <strong>START</strong>.</p></li></ul><h3>2. Der Backofen (Backen) 🍕</h3><ul><li><p><strong>Aktivieren:</strong> Drücken Sie die <strong>Raute (◊)</strong>.</p></li><li><p><strong>Funktion:</strong> Drehen Sie den <strong>linken Knopf</strong> auf die Ofenfunktion (z.B. Heißluft ✪).</p></li><li><p><strong>Temperatur:</strong> Stellen Sie die gewünschte <strong>°C</strong> mit dem <strong>rechten Drehknopf</strong> ein.</p></li><li><p><strong>Start:</strong> Drücken Sie <strong>START</strong>. Der Backofen beginnt sofort mit dem Vorheizen.</p></li></ul><p></p><h3>🛑 Vollständiges Ausschalten</h3><p>Fertig mit dem Kochen? So versetzen Sie den Backofen wieder in den Ruhezustand:</p><ol><li><p>Drücken Sie <strong>STOP</strong>.</p></li><li><p>Drücken Sie die <strong>Raute (◊)</strong>, um das Programm vollständig zu beenden.</p></li></ol><blockquote><p>⚠️ <strong>Wichtig:</strong> Verwenden Sie <strong>niemals</strong> Metall oder Aluminiumfolie im Mikrowellenmodus. Dies kann den Backofen irreparabel beschädigen.</p></blockquote><p></p><p><strong>Guten Appetit!</strong> 🍽️</p><hr><img src=\"/images/Philips afstandsbediening 2.png\" alt=\"Philips afstandsbediening 2.png\" style=\"float: right; margin-left: 14px; margin-bottom: 8px;\"><p style=\"text-align: left;\"><strong>Wie funktioniert der Fernseher?</strong></p><ul><li><p>Nehmen Sie die Fernbedienung und drücken Sie fest auf den Ein-/Aus-Knopf in der Mitte, um den Fernseher einzuschalten. Die Knöpfe funktionieren gut, erfordern aber etwas mehr Druck, als Sie vielleicht gewohnt sind.</p></li><li><p>Der Fernseher startet automatisch auf einem Sender. Mit der Plus- und Minustaste können Sie einfach durch die Sender und Programme blättern, um etwas zum Anschauen auszuwählen.</p></li><li><p>Fertig mit dem Schauen oder gehen Sie weg? Vergessen Sie dann nicht, den Fernseher wieder auszuschalten.</p></li></ul><p></p><p><strong>Wie funktioniert Netflix?</strong></p><ul><li><p>Drücken Sie die große rote Netflix-Taste auf der Fernbedienung, um die App zu öffnen.</p></li><li><p>Um Netflix zu nutzen, benötigen Sie ein eigenes Konto. Es funktioniert am einfachsten, wenn Sie Netflix bereits auf Ihrem Mobiltelefon installiert haben.</p></li><li><p>Wählen Sie auf dem Fernseher 'Sign in'. Es erscheint nun ein Bildschirm mit einem QR-Code. Öffnen Sie die Kamera auf Ihrem Telefon und scannen Sie diesen Code. Sie werden automatisch zu Netflix weitergeleitet.</p></li><li><p>Wählen Sie auf Ihrem Telefon Ihr Profil. Sie sehen dann einen Code, der mit dem Code auf dem Fernseher übereinstimmt. Bestätigen Sie die Anmeldung und Sie können mit dem Ansehen beginnen.</p></li><li><p>Gehen Sie weg? Vergessen Sie dann nicht, sich wieder abzumelden, damit andere Ihr Konto nicht nutzen.</p></li></ul><p></p><p><strong>Wie meldet man sich bei Netflix ab?</strong></p><ul><li><p>Öffnen Sie Netflix auf dem Fernseher und wählen Sie ein beliebiges Profil.</p></li><li><p>Gehen Sie dann oben links im Bild zu Ihrem Profil. Klicken Sie darauf und wählen Sie „Support“.</p></li><li><p>Scrollen Sie dann ganz nach unten und wählen Sie „Abmelden“.</p></li><li><p>Sie werden gefragt, ob Sie sich wirklich abmelden möchten. Wählen Sie „Ja“ zur Bestätigung.</p></li><li><p>Sie sehen nun wieder den Anmeldebildschirm. Sie wurden erfolgreich abgemeldet.</p></li><li><p>Möchten Sie zum normalen Fernseher zurückkehren? Drücken Sie dann die Taste mit dem Pfeil nach rechts (unter der Taste von Rakuten TV). Auf dem Bildschirm erscheint „Inputs“. Wählen Sie hier „DTV“, um wieder fernzusehen.</p></li></ul><p></p><p><strong>Wie funktioniert YouTube?</strong></p><ul><li><p>Drücken Sie oben rechts auf der Fernbedienung die große YouTube-Taste, um die App zu öffnen.</p></li><li><p>Sie sehen automatisch das Konto des Veluwe Droom Chalets. Wir bitten Sie, kein eigenes Konto hinzuzufügen, sondern dieses Konto zu verwenden.</p></li><li><p>Möchten Sie zum normalen Fernseher zurückkehren? Drücken Sie dann die Taste mit dem Pfeil nach rechts (unter der Taste von Rakuten TV). Auf dem Bildschirm erscheint „Inputs“. Wählen Sie hier „DTV“, um wieder fernzusehen.</p></li></ul><p></p><p><strong>Wie funktioniert Spotify?</strong></p><ul><li><p>Drücken Sie auf der Fernbedienung die Taste mit dem Häuschen, um den Smart TV zu öffnen. Hier sehen Sie verschiedene Apps. Wir bitten Sie, hier nichts hinzuzufügen oder zu entfernen.</p></li><li><p>Öffnen Sie dann die Spotify-App. Erhalten Sie die Meldung „Update needed“? Wählen Sie dann „Close“, um diese zu schließen.</p></li><li><p>Es ist ein Spotify-Konto verfügbar: Veluwe Droom Chalet. Nutzen Sie es gerne und fügen Sie eventuell Ihre eigene Playlist hinzu. Wir bitten Sie jedoch, dieses Konto nicht vom Fernseher zu entfernen.</p></li><li><p>Möchten Sie zu den normalen TV-Sendern zurückkehren? Drücken Sie dann die Taste mit dem Pfeil nach rechts (unter der Taste von Rakuten TV). Auf dem Bildschirm erscheint „Inputs“. Wählen Sie hier „DTV“.</p></li></ul><p></p>",
+          "image": "",
+          "widgetCode": ""
+        },
+        {
+          "title": "Spielzimmer",
+          "subtitle": "Spielen Sie ein Spiel",
+          "icon": "icons/gamepad.svg",
+          "action": "none",
+          "detailContent": "<h3>Mal entspannen? Wir haben vier Spiele für Sie bereit!</h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\">🎮 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/tetram\"><span style=\"color: rgb(74, 93, 35);\">Tetram</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Wo <strong>Tetris</strong> mit den Holzblöcken von <strong>Tangram</strong> gespielt wird</span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>🚀 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/rocketman\"><span style=\"color: rgb(74, 93, 35);\">Rocket Man</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Fliegen Sie mit der Weltraumversion von <strong>Flappy Bird</strong> für eine Weile davon</span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>🎲 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/yahtzee\"><span style=\"color: rgb(74, 93, 35);\">Yahtzee</span></a></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35); font-size: 0.8rem;\">Sie können hier Yahtzee alleine oder (maximal) mit <strong>4 Personen </strong>spielen</span></h3><h3 style=\"text-align: center;\"><span style=\"color: rgb(74, 93, 35);\"><br>👾 </span><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"/b/@bookingid/gameroom/pacman\"><span style=\"color: rgb(74, 93, 35);\">Veluwe Pac-Man</span></a></h3><p style=\"text-align: center;\"><span style=\"font-size: 0.8rem;\">Erleben Sie den Wald schon mit </span><span style=\"font-size: 0.8rem;\"><strong>Veluwe</strong> <strong>Pac-Man</strong>, mit Eichhörnchen, Füchsen und Wildschweinen</span></p><p style=\"text-align: center;\"></p><p></p><h3></h3><p></p>",
+          "image": "images/Gameroom banner.jpg",
+          "widgetCode": "",
+          "hideOnMobile": true
+        }
+      ],
+      "expiredPageContent": "<img src=\"/images/Logo.png\" alt=\"Logo.png\" width=\"25%\" style=\"text-align: center; width: 25%;\"><h1 style=\"text-align: center;\"></h1><p style=\"text-align: center;\"></p><p style=\"text-align: center;\"><strong>Liebe Gäste @naamgast,</strong></p><p style=\"text-align: center;\"></p><p>Vielen Dank für Ihren Aufenthalt im&nbsp;<strong>Veluwe Droom Chalet</strong>&nbsp;und für Ihr Vertrauen.<br>Wir hoffen, Sie haben das Chalet und die wunderschöne Umgebung genossen.</p><p>Wir würden es sehr schätzen, wenn Sie Ihre Erfahrung teilen würden, indem Sie eine&nbsp;<strong>Bewertung auf unserer Website</strong>&nbsp;hinterlassen.<br>Als Dankeschön möchten wir Ihnen gerne einen&nbsp;<strong>Wiederkommensrabatt von 15% auf den Gesamtpreis</strong> im Jahr 2027 anbieten. Besuchen Sie dazu <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.veluwedroomchalet.nl\"><strong>unsere Website</strong></a>&nbsp;und verwenden Sie den Rabattcode:</p><p></p><h3 style=\"text-align: center;\">Veluwe Droom Voordeel 2027</h3><p></p><p>Herzliche Grüße und hoffentlich bis bald,</p><p><br><strong><em>Arno &amp; Kitty</em></strong><br><strong>Veluwe Droom Chalet </strong><span style=\"color: rgb(44, 62, 45);\">🌿</span></p><hr><p style=\"text-align: center;\"><span style=\"font-size: 0.8rem;\"><em>Dieser Gästelink ist nicht mehr aktiv.</em></span></p>"
+    }
+  },
+  "expiredPageContent": "<img src=\"/images/Logo.png\" alt=\"Logo.png\" width=\"25%\" style=\"text-align: center; width: 25%;\"><h1 style=\"text-align: center;\"></h1><p style=\"text-align: center;\"></p><p style=\"text-align: center;\"><strong>Beste @naamgast,</strong></p><p style=\"text-align: center;\"></p><p>Dank jullie wel voor het verblijf bij&nbsp;<strong>Veluwe Droom Chalet</strong>&nbsp;en voor het in ons gestelde vertrouwen.<br>We hopen dat jullie hebben genoten van het chalet en de prachtige omgeving.</p><p>We waarderen het enorm als jullie je ervaring willen delen door een&nbsp;<strong>review op onze website </strong>achter te laten.<br>Als dank bieden we jullie graag een&nbsp;<strong>terugkomkorting van 15% op de totale prijs</strong> in 2027. Ga hiervoor naar <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.veluwedroomchalet.nl\"><strong>onze website</strong></a>&nbsp;en gebruik de kortingscode:</p><p></p><h3 style=\"text-align: center;\">Veluwe Droom Voordeel 2027</h3><p></p><p>Hartelijke groeten en hopelijk tot nog eens,</p><p><br><strong><em>Arno &amp; Kitty</em></strong><br><strong>Veluwe Droom Chalet </strong><span style=\"color: rgb(44, 62, 45);\">🌿</span></p><hr><p style=\"text-align: center;\"><span style=\"font-size: 0.8rem;\"><em>Deze gastenlink is niet meer actief.</em></span></p>",
+  "games": [
+    {
+      "id": "tetram",
+      "title": "Tetram",
+      "src": "/Gameroom/tetram/index.html"
+    },
+    {
+      "id": "pacman",
+      "title": "Pacman",
+      "src": "/Gameroom/pacman/index.html"
+    },
+    {
+      "id": "yahtzee",
+      "title": "Yahtzee",
+      "src": "/Gameroom/yahtzee/index.html"
+    },
+    {
+      "id": "rocketman",
+      "title": "Rocketman",
+      "src": "/Gameroom/rocketman/index.html"
+    }
+  ]
+}

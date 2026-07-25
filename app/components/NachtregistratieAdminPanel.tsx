@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { adminUpdateNachtregistratie, verstuurNachtregistratie } from "../actions/adminActions";
 import { berekenBedrag, formatBedrag, formatDatumNL } from "../utils/toeristenbelasting";
+import ConfirmDialog from "./ConfirmDialog";
 
 const DEFAULT_OPMERKING: Record<string, string> = {
     receptie: "Huurder betaalt de toeristenbelasting bij aankomst zelf bij de receptie",
@@ -33,6 +34,7 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
     const [bedrag, setBedrag] = useState(String(reg?.bedrag ?? berekenBedrag(booking.checkIn, booking.checkOut)));
     const [opmerkingen, setOpmerkingen] = useState<string>(reg?.opmerkingen ?? DEFAULT_OPMERKING[reg?.betaalwijze || "receptie"]);
     const [isBusy, setIsBusy] = useState(false);
+    const [verstuurDialog, setVerstuurDialog] = useState<{ title: string; message: string; confirmLabel: string } | null>(null);
 
     const datumWijktAf = aankomst !== booking.checkIn || vertrek !== booking.checkOut;
 
@@ -80,15 +82,28 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
         if (res.success) await onSaved();
     };
 
-    const handleVerstuur = async () => {
+    const handleVerstuur = () => {
         const fout = valideer();
         if (fout) { setToast("❌ " + fout); return; }
+
         if (reg?.status === "verstuurd") {
             const wanneer = reg.verstuurdOp ? new Date(reg.verstuurdOp).toLocaleString("nl-NL") : "eerder";
-            if (!confirm(`Dit formulier is al verstuurd op ${wanneer}. Opnieuw versturen?`)) return;
-        } else if (!confirm("Formulier als PDF mailen naar de camping?")) {
-            return;
+            setVerstuurDialog({
+                title: "Opnieuw versturen?",
+                message: `Dit formulier is al verstuurd op ${wanneer}. Weet je zeker dat je het nogmaals naar het recreatiepark wilt mailen?`,
+                confirmLabel: "Ja, opnieuw versturen",
+            });
+        } else {
+            setVerstuurDialog({
+                title: "Versturen naar het recreatiepark?",
+                message: "Het formulier wordt als PDF gemaild naar het recreatiepark.",
+                confirmLabel: "Ja, versturen",
+            });
         }
+    };
+
+    const doVerstuur = async () => {
+        setVerstuurDialog(null);
         setIsBusy(true);
         setToast("⏳ PDF genereren en mailen...");
         const res = await verstuurNachtregistratie(booking.id, bouwRegistratie());
@@ -176,6 +191,16 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
                     {reg?.verstuurdOp && ` · verstuurd ${new Date(reg.verstuurdOp).toLocaleString("nl-NL")}`}
                 </span>
             </div>
+
+            <ConfirmDialog
+                open={!!verstuurDialog}
+                title={verstuurDialog?.title || ""}
+                message={verstuurDialog?.message}
+                confirmLabel={verstuurDialog?.confirmLabel}
+                variant="primary"
+                onConfirm={doVerstuur}
+                onCancel={() => setVerstuurDialog(null)}
+            />
         </div>
     );
 }

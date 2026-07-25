@@ -16,6 +16,8 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import RichTextEditor from "../components/RichTextEditor";
+import ConfirmDialog from "../components/ConfirmDialog";
+import ImageLightbox from "../components/ImageLightbox";
 
 const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: string }> = {
     checkin:  { bg: "#eff8ff", border: "#3b82f6", label: "🏠 T/m aankomstdag" },
@@ -79,6 +81,17 @@ export default function AdminPage() {
     const [pendingConflict, setPendingConflict] = useState<{ fileName: string; resolve: (mode: "overwrite" | "rename" | "cancel") => void } | null>(null);
     const [deletingImage, setDeletingImage] = useState<string | null>(null);
     const [blockedDelete, setBlockedDelete] = useState<{ name: string; locations: string[] } | null>(null);
+    const [lightbox, setLightbox] = useState<{ src: string; name: string } | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+    // Generieke dialoog (vervangt de systeem-confirm/alert door iets in de huisstijl)
+    const [dialog, setDialog] = useState<{
+        title: string; message?: string; details?: string[];
+        confirmLabel?: string; variant?: "danger" | "primary";
+        onConfirm?: () => void;
+    } | null>(null);
+    const showAlert = (title: string, message?: string, variant: "danger" | "primary" = "primary") =>
+        setDialog({ title, message, variant });
 
     // Form states
     const [propName, setPropName] = useState("");
@@ -301,25 +314,34 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         getImagePreviewMap().then(setImagePreviewUrls);
     };
 
-    const handleDeleteMedia = async (name: string) => {
+    const handleDeleteMedia = (name: string) => {
         const usage = mediaUsage[name];
         if (usage && usage.used) {
             setBlockedDelete({ name, locations: usage.locations });
             return;
         }
-        if (!confirm(`"${name}" verwijderen? Dit gaat als een commit naar GitHub en is niet ongedaan te maken vanuit dit scherm.`)) return;
+        setConfirmDelete(name);
+    };
 
+    const doDeleteMedia = async (name: string) => {
+        setConfirmDelete(null);
         setDeletingImage(name);
         const result = await deleteMediaImage(name);
-        setDeletingImage(null);
 
         if (result.ok) {
             await loadMediaLibrary(true);
+            fetchAvailableHeaderImages().then(setAvailableImages);
+            getImagePreviewMap().then(setImagePreviewUrls);
         } else if (result.reason === "in-use") {
             setBlockedDelete({ name, locations: result.locations || [] });
         } else {
-            alert(`Verwijderen mislukt: ${result.reason === "no-token" ? "GITHUB_TOKEN ontbreekt" : (result.message || result.reason)}`);
+            showAlert(
+                "Verwijderen mislukt",
+                result.reason === "no-token" ? "GITHUB_TOKEN ontbreekt." : (result.message || result.reason),
+                "danger"
+            );
         }
+        setDeletingImage(null);
     };
 
     const handleSaveAll = async () => {
@@ -356,14 +378,14 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             });
             const data = await res.json();
             if (data.error) {
-                alert('❌ ' + data.error);
+                showAlert("Samenvatten mislukt", data.error, "danger");
             } else {
                 const n = [...omgeving];
                 n[idx].desc = data.summary;
                 setOmgeving(n);
             }
         } catch (e) {
-            alert('❌ Er ging iets mis bij het ophalen.');
+            showAlert("Samenvatten mislukt", "Er ging iets mis bij het ophalen van de pagina.", "danger");
         }
         setSummarizingIndex(null);
     };
@@ -499,8 +521,20 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         }
     };
 
-    const handleRemoveBooking = async (id: string) => {
-        if (!confirm("Boeking definitief verwijderen?")) return;
+    const handleRemoveBooking = (id: string) => {
+        const boeking = bookings.find(b => b.id === id);
+        setDialog({
+            title: "Boeking verwijderen?",
+            message: boeking
+                ? `"${boeking.guestName}" wordt definitief verwijderd. De gastenlink werkt daarna niet meer.`
+                : "Deze boeking wordt definitief verwijderd. De gastenlink werkt daarna niet meer.",
+            confirmLabel: "Ja, verwijderen",
+            variant: "danger",
+            onConfirm: () => { setDialog(null); doRemoveBooking(id); },
+        });
+    };
+
+    const doRemoveBooking = async (id: string) => {
         setIsSaving(true);
         setSaveMessage("⏳ Aan het verwijderen...");
         const res = await removeBooking(id);
@@ -1193,8 +1227,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                                         {mediaGithubOk && (
                                             <div style={{ marginBottom: "15px" }}>
-                                                <label style={{ display: "inline-block", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", cursor: isUploadingMedia ? "not-allowed" : "pointer", fontWeight: "bold", opacity: isUploadingMedia ? 0.6 : 1 }}>
-                                                    📤 {isUploadingMedia ? "Bezig met uploaden..." : "Afbeeldingen uploaden"}
+                                                <label style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", cursor: isUploadingMedia ? "wait" : "pointer", fontWeight: "bold", opacity: isUploadingMedia ? 0.75 : 1 }}>
+                                                    {isUploadingMedia
+                                                        ? <><span style={{ display: "inline-block", animation: "vdcSpin 1.2s linear infinite" }}>⏳</span> Bezig met uploaden...</>
+                                                        : <>📤 Afbeeldingen uploaden</>}
                                                     <input
                                                         type="file"
                                                         multiple
@@ -1219,9 +1255,22 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                 return (
                                                     <div key={img.name} style={{ position: "relative", border: `2px solid ${isUnused ? "#4A5D23" : "#eee"}`, borderRadius: "8px", padding: "8px", backgroundColor: isUnused ? "#f2f7ef" : "#fff" }}>
                                                         {!img.isLive && (
-                                                            <span style={{ position: "absolute", top: "6px", left: "6px", backgroundColor: "rgba(0,0,0,0.65)", color: "#fff", fontSize: "0.62rem", padding: "2px 6px", borderRadius: "10px" }}>⏳ wordt gepubliceerd</span>
+                                                            <span style={{ position: "absolute", top: "6px", left: "6px", zIndex: 2, backgroundColor: "rgba(0,0,0,0.65)", color: "#fff", fontSize: "0.62rem", padding: "2px 6px", borderRadius: "10px" }}>⏳ wordt gepubliceerd</span>
                                                         )}
-                                                        <img src={img.previewUrl} alt={img.name} loading="lazy" style={{ width: "100%", height: "90px", objectFit: "cover", borderRadius: "4px", marginBottom: "6px", backgroundColor: "#eee" }} />
+                                                        {deletingImage === img.name && (
+                                                            <div style={{ position: "absolute", inset: 0, zIndex: 3, backgroundColor: "rgba(255,255,255,0.8)", borderRadius: "8px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                                                                <span style={{ fontSize: "1.6rem", animation: "vdcSpin 1.2s linear infinite", display: "inline-block" }}>⏳</span>
+                                                                <span style={{ fontSize: "0.7rem", color: "#b3362a", fontWeight: "bold" }}>Verwijderen...</span>
+                                                            </div>
+                                                        )}
+                                                        <img
+                                                            src={img.previewUrl}
+                                                            alt={img.name}
+                                                            loading="lazy"
+                                                            onClick={() => setLightbox({ src: img.previewUrl, name: img.name })}
+                                                            title="Klik om groot te bekijken"
+                                                            style={{ width: "100%", height: "90px", objectFit: "cover", borderRadius: "4px", marginBottom: "6px", backgroundColor: "#eee", cursor: "zoom-in" }}
+                                                        />
                                                         <div style={{ fontSize: "0.72rem", wordBreak: "break-all", fontWeight: "bold" }}>{img.name}</div>
                                                         <div style={{ fontSize: "0.68rem", color: "#999" }}>{img.sizeKB} KB</div>
                                                         <div style={{ marginTop: "4px" }}>
@@ -1258,29 +1307,39 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {pendingConflict && (
-                            <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-                                <div style={{ background: "#fff", borderRadius: "12px", padding: "24px", maxWidth: "420px" }}>
-                                    <p style={{ marginBottom: "16px" }}>Er bestaat al een afbeelding met (ongeveer) de naam <strong>{pendingConflict.fileName}</strong>. Wat wil je doen?</p>
-                                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                                        <button onClick={() => pendingConflict.resolve("overwrite")} style={{ backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "6px", padding: "8px 14px", cursor: "pointer", fontWeight: "bold" }}>Overschrijven</button>
-                                        <button onClick={() => pendingConflict.resolve("rename")} style={{ backgroundColor: "#4A5D23", color: "white", border: "none", borderRadius: "6px", padding: "8px 14px", cursor: "pointer", fontWeight: "bold" }}>Hernoemen</button>
-                                        <button onClick={() => pendingConflict.resolve("cancel")} style={{ backgroundColor: "#999", color: "white", border: "none", borderRadius: "6px", padding: "8px 14px", cursor: "pointer", fontWeight: "bold" }}>Annuleren</button>
+                            <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(26,26,26,0.45)", backdropFilter: "blur(3px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "20px" }}>
+                                <div style={{ background: "#fff", borderRadius: "16px", padding: "28px", maxWidth: "440px", width: "100%", boxShadow: "0 20px 50px rgba(0,0,0,0.25)" }}>
+                                    <h3 style={{ margin: 0, fontFamily: "Lora, serif", fontSize: "1.25rem", color: "#4A5D23" }}>Naam bestaat al</h3>
+                                    <p style={{ marginTop: "12px", marginBottom: "24px", fontSize: "0.92rem", color: "#555", lineHeight: 1.5 }}>
+                                        Er bestaat al een afbeelding met de naam <strong>{pendingConflict.fileName}</strong>. Wat wil je doen?
+                                    </p>
+                                    <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap" }}>
+                                        <button onClick={() => pendingConflict.resolve("cancel")} style={{ backgroundColor: "#f0f0f0", color: "#555", border: "none", borderRadius: "8px", padding: "10px 20px", cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem" }}>Overslaan</button>
+                                        <button onClick={() => pendingConflict.resolve("rename")} style={{ backgroundColor: "#4A5D23", color: "white", border: "none", borderRadius: "8px", padding: "10px 20px", cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem" }}>Hernoemen</button>
+                                        <button onClick={() => pendingConflict.resolve("overwrite")} style={{ backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "8px", padding: "10px 20px", cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem" }}>Overschrijven</button>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {blockedDelete && (
-                            <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-                                <div style={{ background: "#fff", borderRadius: "12px", padding: "24px", maxWidth: "440px" }}>
-                                    <p style={{ color: "#b3362a", fontWeight: "bold", marginBottom: "8px" }}>🔴 "{blockedDelete.name}" is nog in gebruik</p>
-                                    <ul style={{ fontSize: "0.85rem", color: "#666", paddingLeft: "18px" }}>
-                                        {blockedDelete.locations.map((loc, i) => <li key={i}>{loc}</li>)}
-                                    </ul>
-                                    <button onClick={() => setBlockedDelete(null)} style={{ marginTop: "12px", backgroundColor: "#333", color: "white", border: "none", borderRadius: "6px", padding: "8px 16px", cursor: "pointer", fontWeight: "bold" }}>Sluiten</button>
-                                </div>
-                            </div>
-                        )}
+                        <ConfirmDialog
+                            open={!!blockedDelete}
+                            title={blockedDelete ? `"${blockedDelete.name}" is nog in gebruik` : ""}
+                            message="Deze afbeelding kan niet verwijderd worden zolang hij nog gebruikt wordt op:"
+                            details={blockedDelete?.locations}
+                            variant="danger"
+                            onCancel={() => setBlockedDelete(null)}
+                        />
+
+                        <ConfirmDialog
+                            open={!!confirmDelete}
+                            title="Afbeelding verwijderen?"
+                            message={confirmDelete ? `"${confirmDelete}" wordt definitief verwijderd. Dit is niet ongedaan te maken vanuit dit scherm.` : ""}
+                            confirmLabel="Ja, verwijderen"
+                            variant="danger"
+                            onConfirm={() => confirmDelete && doDeleteMedia(confirmDelete)}
+                            onCancel={() => setConfirmDelete(null)}
+                        />
 
 
                         {/* Sectie: Gameroom */}
@@ -1369,6 +1428,25 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 <ion-icon name="save-outline" style={{ fontSize: "1.4rem" }}></ion-icon>
                 Alles Opslaan
             </button>
+
+            <style>{`@keyframes vdcSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+
+            <ImageLightbox
+                src={lightbox?.src || null}
+                name={lightbox?.name}
+                onClose={() => setLightbox(null)}
+            />
+
+            <ConfirmDialog
+                open={!!dialog}
+                title={dialog?.title || ""}
+                message={dialog?.message}
+                details={dialog?.details}
+                confirmLabel={dialog?.confirmLabel}
+                variant={dialog?.variant}
+                onConfirm={dialog?.onConfirm}
+                onCancel={() => setDialog(null)}
+            />
         </div>
     );
 }
