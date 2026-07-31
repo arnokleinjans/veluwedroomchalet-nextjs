@@ -70,6 +70,7 @@ export default async function BookingLayout({
 
     // Vóór (aankomst − 2 dagen) 08:00 uur ziet de gast alleen het nachtregistratieformulier
     const isPreArrival = (() => {
+        if ((booking as any).nachtregistratie?.status === 'verstuurd') return false;
         const gate = new Date(booking.checkIn + "T12:00:00");
         gate.setDate(gate.getDate() - 2);
         const gateDate = gate.toISOString().slice(0, 10);
