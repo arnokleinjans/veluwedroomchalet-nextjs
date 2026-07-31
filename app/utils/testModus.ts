@@ -154,12 +154,15 @@ export function tegelZichtbaar(insight: any, booking: any): boolean {
     return fasesVanTegel(insight).includes(huidigeFase(booking));
 }
 
-// Bepaalt de kleuraccent van een tegel (rood voor nachtregistratie, groen als
-// de tegel maar in een deel van de fases zichtbaar is).
+// Bepaalt het kleuraccent van een tegel. Rood is voorbehouden aan de
+// nachtregistratie; groen ("uitgelicht") is een eigen keuze van de beheerder,
+// met als terugval het oude gedrag: tegels die niet in alle fases staan.
+export function isUitgelicht(insight: any): boolean {
+    if (typeof insight?.uitgelicht === "boolean") return insight.uitgelicht;
+    return fasesVanTegel(insight).length < FASES_VOOR_TEGELS.length;
+}
+
 export function accentVanTegel(insight: any): string | undefined {
     if (vraagtOmNachtregistratie(insight)) return "nachtregistratie";
-    const fases = fasesVanTegel(insight);
-    if (fases.length >= FASES_VOOR_TEGELS.length) return undefined;
-    if (fases.includes("vertrek") && !fases.includes("verblijf")) return "checkout";
-    return "checkin";
+    return isUitgelicht(insight) ? "uitgelicht" : undefined;
 }

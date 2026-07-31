@@ -16,13 +16,12 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import RichTextEditor from "../components/RichTextEditor";
-import { FASES_VOOR_TEGELS, TEST_FASES, fasesVanTegel, vraagtOmNachtregistratie, toontOpMobiel, toontOpDesktop, accentVanTegel } from "../utils/testModus";
+import { FASES_VOOR_TEGELS, TEST_FASES, fasesVanTegel, vraagtOmNachtregistratie, toontOpMobiel, toontOpDesktop, accentVanTegel, isUitgelicht } from "../utils/testModus";
 import ConfirmDialog from "../components/ConfirmDialog";
 import ImageLightbox from "../components/ImageLightbox";
 
 const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: string }> = {
-    checkin:  { bg: "#eff8ff", border: "#3b82f6", label: "🏠 T/m aankomstdag" },
-    checkout: { bg: "#fff7ed", border: "#f97316", label: "🧳 Vertrekdag" },
+    uitgelicht: { bg: "#f3f8ec", border: "#4A5D23", label: "✨ Uitgelicht" },
     nachtregistratie: { bg: "#fdecea", border: "#b3362a", label: "📋 Nachtregistratieformulier" },
 };
 
@@ -104,7 +103,7 @@ export default function AdminPage() {
 
     // Dynamic Arrays
     const [games, setGames] = useState<{ id: string, title: string, src: string }[]>([]);
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, fases?: string[], alleenLegeNachtregistratie?: boolean, toonMobiel?: boolean, toonDesktop?: boolean, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[] }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, fases?: string[], uitgelicht?: boolean, alleenLegeNachtregistratie?: boolean, toonMobiel?: boolean, toonDesktop?: boolean, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[] }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
@@ -940,6 +939,14 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                                 </label>
                                                             ))}
                                                         </div>
+                                                        <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: isUitgelicht(item) ? "#4A5D23" : "#999", cursor: "pointer", userSelect: "none", borderTop: "1px solid #e8e5da", paddingTop: "8px", marginBottom: "2px" }}>
+                                                            <input type="checkbox" checked={isUitgelicht(item)} style={{ accentColor: "#4A5D23" }} onChange={e => {
+                                                                const n = [...insights];
+                                                                n[idx] = { ...n[idx], uitgelicht: e.target.checked };
+                                                                setInsights(n);
+                                                            }} />
+                                                            ✨ Uitlichten (groene tegel)
+                                                        </label>
                                                         <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: vraagtOmNachtregistratie(item) ? "#b3362a" : "#999", cursor: "pointer", userSelect: "none", borderTop: "1px solid #e8e5da", paddingTop: "8px" }}>
                                                             <input type="checkbox" checked={vraagtOmNachtregistratie(item)} style={{ accentColor: "#b3362a" }} onChange={e => {
                                                                 const n = [...insights];

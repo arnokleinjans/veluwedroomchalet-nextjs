@@ -27,12 +27,7 @@ export default function Home() {
             display: none !important;
           }
         }
-        .card-glass[data-visibility="checkin"] {
-          background: rgba(210, 225, 190, 0.82) !important;
-          border: 1px solid rgba(74, 93, 35, 0.25) !important;
-          box-shadow: 0 4px 18px rgba(74, 93, 35, 0.12) !important;
-        }
-        .card-glass[data-visibility="checkout"] {
+        .card-glass[data-visibility="uitgelicht"] {
           background: rgba(210, 225, 190, 0.82) !important;
           border: 1px solid rgba(74, 93, 35, 0.25) !important;
           box-shadow: 0 4px 18px rgba(74, 93, 35, 0.12) !important;
