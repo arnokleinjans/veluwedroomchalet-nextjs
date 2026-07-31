@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import ClientLayout from "../../components/ClientLayout";
 import ExpiredBookingPage from "../../components/ExpiredBookingPage";
 import NachtregistratieForm from "../../components/NachtregistratieForm";
+import TestBalk from "../../components/TestBalk";
+import { cookies } from "next/headers";
+import { TEST_COOKIE, leesTestKeuze, pasTestKeuzeToe, TestKeuze } from "../../utils/testModus";
 
 export const revalidate = 60; // Cache guest pages for 60 seconds (ISR)
 
@@ -26,6 +29,16 @@ export default async function BookingLayout({
         notFound();
     }
 
+    // Bij de testboeking bepaalt een cookie welke fase we naspelen; de datums
+    // worden verschoven zodat alle bestaande logica er vanzelf op reageert.
+    const isTest = !!(booking as any).isTest;
+    let testKeuze: TestKeuze | null = null;
+    let testBooking = booking;
+    if (isTest) {
+        testKeuze = leesTestKeuze((await cookies()).get(TEST_COOKIE)?.value);
+        testBooking = pasTestKeuzeToe(booking, testKeuze);
+    }
+
     // Deep merge function to replace text values seamlessly if translation exists
     const mergeTranslations = (data: any, translation: any): any => {
         if (!translation) return data;
@@ -45,7 +58,7 @@ export default async function BookingLayout({
         return translation;
     };
 
-    const language = booking.language || 'nl';
+    const language = testBooking.language || 'nl';
     let translatedAppData = appData;
     if (language !== 'nl' && appData.translations && appData.translations[language]) {
         translatedAppData = mergeTranslations(appData, appData.translations[language]);
@@ -65,13 +78,13 @@ export default async function BookingLayout({
     })();
 
     // Check if the booking has expired
-    const isExpired = todayAms > booking.checkOut ||
-        (todayAms === booking.checkOut && hourAms >= 12);
+    const isExpired = todayAms > testBooking.checkOut ||
+        (todayAms === testBooking.checkOut && hourAms >= 12);
 
     // Vóór (aankomst − 2 dagen) 08:00 uur ziet de gast alleen het nachtregistratieformulier
     const isPreArrival = (() => {
-        if ((booking as any).nachtregistratie?.status === 'verstuurd') return false;
-        const gate = new Date(booking.checkIn + "T12:00:00");
+        if ((testBooking as any).nachtregistratie?.status === 'verstuurd') return false;
+        const gate = new Date(testBooking.checkIn + "T12:00:00");
         gate.setDate(gate.getDate() - 2);
         const gateDate = gate.toISOString().slice(0, 10);
         if (todayAms < gateDate) return true;
@@ -79,31 +92,36 @@ export default async function BookingLayout({
         return false;
     })();
 
+    const balk = testKeuze ? <TestBalk keuze={testKeuze} /> : null;
+
     if (isExpired) {
         return (
+            <>
+            {balk}
             <ExpiredBookingPage
-                guestName={booking.guestName}
+                guestName={testBooking.guestName}
                 propertyName={translatedAppData.property?.name || "Veluwe Droom Chalet"}
                 content={(translatedAppData as any).expiredPageContent || ""}
                 booking={{
-                    id: booking.id,
-                    guestName: booking.guestName,
-                    checkIn: booking.checkIn,
-                    checkOut: booking.checkOut,
+                    id: testBooking.id,
+                    guestName: testBooking.guestName,
+                    checkIn: testBooking.checkIn,
+                    checkOut: testBooking.checkOut,
                     keyCode: (translatedAppData?.property as any)?.keyCode || '',
                 }}
             />
+            </>
         );
     }
 
     const rawBookingInfo = {
-        id: booking.id,
-        guestName: booking.guestName,
-        checkIn: booking.checkIn,
-        checkOut: booking.checkOut,
+        id: testBooking.id,
+        guestName: testBooking.guestName,
+        checkIn: testBooking.checkIn,
+        checkOut: testBooking.checkOut,
         language: language,
         keyCode: (translatedAppData?.property as any)?.keyCode || '',
-        nachtregistratie: (booking as any).nachtregistratie || undefined,
+        nachtregistratie: (testBooking as any).nachtregistratie || undefined,
     };
 
     const finalAppData = toClientAppData(translatedAppData);
@@ -112,6 +130,8 @@ export default async function BookingLayout({
 
     if (isPreArrival) {
         return (
+            <>
+            {balk}
             <div style={{
                 minHeight: "100vh",
                 display: "flex",
@@ -132,11 +152,13 @@ export default async function BookingLayout({
                     />
                 </div>
             </div>
+            </>
         );
     }
 
     return (
         <BookingProvider booking={bookingInfo} appData={finalAppData}>
+            {balk}
             <ClientLayout basePath={`/b/${bookingInfo.id}`} appData={finalAppData} booking={bookingInfo}>
                 {children}
             </ClientLayout>

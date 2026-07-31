@@ -751,10 +751,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                 </div>
 
                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                    {[...bookings].sort((a, b) => a.checkOut.localeCompare(b.checkOut)).filter(b => bookingFilter === "alle" || (new Date(b.checkOut + "T12:00:00") < new Date()) === (bookingFilter === "verlopen")).filter(b => b.guestName.toLowerCase().includes(bookingSearch.trim().toLowerCase())).map((booking) => {
+                                    {[...bookings].sort((a, b) => (((b as any).isTest ? 1 : 0) - ((a as any).isTest ? 1 : 0)) || a.checkOut.localeCompare(b.checkOut)).filter(b => (b as any).isTest || bookingFilter === "alle" || (new Date(b.checkOut + "T12:00:00") < new Date()) === (bookingFilter === "verlopen")).filter(b => (b as any).isTest || b.guestName.toLowerCase().includes(bookingSearch.trim().toLowerCase())).map((booking) => {
                                         const shareUrl = `${window.location.origin}/b/${booking.id}`;
                                         const isEditing = editingId === booking.id;
-                                        const isExpired = new Date(booking.checkOut + "T12:00:00") < new Date();
+                                        const isTestBooking = !!(booking as any).isTest;
+                                        const isExpired = !isTestBooking && new Date(booking.checkOut + "T12:00:00") < new Date();
                                         const reg = (booking as any).nachtregistratie;
                                         const regStatus: "leeg" | "ingevuld" | "verstuurd" = !reg ? "leeg" : reg.status;
                                         const regBadge = {
@@ -772,6 +773,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <strong style={{ color: isExpired ? "#999" : "#333" }}>{booking.guestName}</strong>
                                                         <span style={{ fontSize: "0.7rem", backgroundColor: regBadge.bg, color: regBadge.color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>{regBadge.label}</span>
                                                         {isExpired && !isEditing && <span style={{ fontSize: "0.7rem", backgroundColor: "#f0f0f0", color: "#999", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>Verlopen</span>}
+                                                        {isTestBooking && <span style={{ fontSize: "0.7rem", backgroundColor: "#4A5D23", color: "white", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>🧪 Testboeking</span>}
                                                     </div>
                                                     <div style={{ display: "flex", gap: "8px", flexShrink: 0, marginLeft: "10px" }}>
                                                         {isEditing ? (
@@ -783,7 +785,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             <>
                                                                 <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Bewerk</button>
                                                                 <button onClick={() => !isExpired && copyToClipboard(shareUrl, booking.id)} disabled={isExpired} style={{ backgroundColor: isExpired ? "#f0f0f0" : copiedId === booking.id ? "#4A5D23" : "#e0e0e0", color: isExpired ? "#bbb" : copiedId === booking.id ? "white" : "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: isExpired ? "not-allowed" : "pointer", fontSize: "0.85rem", fontWeight: "bold", transition: "all 0.2s" }}>{copiedId === booking.id ? "✓ Gekopieerd" : "Kopieer"}</button>
-                                                                <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>
+                                                                {!isTestBooking && <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>}
                                                             </>
                                                         )}
                                                     </div>

@@ -216,6 +216,10 @@ export async function removeBooking(id: string) {
 
     if (!updatedData.bookings) return { success: false, error: "Geen boekingen gevonden." };
 
+    if (updatedData.bookings.some((b: any) => b.id === id && b.isTest)) {
+        return { success: false, error: "De testboeking kan niet worden verwijderd." };
+    }
+
     updatedData.bookings = updatedData.bookings.filter((b: any) => b.id !== id);
 
     return await saveToKV(updatedData);
