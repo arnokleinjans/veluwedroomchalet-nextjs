@@ -675,3 +675,96 @@ h3 {
     margin-left: auto;
     margin-right: 0;
 }
+/* Stappenplan (check-in / check-out instructies) */
+.stappenplan {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+@media (min-width: 720px) {
+    .stappenplan {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.stappenplan-kaart {
+    background-color: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(74, 93, 35, 0.14);
+    border-radius: 14px;
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stappenplan-beeld {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
+    margin-bottom: 10px;
+}
+
+.stappenplan-beeld img {
+    max-width: 100%;
+    max-height: 108px;
+    width: auto;
+    height: auto;
+}
+
+.stappenplan-kop {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.stappenplan-nummer {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-family: var(--font-lora), serif;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.stappenplan-tekst {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.stappenplan-toelichting {
+    grid-column: 1 / -1;
+    background-color: rgba(212, 163, 115, 0.16);
+    border: 1px solid rgba(139, 90, 43, 0.22);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.stappenplan-toelichting img {
+    max-width: 100%;
+    max-height: 92px;
+    width: auto;
+    height: auto;
+    flex-shrink: 0;
+}
+
+.stappenplan-toelichting .stappenplan-tekst {
+    flex: 1;
+    min-width: 180px;
+    font-weight: 600;
+}

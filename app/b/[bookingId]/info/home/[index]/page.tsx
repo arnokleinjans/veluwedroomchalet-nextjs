@@ -3,6 +3,7 @@ import { findBooking } from "../../../../../utils/findBooking";
 import { parseTemplateString } from "../../../../../utils/templateParser";
 import Link from "next/link";
 import WidgetEmbed from "../../../../../components/WidgetEmbed";
+import Stappenplan from "../../../../../components/Stappenplan";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,8 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
     const booking = rawBooking ? { ...rawBooking, keyCode: (appData?.property as any)?.keyCode || '' } : null;
     const insights = appData.insights || [];
     const item = insights[itemIndex] as any;
-    const hasContent = (item?.detailContent && item.detailContent.trim() !== '' && item.detailContent.trim() !== '<p></p>' && item.detailContent.trim() !== '<p><br></p>') || (item?.widgetCode && item.widgetCode.trim() !== '');
+    const stappen = (item?.stappen || []) as any[];
+    const hasContent = (item?.detailContent && item.detailContent.trim() !== '' && item.detailContent.trim() !== '<p></p>' && item.detailContent.trim() !== '<p><br></p>') || (item?.widgetCode && item.widgetCode.trim() !== '') || stappen.length > 0;
 
     if (!item || !hasContent) {
         return (
@@ -98,6 +100,7 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
                     <div className="rich-content">
                         <WidgetEmbed code={parseTemplateString(item.detailContent || "", booking)} />
                     </div>
+                    <Stappenplan stappen={stappen.map((s: any) => ({ ...s, tekst: parseTemplateString(s.tekst || "", booking) }))} />
                 </div>
             </div>
         </div>

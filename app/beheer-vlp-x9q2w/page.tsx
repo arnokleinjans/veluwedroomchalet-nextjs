@@ -103,7 +103,7 @@ export default function AdminPage() {
 
     // Dynamic Arrays
     const [games, setGames] = useState<{ id: string, title: string, src: string }[]>([]);
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, stappen?: { image?: string, tekst?: string, zonderNummer?: boolean }[] }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
@@ -970,6 +970,60 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>📄 Detailpagina (klik om te bewerken)</summary>
                                                         <p style={{ fontSize: "0.75rem", color: "#888", margin: "8px 0" }}>Als je hier content invult, wordt het item klikbaar in de app en opent het een detailpagina.</p>
                                                         <RichTextEditor content={item.detailContent || ""} onChange={html => { const n = [...insights]; n[idx].detailContent = html; setInsights(n); }} images={availableImages} />
+                                                    </details>
+
+                                                    <details style={{ marginTop: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "12px" }}>
+                                                        <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>
+                                                            🪜 Stappenplan {item.stappen && item.stappen.length > 0 ? `(${item.stappen.length} stappen)` : "(leeg)"}
+                                                        </summary>
+                                                        <p style={{ fontSize: "0.75rem", color: "#888", margin: "8px 0" }}>
+                                                            Genummerde stappen met een tekening ernaast, onder de detailpagina. De tekst wordt automatisch meevertaald naar Engels en Duits.
+                                                        </p>
+                                                        {(item.stappen || []).map((stap, sIdx) => {
+                                                            const wijzig = (velden: Partial<{ image: string, tekst: string, zonderNummer: boolean }>) => {
+                                                                const n = [...insights];
+                                                                const lijst = [...(n[idx].stappen || [])];
+                                                                lijst[sIdx] = { ...lijst[sIdx], ...velden };
+                                                                n[idx] = { ...n[idx], stappen: lijst };
+                                                                setInsights(n);
+                                                            };
+                                                            const verplaats = (richting: number) => {
+                                                                const n = [...insights];
+                                                                const lijst = [...(n[idx].stappen || [])];
+                                                                const doel = sIdx + richting;
+                                                                if (doel < 0 || doel >= lijst.length) return;
+                                                                [lijst[sIdx], lijst[doel]] = [lijst[doel], lijst[sIdx]];
+                                                                n[idx] = { ...n[idx], stappen: lijst };
+                                                                setInsights(n);
+                                                            };
+                                                            return (
+                                                                <div key={sIdx} style={{ display: "flex", gap: "10px", alignItems: "flex-start", backgroundColor: "white", border: "1px solid #e5e2d8", borderRadius: "8px", padding: "10px", marginBottom: "8px" }}>
+                                                                    {stap.image && (
+                                                                        <img src={imagePreviewUrls[stap.image] || `/${stap.image}`} alt="" style={{ width: "84px", height: "68px", objectFit: "contain", flexShrink: 0, backgroundColor: "#faf9f5", borderRadius: "6px" }} />
+                                                                    )}
+                                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                                        <select value={stap.image || ""} onChange={e => wijzig({ image: e.target.value })} style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.8rem", marginBottom: "6px" }}>
+                                                                            <option value="">-- Geen tekening --</option>
+                                                                            {availableImages.map((img, i) => {
+                                                                                const naam = (img.split('/').pop() || '').replace(/\.[^/.]+$/, "");
+                                                                                return <option key={i} value={img}>{naam}</option>;
+                                                                            })}
+                                                                        </select>
+                                                                        <textarea value={stap.tekst || ""} onChange={e => wijzig({ tekst: e.target.value })} placeholder="Tekst bij deze stap" style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "52px", fontFamily: "inherit", fontSize: "0.85rem" }} />
+                                                                        <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.75rem", color: "#888", marginTop: "5px", cursor: "pointer", userSelect: "none" }}>
+                                                                            <input type="checkbox" checked={!!stap.zonderNummer} onChange={e => wijzig({ zonderNummer: e.target.checked })} />
+                                                                            Toelichting (volle breedte, zonder nummer)
+                                                                        </label>
+                                                                    </div>
+                                                                    <div style={{ display: "flex", flexDirection: "column", gap: "4px", flexShrink: 0 }}>
+                                                                        <button onClick={() => verplaats(-1)} disabled={sIdx === 0} style={{ border: "1px solid #ddd", backgroundColor: "white", borderRadius: "4px", cursor: sIdx === 0 ? "default" : "pointer", padding: "2px 7px", opacity: sIdx === 0 ? 0.35 : 1 }}>↑</button>
+                                                                        <button onClick={() => verplaats(1)} disabled={sIdx === (item.stappen || []).length - 1} style={{ border: "1px solid #ddd", backgroundColor: "white", borderRadius: "4px", cursor: "pointer", padding: "2px 7px", opacity: sIdx === (item.stappen || []).length - 1 ? 0.35 : 1 }}>↓</button>
+                                                                        <button onClick={() => { const n = [...insights]; n[idx] = { ...n[idx], stappen: (n[idx].stappen || []).filter((_, i) => i !== sIdx) }; setInsights(n); }} style={{ border: "none", backgroundColor: "#f7e2e0", color: "#c0392b", borderRadius: "4px", cursor: "pointer", padding: "2px 7px" }}>✕</button>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        <button onClick={() => { const n = [...insights]; n[idx] = { ...n[idx], stappen: [...(n[idx].stappen || []), { image: "", tekst: "" }] }; setInsights(n); }} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "7px 14px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem" }}>+ Stap toevoegen</button>
                                                     </details>
                                                 </SortableItem>
                                             ))}
