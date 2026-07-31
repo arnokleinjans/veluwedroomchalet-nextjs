@@ -8,7 +8,7 @@ import { t } from "../utils/translations";
 
 import WeatherWidget from "./WeatherWidget";
 
-export default function ClientLayout({ children, basePath = "", appData, booking = null }: { children: React.ReactNode, basePath?: string, appData: any, booking?: any }) {
+export default function ClientLayout({ children, basePath = "", appData, booking = null, topOffset = 0 }: { children: React.ReactNode, basePath?: string, appData: any, booking?: any, topOffset?: number }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [accessCode, setAccessCode] = useState("");
     const [error, setError] = useState(false);
@@ -110,7 +110,7 @@ export default function ClientLayout({ children, basePath = "", appData, booking
                 />
             )}
             {/* Desktop Top Nav */}
-            <div className="hidden md:block fixed top-0 left-0 right-0 z-[60] w-full bg-[rgba(253,251,247,0.85)] backdrop-blur-md border-b border-[var(--border-color)]">
+            <div className="hidden md:block fixed left-0 right-0 z-[60] w-full bg-[rgba(253,251,247,0.85)] backdrop-blur-md border-b border-[var(--border-color)]" style={{ top: topOffset }}>
                 <div className="desktop-nav-inner flex items-center relative">
                     <div className="flex-1 flex justify-start">
                         <h1 className="text-xl font-bold" style={{ color: "var(--primary-color)" }}>{appData.property.name}</h1>

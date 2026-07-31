@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import ClientLayout from "../../components/ClientLayout";
 import ExpiredBookingPage from "../../components/ExpiredBookingPage";
 import NachtregistratieForm from "../../components/NachtregistratieForm";
-import TestBalk from "../../components/TestBalk";
+import TestBalk, { TEST_BALK_HOOGTE } from "../../components/TestBalk";
 import { cookies } from "next/headers";
 import { TEST_COOKIE, leesTestKeuze, pasTestKeuzeToe, TestKeuze } from "../../utils/testModus";
 
@@ -159,7 +159,7 @@ export default async function BookingLayout({
     return (
         <BookingProvider booking={bookingInfo} appData={finalAppData}>
             {balk}
-            <ClientLayout basePath={`/b/${bookingInfo.id}`} appData={finalAppData} booking={bookingInfo}>
+            <ClientLayout basePath={`/b/${bookingInfo.id}`} appData={finalAppData} booking={bookingInfo} topOffset={balk ? TEST_BALK_HOOGTE : 0}>
                 {children}
             </ClientLayout>
         </BookingProvider>

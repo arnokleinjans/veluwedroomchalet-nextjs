@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TEST_COOKIE, TEST_FASES, TestKeuze, schrijfTestKeuze } from "../utils/testModus";
 
-const HOOGTE = 42;
+export const TEST_BALK_HOOGTE = 42;
+const HOOGTE = TEST_BALK_HOOGTE;
 
 export default function TestBalk({ keuze }: { keuze: TestKeuze }) {
     const router = useRouter();

@@ -740,7 +740,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                 {/* Filter: nieuw / verlopen / alle */}
                                 <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
                                     {(["nieuw", "verlopen", "alle"] as const).map(f => {
-                                        const count = f === "alle" ? bookings.length : bookings.filter(b => (new Date(b.checkOut + "T12:00:00") < new Date()) === (f === "verlopen")).length;
+                                        const echte = bookings.filter(b => !(b as any).isTest);
+                                        const count = f === "alle" ? echte.length : echte.filter(b => (new Date(b.checkOut + "T12:00:00") < new Date()) === (f === "verlopen")).length;
                                         return (
                                             <button key={f} onClick={() => setBookingFilter(f)} style={{ padding: "6px 14px", borderRadius: "20px", border: bookingFilter === f ? "1px solid #4A5D23" : "1px solid #ddd", backgroundColor: bookingFilter === f ? "#4A5D23" : "white", color: bookingFilter === f ? "white" : "#666", fontSize: "0.82rem", fontWeight: "bold", cursor: "pointer" }}>
                                                 {f === "nieuw" ? "Nieuw" : f === "verlopen" ? "Verlopen" : "Alle"} ({count})

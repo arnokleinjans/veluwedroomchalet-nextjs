@@ -1,6 +1,7 @@
 import { Redis } from '@upstash/redis';
 import { unstable_noStore as noStore } from 'next/cache';
 import { findBooking } from './findBooking';
+import { metTestOverride } from './testModusServer';
 
 let kvInstance: Redis | null = null;
 export function getKV(): Redis {
@@ -165,7 +166,7 @@ export async function getAppData() {
 
 export async function getTranslatedAppData(bookingId: string) {
     const appData = await getAppData();
-    const booking = findBooking(appData.bookings, bookingId);
+    const { booking } = await metTestOverride(findBooking(appData.bookings, bookingId));
     if (!booking || !booking.language || booking.language === 'nl') return appData;
 
     const mergeTranslations = (data: any, translation: any): any => {

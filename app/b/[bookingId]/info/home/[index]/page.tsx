@@ -1,5 +1,6 @@
 import { getTranslatedAppData } from "../../../../../utils/db";
 import { findBooking } from "../../../../../utils/findBooking";
+import { metTestOverride } from "../../../../../utils/testModusServer";
 import { parseTemplateString } from "../../../../../utils/templateParser";
 import Link from "next/link";
 import WidgetEmbed from "../../../../../components/WidgetEmbed";
@@ -13,7 +14,7 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
     const itemIndex = parseInt(resolvedParams.index, 10);
 
     const appData = await getTranslatedAppData(bookingId);
-    const rawBooking = findBooking(appData.bookings, bookingId);
+    const rawBooking = (await metTestOverride(findBooking(appData.bookings, bookingId))).booking;
     const booking = rawBooking ? { ...rawBooking, keyCode: (appData?.property as any)?.keyCode || '' } : null;
     const insights = appData.insights || [];
     const item = insights[itemIndex] as any;

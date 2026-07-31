@@ -1,5 +1,6 @@
 import { getTranslatedAppData } from "../../../utils/db";
 import { findBooking } from "../../../utils/findBooking";
+import { metTestOverride } from "../../../utils/testModusServer";
 import { parseTemplateString } from "../../../utils/templateParser";
 import Link from "next/link";
 
@@ -10,7 +11,7 @@ export default async function Omgeving({ params }: { params: { bookingId: string
     const bookingId = (resolvedParams.bookingId || "").toUpperCase();
 
     const appData = await getTranslatedAppData(bookingId);
-    const rawBooking = findBooking(appData.bookings, bookingId);
+    const rawBooking = (await metTestOverride(findBooking(appData.bookings, bookingId))).booking;
     const booking = rawBooking ? { ...rawBooking, keyCode: (appData?.property as any)?.keyCode || '' } : null;
     const items = (appData as any).omgeving || (appData as any).restaurants || [];
 

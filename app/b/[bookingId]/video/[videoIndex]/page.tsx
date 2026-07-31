@@ -1,5 +1,6 @@
 import { getTranslatedAppData } from "../../../../utils/db";
 import { findBooking } from "../../../../utils/findBooking";
+import { metTestOverride } from "../../../../utils/testModusServer";
 import { parseTemplateString } from "../../../../utils/templateParser";
 import { t } from "../../../../utils/translations";
 import CinemaPlayer from "./CinemaPlayer";
@@ -12,7 +13,7 @@ export default async function VideoPage({ params }: { params: { bookingId: strin
     const videoIndex = parseInt(resolvedParams.videoIndex, 10);
 
     const appData = await getTranslatedAppData(bookingId);
-    const rawBooking = findBooking(appData.bookings, bookingId);
+    const rawBooking = (await metTestOverride(findBooking(appData.bookings, bookingId))).booking;
     const booking = rawBooking ? { ...rawBooking, keyCode: (appData?.property as any)?.keyCode || '' } : null;
     const videos = (appData as any).videos || [];
     const video = videos[videoIndex];
