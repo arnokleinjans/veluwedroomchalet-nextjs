@@ -3,6 +3,8 @@ import { GoogleGenAI } from '@google/genai';
 import { checkRateLimit } from '../../utils/rateLimit';
 import { VERTAALTALEN } from '../../utils/talen';
 
+export const maxDuration = 300;
+
 export async function POST(req: Request) {
     const limit = checkRateLimit('translate-api');
     if (!limit.allowed) {
@@ -54,7 +56,12 @@ ${JSON.stringify(dataToTranslate, null, 2)}`;
                     const result = await ai.models.generateContent({
                         model: 'gemini-2.5-flash',
                         contents: [{ role: 'user', parts: [{ text: maakPrompt(engels) }] }],
-                        config: { responseMimeType: 'application/json' }
+                        config: {
+                            responseMimeType: 'application/json',
+                            maxOutputTokens: 65535,
+                            // Nadenken levert bij vertalen niets op en verdubbelt de duur.
+                            thinkingConfig: { thinkingBudget: 0 },
+                        }
                     });
                     return JSON.parse(result.text || '{}');
                 } catch (fout: any) {

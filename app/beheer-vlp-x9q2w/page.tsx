@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
-    updateChatbotContext, updateTranslations, updateExpiredPageContent, updateGames,
+    updateChatbotContext, updateTranslationsVoorTaal, updateExpiredPageContent, updateGames,
     verifyAdminPin
 } from "../actions/adminActions";
 import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
@@ -19,7 +19,7 @@ import RichTextEditor from "../components/RichTextEditor";
 import { FASES_VOOR_TEGELS, TEST_FASES, fasesVanTegel, vraagtOmNachtregistratie, toontOpMobiel, toontOpDesktop, accentVanTegel, isUitgelicht } from "../utils/testModus";
 import ConfirmDialog from "../components/ConfirmDialog";
 import ImageLightbox from "../components/ImageLightbox";
-import { TALEN, VERTAALTALEN, vlagVan } from "../utils/talen";
+import { TALEN, VERTAALTALEN, vlagVan, naamVan } from "../utils/talen";
 
 const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: string }> = {
     uitgelicht: { bg: "#f3f8ec", border: "#4A5D23", label: "✨ Uitgelicht" },
@@ -155,7 +155,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [importProgress, setImportProgress] = useState<{ done: number, total: number } | null>(null);
 
     const [isSaving, setIsSaving] = useState(false);
-    const [isTranslating, setIsTranslating] = useState(false);
+    const [isTranslating, setIsTranslating] = useState<string | null>(null);
+    const [toonVertaalMenu, setToonVertaalMenu] = useState(false);
     const [saveMessage, setSaveMessage] = useState("");
 
     useEffect(() => {
@@ -221,46 +222,69 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         }
     };
 
-    const handleTranslateAll = async () => {
-        setIsTranslating(true);
-        setSaveMessage(`⏳ Bezig met vertalen naar ${VERTAALTALEN.map(t => t.naam).join(", ")}... (dit kan een minuut duren)`);
+    const vertaalEenTaal = async (code: string) => {
+        const payload = {
+            property: { name: propName, subtitle, host: { name: hostName, phone } },
+            insights, videos, omgeving, expiredPageContent,
+            talen: [code],
+        };
+        const res = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        // Bij een time-out stuurt Vercel een HTML-foutpagina terug; res.json() geeft dan
+        // een onbegrijpelijke "invalid JSON"-melding.
+        const tekst = await res.text();
+        let data: any;
         try {
-            const payload = {
-                property: { name: propName, subtitle, host: { name: hostName, phone } },
-                insights, videos, omgeving, expiredPageContent
-                // We omit chatgptContext or bookings
-            };
-            const res = await fetch('/api/translate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.error) {
-                setSaveMessage("❌ Vertaalfout: " + data.error);
-            } else if (VERTAALTALEN.some(t => data[t.code])) {
-                const vertalingen: Record<string, any> = {};
-                VERTAALTALEN.forEach(t => { if (data[t.code]) vertalingen[t.code] = data[t.code]; });
-                const saveRes = await updateTranslations(vertalingen);
-                if (saveRes.success) {
-                    const gelukt = Object.keys(vertalingen).map(c => vlagVan(c)).join(" ");
-                    setSaveMessage(data.mislukt?.length
-                        ? `⚠️ Vertaald: ${gelukt} — mislukt: ${data.mislukt.join(", ")}`
-                        : `✅ Vertaald naar ${gelukt}`);
-                    setTimeout(() => setSaveMessage(""), 4000);
-                } else {
-                    setSaveMessage("❌ Opslaan van vertalingen mislukt.");
-                    setTimeout(() => setSaveMessage(""), 5000);
-                }
-            } else {
-                setSaveMessage("❌ Ongeldige response van vertaalservice.");
-                setTimeout(() => setSaveMessage(""), 5000);
-            }
-        } catch (e: any) {
-            setSaveMessage("❌ Fout: " + e.message);
-            setTimeout(() => setSaveMessage(""), 5000);
+            data = JSON.parse(tekst);
+        } catch {
+            throw new Error(res.status === 504 || !res.ok
+                ? `de vertaaldienst reageerde niet op tijd (${res.status})`
+                : "onleesbaar antwoord van de vertaaldienst");
         }
-        setIsTranslating(false);
+
+        if (data.error) throw new Error(data.error);
+        if (!data[code]) throw new Error("geen vertaling ontvangen");
+
+        const saveRes = await updateTranslationsVoorTaal(code, data[code]);
+        if (!saveRes.success) throw new Error(saveRes.error || "opslaan mislukt");
+    };
+
+    const handleTranslate = async (code: string) => {
+        setIsTranslating(code);
+        setSaveMessage(`⏳ Bezig met vertalen naar ${naamVan(code)}... (dit duurt ongeveer een minuut)`);
+        try {
+            await vertaalEenTaal(code);
+            setSaveMessage(`✅ ${vlagVan(code)} ${naamVan(code)} vertaald en opgeslagen`);
+            setTimeout(() => setSaveMessage(""), 4000);
+        } catch (e: any) {
+            setSaveMessage(`❌ ${naamVan(code)} mislukt: ${e.message}`);
+            setTimeout(() => setSaveMessage(""), 8000);
+        }
+        setIsTranslating(null);
+    };
+
+    const handleTranslateAll = async () => {
+        const gelukt: string[] = [];
+        const mislukt: string[] = [];
+        for (const taal of VERTAALTALEN) {
+            setIsTranslating(taal.code);
+            setSaveMessage(`⏳ ${taal.vlag} ${taal.naam} (${gelukt.length + mislukt.length + 1} van ${VERTAALTALEN.length})...`);
+            try {
+                await vertaalEenTaal(taal.code);
+                gelukt.push(taal.vlag);
+            } catch {
+                mislukt.push(taal.naam);
+            }
+        }
+        setIsTranslating(null);
+        setSaveMessage(mislukt.length
+            ? `⚠️ Vertaald: ${gelukt.join(" ") || "niets"} — mislukt: ${mislukt.join(", ")}`
+            : `✅ Vertaald naar ${gelukt.join(" ")}`);
+        setTimeout(() => setSaveMessage(""), 8000);
     };
 
     const handleSaveGeneral = () => runSaveAction(
@@ -609,9 +633,35 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         <p style={{ margin: "5px 0 0", opacity: 0.9 }}>Pas direct app-teksten aan. (Opgeslagen via Vercel KV)</p>
                     </div>
                     <div style={{ display: "flex", gap: "10px" }}>
-                        <button onClick={handleTranslateAll} disabled={isTranslating} style={{ backgroundColor: "#ffb400", border: "none", borderRadius: "6px", color: "#333", padding: "8px 16px", cursor: isTranslating ? "wait" : "pointer", fontWeight: "bold", opacity: isTranslating ? 0.7 : 1 }}>
-                            {isTranslating ? "⏳ Vertalen..." : "🌟 Vertaal"}
-                        </button>
+                        <div style={{ position: "relative" }}>
+                            <button
+                                onClick={() => setToonVertaalMenu(v => !v)}
+                                disabled={!!isTranslating}
+                                style={{ backgroundColor: "#ffb400", border: "none", borderRadius: "6px", color: "#333", padding: "8px 16px", cursor: isTranslating ? "wait" : "pointer", fontWeight: "bold", opacity: isTranslating ? 0.7 : 1 }}
+                            >
+                                {isTranslating ? `⏳ ${naamVan(isTranslating)}...` : "🌟 Vertaal ▾"}
+                            </button>
+                            {toonVertaalMenu && !isTranslating && (
+                                <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 30, backgroundColor: "white", borderRadius: "10px", boxShadow: "0 10px 24px rgba(0,0,0,0.18)", padding: "6px", minWidth: "190px" }}>
+                                    {VERTAALTALEN.map(t => (
+                                        <button
+                                            key={t.code}
+                                            onClick={() => { setToonVertaalMenu(false); handleTranslate(t.code); }}
+                                            style={{ display: "block", width: "100%", textAlign: "left", background: "none", border: "none", padding: "10px 12px", borderRadius: "6px", cursor: "pointer", color: "#333", fontSize: "0.95rem" }}
+                                        >
+                                            {t.vlag} {t.naam}
+                                        </button>
+                                    ))}
+                                    <div style={{ borderTop: "1px solid #eee", margin: "4px 0" }} />
+                                    <button
+                                        onClick={() => { setToonVertaalMenu(false); handleTranslateAll(); }}
+                                        style={{ display: "block", width: "100%", textAlign: "left", background: "none", border: "none", padding: "10px 12px", borderRadius: "6px", cursor: "pointer", color: "#333", fontWeight: "bold", fontSize: "0.95rem" }}
+                                    >
+                                        🌍 Alle talen (duurt lang)
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                         <button onClick={handleLogout} style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: "6px", color: "white", padding: "8px 16px", cursor: "pointer", fontWeight: "bold", backdropFilter: "blur(4px)" }}>
                             Uitloggen
                         </button>

@@ -243,6 +243,16 @@ export async function updateTranslations(translations: Record<string, any>) {
     return await saveToKV(updatedData);
 }
 
+// Per taal opslaan, zodat een mislukte taal de bestaande vertalingen niet wist.
+export async function updateTranslationsVoorTaal(code: string, vertaling: any) {
+    noStore();
+    const appData = await getAppDataFresh();
+    const updatedData = { ...appData } as any;
+
+    updatedData.translations = { ...(updatedData.translations || {}), [code]: vertaling };
+    return await saveToKV(updatedData);
+}
+
 // ---------- Nachtregistratie ----------
 
 export async function adminUpdateNachtregistratie(bookingId: string, registratie: any) {
