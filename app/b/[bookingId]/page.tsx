@@ -3,50 +3,27 @@
 import Link from "next/link";
 import { useBooking } from "../../context/BookingContext";
 import { parseTemplateString } from "../../utils/templateParser";
+import { tegelZichtbaar, toontOpMobiel, toontOpDesktop, accentVanTegel } from "../../utils/testModus";
 
 export const dynamic = "force-dynamic";
 
-
-function isInsightVisible(insight: any, booking: any): boolean {
-  const visibility = insight.visibility || "always";
-  if (visibility === "always") return true;
-
-  if (visibility === "nachtregistratie") {
-    // Alleen tonen zolang het nachtregistratieformulier nog niet is ingevuld
-    return !booking?.nachtregistratie;
-  }
-
-  if (!booking?.checkIn || !booking?.checkOut) return true;
-
-  const now = new Date();
-  const today = now.toISOString().slice(0, 10); // YYYY-MM-DD
-
-  if (visibility === "checkin") {
-    // Visible from link receipt until end of check-in day
-    return today <= booking.checkIn;
-  }
-
-  if (visibility === "checkout") {
-    // Visible from noon the day before checkout onwards
-    const checkoutMidnight = new Date(booking.checkOut + "T00:00:00");
-    const showFrom = new Date(checkoutMidnight.getTime() - 12 * 60 * 60 * 1000);
-    return now >= showFrom;
-  }
-
-  return true;
-}
 
 export default function Home() {
   const { booking, appData } = useBooking();
   const visibleInsights = (appData.insights || [])
     .map((insight: any, originalIndex: number) => ({ ...insight, originalIndex }))
-    .filter((insight: any) => isInsightVisible(insight, booking));
+    .filter((insight: any) => tegelZichtbaar(insight, booking));
 
   return (
     <div className="tab-content active" id="home-tab">
       <style>{`
         @media (max-width: 767px) {
           [data-hide-mobile="true"] {
+            display: none !important;
+          }
+        }
+        @media (min-width: 768px) {
+          [data-hide-desktop="true"] {
             display: none !important;
           }
         }
@@ -108,7 +85,7 @@ export default function Home() {
                 key={index}
                 href={`/b/${booking?.id}/nachtregistratie`}
                 className="card card-glass clickable h-full m-0"
-                data-hide-mobile={insight.hideOnMobile ? "true" : undefined}
+                data-hide-mobile={toontOpMobiel(insight) ? undefined : "true"} data-hide-desktop={toontOpDesktop(insight) ? undefined : "true"}
                 data-visibility="nachtregistratie"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
@@ -123,8 +100,8 @@ export default function Home() {
                 key={index}
                 href={`/b/${booking?.id}/info/home/${insight.originalIndex}`}
                 className="card card-glass clickable h-full m-0"
-                data-hide-mobile={insight.hideOnMobile ? "true" : undefined}
-                data-visibility={(insight as any).visibility || undefined}
+                data-hide-mobile={toontOpMobiel(insight) ? undefined : "true"} data-hide-desktop={toontOpDesktop(insight) ? undefined : "true"}
+                data-visibility={accentVanTegel(insight)}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 {cardContent}
@@ -133,7 +110,7 @@ export default function Home() {
           }
 
           return (
-            <div key={index} className="card card-glass h-full m-0" data-hide-mobile={insight.hideOnMobile ? "true" : undefined} data-visibility={(insight as any).visibility || undefined}>
+            <div key={index} className="card card-glass h-full m-0" data-hide-mobile={toontOpMobiel(insight) ? undefined : "true"} data-hide-desktop={toontOpDesktop(insight) ? undefined : "true"} data-visibility={accentVanTegel(insight)}>
               {cardContent}
             </div>
           );

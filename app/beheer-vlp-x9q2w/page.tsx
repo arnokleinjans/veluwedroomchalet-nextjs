@@ -16,6 +16,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import RichTextEditor from "../components/RichTextEditor";
+import { FASES_VOOR_TEGELS, TEST_FASES, fasesVanTegel, vraagtOmNachtregistratie, toontOpMobiel, toontOpDesktop, accentVanTegel } from "../utils/testModus";
 import ConfirmDialog from "../components/ConfirmDialog";
 import ImageLightbox from "../components/ImageLightbox";
 
@@ -103,7 +104,7 @@ export default function AdminPage() {
 
     // Dynamic Arrays
     const [games, setGames] = useState<{ id: string, title: string, src: string }[]>([]);
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[] }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, fases?: string[], alleenLegeNachtregistratie?: boolean, toonMobiel?: boolean, toonDesktop?: boolean, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[] }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
@@ -904,35 +905,55 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
                                         <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                             {insights.map((item, idx) => (
-                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={item.visibility && item.visibility !== "always" ? item.visibility : undefined}>
+                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)}>
                                                     <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
-                                                    <div style={{ position: "absolute", top: "10px", right: "115px", display: "flex", alignItems: "center", gap: "10px" }}>
-                                                        <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.75rem", color: item.hideOnMobile ? "#c0392b" : "#999", cursor: "pointer", userSelect: "none" }}>
-                                                            <input type="checkbox" checked={!!item.hideOnMobile} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], hideOnMobile: e.target.checked }; setInsights(n); }} style={{ accentColor: "#c0392b" }} />
-                                                            Verberg op mobiel
-                                                        </label>
-                                                        <select
-                                                            value={item.visibility || "always"}
-                                                            onChange={e => {
+                                                    <div style={{ marginTop: "34px", marginBottom: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>
+                                                        <div style={{ fontSize: "0.75rem", color: "#777", marginBottom: "6px" }}>Zichtbaar in fase</div>
+                                                        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "8px" }}>
+                                                            {FASES_VOOR_TEGELS.map(f => {
+                                                                const actief = fasesVanTegel(item).includes(f);
+                                                                return (
+                                                                    <label key={f} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: actief ? "#333" : "#999", cursor: "pointer", userSelect: "none" }}>
+                                                                        <input type="checkbox" checked={actief} style={{ accentColor: "#4A5D23" }} onChange={e => {
+                                                                            const n = [...insights];
+                                                                            const huidig = fasesVanTegel(item);
+                                                                            const volgende = e.target.checked ? [...huidig, f] : huidig.filter(x => x !== f);
+                                                                            n[idx] = { ...n[idx], fases: FASES_VOOR_TEGELS.filter(x => volgende.includes(x)), visibility: undefined };
+                                                                            setInsights(n);
+                                                                        }} />
+                                                                        {TEST_FASES.find(tf => tf.waarde === f)?.label || f}
+                                                                    </label>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        <div style={{ fontSize: "0.75rem", color: "#777", marginBottom: "6px" }}>Zichtbaar op</div>
+                                                        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "8px" }}>
+                                                            {([["toonMobiel", "Mobiel", toontOpMobiel(item)], ["toonDesktop", "Desktop", toontOpDesktop(item)]] as const).map(([veld, label, actief]) => (
+                                                                <label key={veld} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: actief ? "#333" : "#999", cursor: "pointer", userSelect: "none" }}>
+                                                                    <input type="checkbox" checked={actief} style={{ accentColor: "#4A5D23" }} onChange={e => {
+                                                                        const n = [...insights];
+                                                                        n[idx] = { ...n[idx], [veld]: e.target.checked, hideOnMobile: undefined };
+                                                                        setInsights(n);
+                                                                    }} />
+                                                                    {label}
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                        <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: vraagtOmNachtregistratie(item) ? "#b3362a" : "#999", cursor: "pointer", userSelect: "none", borderTop: "1px solid #e8e5da", paddingTop: "8px" }}>
+                                                            <input type="checkbox" checked={vraagtOmNachtregistratie(item)} style={{ accentColor: "#b3362a" }} onChange={e => {
                                                                 const n = [...insights];
-                                                                const nieuweVisibility = e.target.value;
                                                                 const iconNogNietGezet = !n[idx].icon || n[idx].icon === "icons/default.png";
                                                                 n[idx] = {
                                                                     ...n[idx],
-                                                                    visibility: nieuweVisibility,
-                                                                    icon: nieuweVisibility === "nachtregistratie" && iconNogNietGezet ? "icons/clipboard.svg" : n[idx].icon,
+                                                                    alleenLegeNachtregistratie: e.target.checked,
+                                                                    visibility: undefined,
+                                                                    icon: e.target.checked && iconNogNietGezet ? "icons/clipboard.svg" : n[idx].icon,
                                                                 };
                                                                 setInsights(n);
-                                                            }}
-                                                            style={{ padding: "3px 6px", borderRadius: "4px", border: `1px solid ${item.visibility && item.visibility !== "always" ? "#4A5D23" : "#ccc"}`, fontSize: "0.75rem", color: item.visibility && item.visibility !== "always" ? "#4A5D23" : "#888", backgroundColor: item.visibility && item.visibility !== "always" ? "#f6faf0" : "white", cursor: "pointer" }}
-                                                            title="Wanneer zichtbaar?"
-                                                        >
-                                                            <option value="always">👁 Altijd</option>
-                                                            <option value="checkin">🏠 T/m aankomstdag</option>
-                                                            <option value="checkout">🧳 Vertrekdag (+ avond ervoor)</option>
-                                                            <option value="nachtregistratie">📋 Nachtregistratieformulier</option>
-                                                        </select>
+                                                            }} />
+                                                            📋 Alleen zolang de nachtregistratie nog niet is ingevuld (rode tegel)
+                                                        </label>
                                                     </div>
 
                                                     <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>

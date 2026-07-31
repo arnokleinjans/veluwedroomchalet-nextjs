@@ -87,3 +87,79 @@ export function pasTestKeuzeToe<T extends Record<string, any>>(booking: T, keuze
 
     return aangepast as T;
 }
+
+// ---- Zichtbaarheid van tegels per fase ----------------------------------
+// Een tegel is nooit zichtbaar in de fase "verlopen": daar vervangt de
+// bedankpagina de hele app.
+export const FASES_VOOR_TEGELS: TestFase[] = ["voor", "aankomst", "verblijf", "vertrek"];
+
+export function huidigeFase(booking: { checkIn?: string; checkOut?: string } | null | undefined): TestFase {
+    if (!booking?.checkIn || !booking?.checkOut) return "verblijf";
+
+    const nu = new Date();
+    const p: Record<string, string> = {};
+    new Intl.DateTimeFormat("en-US", {
+        timeZone: "Europe/Amsterdam",
+        year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false,
+    }).formatToParts(nu).forEach(({ type, value }) => { if (type !== "literal") p[type] = value; });
+    const vandaag = `${p.year}-${p.month}-${p.day}`;
+    const uur = parseInt(p.hour);
+
+    if (vandaag > booking.checkOut || (vandaag === booking.checkOut && uur >= 12)) return "verlopen";
+
+    const poort = new Date(booking.checkIn + "T12:00:00");
+    poort.setDate(poort.getDate() - 2);
+    const poortDatum = poort.toISOString().slice(0, 10);
+    if (vandaag < poortDatum || (vandaag === poortDatum && uur < 8)) return "voor";
+
+    if (vandaag <= booking.checkIn) return "aankomst";
+
+    const vertrekVanaf = new Date(booking.checkOut + "T00:00:00").getTime() - 12 * 60 * 60 * 1000;
+    if (nu.getTime() >= vertrekVanaf) return "vertrek";
+
+    return "verblijf";
+}
+
+// Oudere tegels hebben nog het enkelvoudige `visibility`-veld; die vertalen we
+// naar dezelfde fases zodat bestaande instellingen blijven werken.
+export function fasesVanTegel(insight: any): TestFase[] {
+    if (Array.isArray(insight?.fases)) return insight.fases as TestFase[];
+    switch (insight?.visibility) {
+        case "checkin": return ["voor", "aankomst"];
+        case "checkout": return ["vertrek"];
+        default: return [...FASES_VOOR_TEGELS];
+    }
+}
+
+export function vraagtOmNachtregistratie(insight: any): boolean {
+    if (typeof insight?.alleenLegeNachtregistratie === "boolean") return insight.alleenLegeNachtregistratie;
+    return insight?.visibility === "nachtregistratie";
+}
+
+// Mobiel/desktop staan in dezelfde vinkjesgroep als de fases. Oudere tegels
+// hebben nog `hideOnMobile`; die blijft gewoon werken.
+export function toontOpMobiel(insight: any): boolean {
+    if (typeof insight?.toonMobiel === "boolean") return insight.toonMobiel;
+    return !insight?.hideOnMobile;
+}
+
+export function toontOpDesktop(insight: any): boolean {
+    if (typeof insight?.toonDesktop === "boolean") return insight.toonDesktop;
+    return true;
+}
+
+export function tegelZichtbaar(insight: any, booking: any): boolean {
+    if (vraagtOmNachtregistratie(insight) && booking?.nachtregistratie) return false;
+    if (!toontOpMobiel(insight) && !toontOpDesktop(insight)) return false;
+    return fasesVanTegel(insight).includes(huidigeFase(booking));
+}
+
+// Bepaalt de kleuraccent van een tegel (rood voor nachtregistratie, groen als
+// de tegel maar in een deel van de fases zichtbaar is).
+export function accentVanTegel(insight: any): string | undefined {
+    if (vraagtOmNachtregistratie(insight)) return "nachtregistratie";
+    const fases = fasesVanTegel(insight);
+    if (fases.length >= FASES_VOOR_TEGELS.length) return undefined;
+    if (fases.includes("vertrek") && !fases.includes("verblijf")) return "checkout";
+    return "checkin";
+}
