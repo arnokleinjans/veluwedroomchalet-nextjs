@@ -26,6 +26,19 @@ const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: str
     nachtregistratie: { bg: "#fdecea", border: "#b3362a", label: "📋 Nachtregistratieformulier" },
 };
 
+function samenvattingZichtbaarheid(item: any): string {
+    const delen: string[] = [];
+    const fases = fasesVanTegel(item);
+    delen.push(fases.length >= FASES_VOOR_TEGELS.length
+        ? "altijd"
+        : fases.map(f => TEST_FASES.find(t => t.waarde === f)?.label.toLowerCase() || f).join(", "));
+    if (!toontOpMobiel(item)) delen.push("niet op mobiel");
+    if (!toontOpDesktop(item)) delen.push("niet op desktop");
+    if (isUitgelicht(item)) delen.push("uitgelicht");
+    if (vraagtOmNachtregistratie(item)) delen.push("nachtregistratie");
+    return delen.join(" · ");
+}
+
 function SortableItem({ id, children, accent }: { id: string, children: React.ReactNode, accent?: string }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
     const style = {
@@ -909,7 +922,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                 <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)}>
                                                     <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
-                                                    <div style={{ marginTop: "34px", marginBottom: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>
+                                                    <details style={{ marginTop: "34px", marginBottom: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>
+                                                        <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>
+                                                            👁 Zichtbaarheid <span style={{ fontWeight: "normal", color: "#888" }}>({samenvattingZichtbaarheid(item)})</span>
+                                                        </summary>
+                                                        <div style={{ marginTop: "10px" }}>
                                                         <div style={{ fontSize: "0.75rem", color: "#777", marginBottom: "6px" }}>Zichtbaar in fase</div>
                                                         <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "8px" }}>
                                                             {FASES_VOOR_TEGELS.map(f => {
@@ -964,6 +981,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             📋 Alleen zolang de nachtregistratie nog niet is ingevuld (rode tegel)
                                                         </label>
                                                     </div>
+                                                    </details>
 
                                                     <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
                                                         <div style={{ flex: 1 }}>
