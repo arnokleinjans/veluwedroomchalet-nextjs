@@ -103,7 +103,7 @@ export default function AdminPage() {
 
     // Dynamic Arrays
     const [games, setGames] = useState<{ id: string, title: string, src: string }[]>([]);
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, stappen?: { image?: string, tekst?: string, zonderNummer?: boolean }[] }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[] }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
@@ -980,7 +980,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             Genummerde stappen met een tekening ernaast, onder de detailpagina. De tekst wordt automatisch meevertaald naar Engels en Duits.
                                                         </p>
                                                         {(item.stappen || []).map((stap, sIdx) => {
-                                                            const wijzig = (velden: Partial<{ image: string, tekst: string, zonderNummer: boolean }>) => {
+                                                            const wijzig = (velden: Partial<{ image: string, tekst: string, volleBreedte: boolean }>) => {
                                                                 const n = [...insights];
                                                                 const lijst = [...(n[idx].stappen || [])];
                                                                 lijst[sIdx] = { ...lijst[sIdx], ...velden };
@@ -1011,8 +1011,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                                         </select>
                                                                         <textarea value={stap.tekst || ""} onChange={e => wijzig({ tekst: e.target.value })} placeholder="Tekst bij deze stap" style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #ccc", minHeight: "52px", fontFamily: "inherit", fontSize: "0.85rem" }} />
                                                                         <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.75rem", color: "#888", marginTop: "5px", cursor: "pointer", userSelect: "none" }}>
-                                                                            <input type="checkbox" checked={!!stap.zonderNummer} onChange={e => wijzig({ zonderNummer: e.target.checked })} />
-                                                                            Toelichting (volle breedte, zonder nummer)
+                                                                            <input type="checkbox" checked={!!stap.volleBreedte} onChange={e => wijzig({ volleBreedte: e.target.checked })} />
+                                                                            Volle breedte
                                                                         </label>
                                                                     </div>
                                                                     <div style={{ display: "flex", flexDirection: "column", gap: "4px", flexShrink: 0 }}>
