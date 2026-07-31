@@ -1,4 +1,4 @@
-import { getAppData } from "../../utils/db";
+import { getAppData, toClientAppData } from "../../utils/db";
 import { findBooking } from "../../utils/findBooking";
 import { BookingProvider, BookingInfo } from "../../context/BookingContext";
 import { notFound } from "next/navigation";
@@ -106,7 +106,7 @@ export default async function BookingLayout({
         nachtregistratie: (booking as any).nachtregistratie || undefined,
     };
 
-    const finalAppData = translatedAppData;
+    const finalAppData = toClientAppData(translatedAppData);
 
     const bookingInfo: BookingInfo = rawBookingInfo;
 

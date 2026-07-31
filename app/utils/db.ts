@@ -194,6 +194,23 @@ export async function getTranslatedAppData(bookingId: string) {
 }
 
 
+// Alles wat via een client-component naar de browser gaat, belandt leesbaar in de
+// paginabron. Deze velden horen daar niet: bookings bevat de persoonsgegevens én de
+// links van álle gasten, accessCode is het toegangswoord van de publieke site, en
+// chatbotContext/aiPrompt/translations gebruikt de client sowieso niet.
+export function toClientAppData<T extends Record<string, any>>(appData: T) {
+    const {
+        bookings: _bookings,
+        accessCode: _accessCode,
+        chatbotContext: _chatbotContext,
+        aiPrompt: _aiPrompt,
+        aiMaxChars: _aiMaxChars,
+        translations: _translations,
+        ...safe
+    } = appData as any;
+    return safe as Omit<T, 'bookings' | 'accessCode' | 'chatbotContext' | 'aiPrompt' | 'aiMaxChars' | 'translations'>;
+}
+
 // Uncached read for admin panel — always gets fresh data
 export async function getAppDataFresh() {
     noStore();
