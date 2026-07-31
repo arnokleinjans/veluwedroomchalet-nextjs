@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { getTranslatedAppData } from '../../utils/db';
 import { checkRateLimit } from '../../utils/rateLimit';
+import { TALEN } from '../../utils/talen';
 
 export async function POST(req: Request) {
     // Rate limit: max 30 requests per minute
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
         const booking = appData.bookings?.find((b: any) => b.id === guestContext?.bookingId);
-        const languageMap: Record<string, string> = { nl: "Nederlands", en: "Engels", de: "Duits" };
+        const languageMap: Record<string, string> = Object.fromEntries(TALEN.map(t => [t.code, t.naam]));
         const guestLanguage = languageMap[booking?.language || "nl"] || "Nederlands";
 
         // Build the system context instructing the AI on how to behave

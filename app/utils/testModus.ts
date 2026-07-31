@@ -1,3 +1,5 @@
+import { TAALCODES } from "./talen";
+
 export const TEST_COOKIE = "vdc_test";
 
 export type TestFase = "voor" | "aankomst" | "verblijf" | "vertrek" | "verlopen";
@@ -24,7 +26,7 @@ export function leesTestKeuze(ruw: string | undefined | null): TestKeuze {
     const [fase, taal, nachtreg] = decodeURIComponent(ruw).split("|");
     return {
         fase: (TEST_FASES.some(f => f.waarde === fase) ? fase : TEST_STANDAARD.fase) as TestFase,
-        taal: ["nl", "en", "de"].includes(taal) ? taal : TEST_STANDAARD.taal,
+        taal: TAALCODES.includes(taal) ? taal : TEST_STANDAARD.taal,
         nachtreg: (["leeg", "ingevuld", "verstuurd"].includes(nachtreg) ? nachtreg : TEST_STANDAARD.nachtreg) as TestNachtreg,
     };
 }

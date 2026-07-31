@@ -1,6 +1,7 @@
 "use server";
 
 import fs from "fs";
+import { VERTAALTALEN } from "../utils/talen";
 import path from "path";
 import { getAppDataFresh } from "../utils/db";
 
@@ -167,6 +168,11 @@ export async function getImageUsageMap(imageNames?: string[]): Promise<Record<st
                 if (typeof i?.detailContent === "string" && i.detailContent.includes(filename)) {
                     addUsage(filename, `Home-item '${i.title}' (detailpagina)${langSuffix}`);
                 }
+                (i?.stappen || []).forEach((stap: any, nr: number) => {
+                    if (baseNameMatches(stap?.image, filename)) {
+                        addUsage(filename, `Home-item '${i.title}' — stap ${nr + 1}${langSuffix}`);
+                    }
+                });
             });
             if (typeof block.expiredPageContent === "string" && block.expiredPageContent.includes(filename)) {
                 addUsage(filename, `Verlopen boeking pagina${langSuffix}`);
@@ -175,8 +181,9 @@ export async function getImageUsageMap(imageNames?: string[]): Promise<Record<st
     };
 
     scanLanguageBlock(data, "");
-    scanLanguageBlock(data.translations?.en, " (EN)");
-    scanLanguageBlock(data.translations?.de, " (DE)");
+    for (const taal of VERTAALTALEN) {
+        scanLanguageBlock(data.translations?.[taal.code], ` (${taal.code.toUpperCase()})`);
+    }
 
     for (const [filename, label] of Object.entries(HARDCODED_CODE_REFERENCES)) {
         addUsage(filename, `${label} — vast in code`);

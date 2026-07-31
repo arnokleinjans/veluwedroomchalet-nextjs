@@ -234,7 +234,7 @@ export async function updateGames(newGames: any[]) {
     return await saveToKV(updatedData);
 }
 
-export async function updateTranslations(translations: { en: any, de: any }) {
+export async function updateTranslations(translations: Record<string, any>) {
     noStore();
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;

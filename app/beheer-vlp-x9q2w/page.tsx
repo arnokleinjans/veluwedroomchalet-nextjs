@@ -19,6 +19,7 @@ import RichTextEditor from "../components/RichTextEditor";
 import { FASES_VOOR_TEGELS, TEST_FASES, fasesVanTegel, vraagtOmNachtregistratie, toontOpMobiel, toontOpDesktop, accentVanTegel, isUitgelicht } from "../utils/testModus";
 import ConfirmDialog from "../components/ConfirmDialog";
 import ImageLightbox from "../components/ImageLightbox";
+import { TALEN, VERTAALTALEN, vlagVan } from "../utils/talen";
 
 const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: string }> = {
     uitgelicht: { bg: "#f3f8ec", border: "#4A5D23", label: "✨ Uitgelicht" },
@@ -209,7 +210,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
     const handleTranslateAll = async () => {
         setIsTranslating(true);
-        setSaveMessage("⏳ Bezig met vertalen naar Engels en Duits... (Dit kan 10-30s duren)");
+        setSaveMessage(`⏳ Bezig met vertalen naar ${VERTAALTALEN.map(t => t.naam).join(", ")}... (dit kan een minuut duren)`);
         try {
             const payload = {
                 property: { name: propName, subtitle, host: { name: hostName, phone } },
@@ -224,10 +225,15 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             const data = await res.json();
             if (data.error) {
                 setSaveMessage("❌ Vertaalfout: " + data.error);
-            } else if (data.en && data.de) {
-                const saveRes = await updateTranslations({ en: data.en, de: data.de });
+            } else if (VERTAALTALEN.some(t => data[t.code])) {
+                const vertalingen: Record<string, any> = {};
+                VERTAALTALEN.forEach(t => { if (data[t.code]) vertalingen[t.code] = data[t.code]; });
+                const saveRes = await updateTranslations(vertalingen);
                 if (saveRes.success) {
-                    setSaveMessage("✅ Succesvol vertaald en gereed voor EN/DE weergave!");
+                    const gelukt = Object.keys(vertalingen).map(c => vlagVan(c)).join(" ");
+                    setSaveMessage(data.mislukt?.length
+                        ? `⚠️ Vertaald: ${gelukt} — mislukt: ${data.mislukt.join(", ")}`
+                        : `✅ Vertaald naar ${gelukt}`);
                     setTimeout(() => setSaveMessage(""), 4000);
                 } else {
                     setSaveMessage("❌ Opslaan van vertalingen mislukt.");
@@ -661,9 +667,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         <div style={{ flex: "1 1 120px" }}>
                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Weergavetaal</label>
                                             <select value={newLanguage} onChange={e => setNewLanguage(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white" }}>
-                                                <option value="nl">🇳🇱 Nederlands</option>
-                                                <option value="en">🇬🇧 Engels</option>
-                                                <option value="de">🇩🇪 Duits</option>
+                                                {TALEN.map(t => <option key={t.code} value={t.code}>{t.vlag} {t.naam}</option>)}
                                             </select>
                                         </div>
                                     </div>
@@ -809,16 +813,14 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <div style={{ flex: "1 1 130px" }}>
                                                             <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Taal</label>
                                                             <select value={editValues.language} onChange={e => setEditValues(v => ({ ...v, language: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white", fontSize: "0.85rem" }}>
-                                                                <option value="nl">🇳🇱 Nederlands</option>
-                                                                <option value="en">🇬🇧 Engels</option>
-                                                                <option value="de">🇩🇪 Duits</option>
+                                                                {TALEN.map(t => <option key={t.code} value={t.code}>{t.vlag} {t.naam}</option>)}
                                                             </select>
                                                         </div>
                                                     </div>
                                                 ) : (
                                                     <div>
                                                         <span style={{ fontSize: "0.85rem", color: isExpired ? "#aaa" : "#777" }}>{formatDatumNL(booking.checkIn)} t/m {formatDatumNL(booking.checkOut)}</span>
-                                                        {booking.language && booking.language !== "nl" && <span style={{ fontSize: "0.8rem", color: "#888", marginLeft: "10px" }}>{booking.language === "en" ? "🇬🇧" : "🇩🇪"}</span>}
+                                                        {booking.language && booking.language !== "nl" && <span style={{ fontSize: "0.8rem", color: "#888", marginLeft: "10px" }}>{vlagVan(booking.language)}</span>}
                                                         <div style={{ fontSize: "0.85rem", color: isExpired ? "#bbb" : "#4A5D23", marginTop: "4px", wordBreak: "break-all", textDecoration: isExpired ? "line-through" : "none" }}>{shareUrl}</div>
                                                     </div>
                                                 )}

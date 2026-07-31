@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TEST_COOKIE, TEST_FASES, TestKeuze, schrijfTestKeuze } from "../utils/testModus";
+import { TALEN } from "../utils/talen";
 
 export const TEST_BALK_HOOGTE = 42;
 const HOOGTE = TEST_BALK_HOOGTE;
@@ -55,9 +56,7 @@ export default function TestBalk({ keuze }: { keuze: TestKeuze }) {
                 <span style={{ flexShrink: 0 }}>
                     <span style={label}>Taal</span>
                     <select style={veld} value={keuze.taal} onChange={e => zet({ taal: e.target.value })}>
-                        <option value="nl">Nederlands</option>
-                        <option value="en">Engels</option>
-                        <option value="de">Duits</option>
+                        {TALEN.map(t => <option key={t.code} value={t.code}>{t.naam}</option>)}
                     </select>
                 </span>
 
