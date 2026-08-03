@@ -45,16 +45,16 @@ export default function ImageLightbox({
             style={{
                 position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.85)",
                 display: "flex", flexDirection: "column", alignItems: "center",
-                justifyContent: "center", zIndex: 2100, padding: vullend ? "0" : "24px", cursor: "zoom-out",
+                justifyContent: "center", zIndex: 10050, padding: vullend ? "0" : "24px", cursor: "zoom-out",
                 touchAction: "none", overscrollBehavior: "contain",
             }}
         >
             <img
                 src={src}
                 alt={name || ""}
-                onClick={(e) => e.stopPropagation()}
+                onClick={vullend ? undefined : (e) => e.stopPropagation()}
                 style={vullend ? {
-                    width: "100%", maxHeight: "100dvh", objectFit: "contain", cursor: "default",
+                    width: "100%", maxHeight: "100dvh", objectFit: "contain", cursor: "zoom-out",
                     backgroundColor: "#fff",
                 } : {
                     maxWidth: "100%", maxHeight: "85vh", objectFit: "contain",
