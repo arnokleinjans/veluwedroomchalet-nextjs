@@ -40,7 +40,7 @@ export default function Stappenplan({ stappen }: { stappen?: Stap[] }) {
                     );
                 })}
             </div>
-            <ImageLightbox src={vergroot} onClose={() => setVergroot(null)} />
+            <ImageLightbox src={vergroot} onClose={() => setVergroot(null)} vullend />
         </>
     );
 }
