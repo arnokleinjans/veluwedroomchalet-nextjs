@@ -815,11 +815,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                             </button>
                                         );
                                     })}
-                                    <input type="text" value={bookingSearch} onChange={e => setBookingSearch(e.target.value)} placeholder="🔍 Zoek op naam..." style={{ padding: "6px 12px", borderRadius: "20px", border: "1px solid #ddd", fontSize: "0.82rem", flex: "1 1 160px", minWidth: "140px" }} />
+                                    <input type="text" value={bookingSearch} onChange={e => setBookingSearch(e.target.value)} placeholder="🔍 Zoek op naam of boekingsnr..." style={{ padding: "6px 12px", borderRadius: "20px", border: "1px solid #ddd", fontSize: "0.82rem", flex: "1 1 160px", minWidth: "140px" }} />
                                 </div>
 
                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                    {[...bookings].sort((a, b) => (((b as any).isTest ? 1 : 0) - ((a as any).isTest ? 1 : 0)) || a.checkOut.localeCompare(b.checkOut)).filter(b => (b as any).isTest || bookingFilter === "alle" || (new Date(b.checkOut + "T12:00:00") < new Date()) === (bookingFilter === "verlopen")).filter(b => (b as any).isTest || b.guestName.toLowerCase().includes(bookingSearch.trim().toLowerCase())).map((booking) => {
+                                    {[...bookings].sort((a, b) => (((b as any).isTest ? 1 : 0) - ((a as any).isTest ? 1 : 0)) || a.checkOut.localeCompare(b.checkOut)).filter(b => (b as any).isTest || bookingFilter === "alle" || (new Date(b.checkOut + "T12:00:00") < new Date()) === (bookingFilter === "verlopen")).filter(b => { const q = bookingSearch.trim().toLowerCase(); return (b as any).isTest || !q || b.guestName.toLowerCase().includes(q) || b.id.toLowerCase().includes(q); }).map((booking) => {
                                         const shareUrl = `${window.location.origin}/b/${booking.id}`;
                                         const isEditing = editingId === booking.id;
                                         const isTestBooking = !!(booking as any).isTest;

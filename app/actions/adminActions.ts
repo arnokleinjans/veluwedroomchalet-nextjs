@@ -144,11 +144,19 @@ function normalizeBookingId(raw: string): string {
     return raw.trim().toUpperCase();
 }
 
-function isBookingIdTaken(bookings: any[], id: string, excludeId?: string): boolean {
-    return bookings.some((b: any) => {
+function findBookingWithId(bookings: any[], id: string, excludeId?: string): any | null {
+    return bookings.find((b: any) => {
         if (excludeId && b.id === excludeId) return false;
         return b.id?.toUpperCase() === id;
-    });
+    }) || null;
+}
+
+function idTakenError(newId: string, bezet: any) {
+    const naam = bezet.guestName || "onbekende gast";
+    const periode = bezet.checkIn && bezet.checkOut ? ` (${bezet.checkIn} t/m ${bezet.checkOut})` : "";
+    const verlopen = bezet.checkOut && new Date(bezet.checkOut + "T12:00:00") < new Date();
+    const hint = verlopen ? ' Die boeking is verlopen — zet het filter op "Alle" om hem te zien.' : "";
+    return { success: false, error: `Boekingsnummer ${newId} is al in gebruik door ${naam}${periode}.${hint}` };
 }
 
 export async function addBooking(guestName: string, checkIn: string, checkOut: string, language: string = "nl", bookingNumber?: string) {
@@ -163,9 +171,8 @@ export async function addBooking(guestName: string, checkIn: string, checkOut: s
     let newId: string;
     if (bookingNumber && bookingNumber.trim()) {
         newId = normalizeBookingId(bookingNumber);
-        if (isBookingIdTaken(updatedData.bookings, newId)) {
-            return { success: false, error: `Boekingsnummer ${newId} is al in gebruik.` };
-        }
+        const bezet = findBookingWithId(updatedData.bookings, newId);
+        if (bezet) return idTakenError(newId, bezet);
     } else {
         const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
         const safeNamePart = guestName.split(' ')[0].replace(/[^a-zA-Z]/g, '').toUpperCase();
@@ -193,9 +200,8 @@ export async function updateBooking(id: string, checkIn: string, checkOut: strin
     let newId: string | null = null;
     if (bookingNumber && bookingNumber.trim() && normalizeBookingId(bookingNumber) !== id.toUpperCase()) {
         newId = normalizeBookingId(bookingNumber);
-        if (isBookingIdTaken(updatedData.bookings, newId, id)) {
-            return { success: false, error: `Boekingsnummer ${newId} is al in gebruik.` };
-        }
+        const bezet = findBookingWithId(updatedData.bookings, newId, id);
+        if (bezet) return idTakenError(newId, bezet);
     }
 
     updatedData.bookings = updatedData.bookings.map((b: any) => {
