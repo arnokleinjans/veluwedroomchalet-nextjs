@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { GEMINI_MODEL, GEMINI_THINKING } from '../../utils/gemini';
 import { getTranslatedAppData } from '../../utils/db';
 import { checkRateLimit } from '../../utils/rateLimit';
 import { TALEN } from '../../utils/talen';
@@ -86,13 +87,18 @@ ${message}
 Reageer direct op de nieuwe vraag, als de Conciërge. Begin niet met "Conciërge:" maar geef gewoon het antwoord.
 `;
 
-        // Await response from Gemini Flash 2.5
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+        const vraag = () => ai.models.generateContent({
+            model: GEMINI_MODEL,
             contents: prompt,
+            config: { thinkingConfig: GEMINI_THINKING },
         });
 
-        return NextResponse.json({ reply: response.text });
+        // Het model geeft af en toe een leeg antwoord; de gast zag dan een lege ballon.
+        let reply = (await vraag()).text?.trim();
+        if (!reply) reply = (await vraag()).text?.trim();
+        if (!reply) throw new Error("Leeg antwoord van Gemini");
+
+        return NextResponse.json({ reply });
     } catch (error) {
         console.error("Gemini API Error:", error);
         return NextResponse.json(

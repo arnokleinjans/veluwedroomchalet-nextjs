@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { GEMINI_MODEL, GEMINI_THINKING } from '../../utils/gemini';
 import { checkRateLimit } from '../../utils/rateLimit';
 import { VERTAALTALEN } from '../../utils/talen';
 
@@ -54,13 +55,12 @@ ${JSON.stringify(dataToTranslate, null, 2)}`;
                 try {
                     if (poging > 0) await new Promise(r => setTimeout(r, 6000 * poging));
                     const result = await ai.models.generateContent({
-                        model: 'gemini-2.5-flash',
+                        model: GEMINI_MODEL,
                         contents: [{ role: 'user', parts: [{ text: maakPrompt(engels) }] }],
                         config: {
                             responseMimeType: 'application/json',
                             maxOutputTokens: 65535,
-                            // Nadenken levert bij vertalen niets op en verdubbelt de duur.
-                            thinkingConfig: { thinkingBudget: 0 },
+                            thinkingConfig: GEMINI_THINKING,
                         }
                     });
                     return JSON.parse(result.text || '{}');

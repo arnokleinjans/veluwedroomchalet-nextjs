@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { GEMINI_MODEL, GEMINI_THINKING } from '../../utils/gemini';
 import { checkRateLimit } from '../../utils/rateLimit';
 
 export async function POST(req: Request) {
@@ -78,8 +79,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                     await new Promise(r => setTimeout(r, 5000 * attempt));
                 }
                 const result = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
+                    model: GEMINI_MODEL,
                     contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nDit is de tekst van de website:\n\n${pageText}` }] }],
+                    config: { thinkingConfig: GEMINI_THINKING },
                 });
 
                 const summary = result.text || '';
