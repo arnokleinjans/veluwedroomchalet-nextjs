@@ -183,12 +183,21 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
                 <textarea value={bericht} onChange={e => setBericht(e.target.value)} rows={2} placeholder="Bijv: de haren in de put waren de vorige keer niet schoon" style={{ ...veld, fontFamily: "inherit" }} />
             </div>
 
-            <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap", marginTop: "10px" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", cursor: "pointer" }}>
-                    <input type="checkbox" checked={betaald} onChange={e => setBetaald(e.target.checked)} /> Betaald
-                </label>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginTop: "12px" }}>
+                <button
+                    type="button"
+                    role="switch"
+                    aria-checked={betaald}
+                    onClick={() => { const nu = !betaald; setBetaald(nu); if (nu && !betaaldOp) setBetaaldOp(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Amsterdam" }).format(new Date())); }}
+                    style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 14px 8px 8px", borderRadius: "24px", border: betaald ? "2px solid #166534" : "2px solid #d6b56b", backgroundColor: betaald ? "#dcfce7" : "#fffbeb", color: betaald ? "#166534" : "#92400e", fontWeight: "bold", fontSize: "0.9rem", cursor: "pointer" }}
+                >
+                    <span style={{ width: "40px", height: "22px", borderRadius: "11px", backgroundColor: betaald ? "#166534" : "#d1d5db", position: "relative", transition: "background-color 0.15s", flexShrink: 0 }}>
+                        <span style={{ position: "absolute", top: "3px", left: betaald ? "21px" : "3px", width: "16px", height: "16px", borderRadius: "50%", backgroundColor: "white", transition: "left 0.15s" }} />
+                    </span>
+                    {betaald ? "✓ Betaald" : "Nog niet betaald"}
+                </button>
                 {betaald && (
-                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.8rem", color: "#555" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", color: "#555" }}>
                         op <input type="date" value={betaaldOp} onChange={e => setBetaaldOp(e.target.value)} style={{ ...veld, width: "auto" }} />
                     </label>
                 )}

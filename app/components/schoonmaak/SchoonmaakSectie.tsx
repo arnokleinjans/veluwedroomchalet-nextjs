@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { bewaarSchoonmaakInstellingen, bewaarSchoonmaker, haalPortaalLink, maakNieuwePin } from "../../actions/schoonmaakActions";
-import { STATUS_LABEL, formatEuro, type BeurtMetContext, type SchoonmaakInstellingen, type SchoonmakerPubliek } from "../../utils/schoonmaakTypes";
+import { STATUS_LABEL, formatEuro, type BeurtMetContext, type BeurtStatus, type SchoonmaakInstellingen, type SchoonmakerPubliek } from "../../utils/schoonmaakTypes";
 import { formatDatumNL } from "../../utils/toeristenbelasting";
 import BeurtPaneel, { type SchoonmaakBoeking } from "./BeurtPaneel";
 
@@ -20,7 +20,11 @@ const blokKop: React.CSSProperties = { cursor: "pointer", fontWeight: "bold", co
 const groeneKnop: React.CSSProperties = { backgroundColor: "#4A5D23", color: "white", border: "none", borderRadius: "6px", padding: "8px 14px", cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem" };
 const grijzeKnop: React.CSSProperties = { backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" };
 
-type Filter = "komend" | "zonder" | "afgekeurd" | "onbetaald" | "alle";
+type Periode = "komend" | "afgelopen" | "alles";
+type Betaling = "alle" | "tebetalen" | "betaald";
+type StatusKeuze = BeurtStatus | "alle";
+
+const PERIODES: Record<Periode, string> = { komend: "Komend", afgelopen: "Afgelopen", alles: "Alles" };
 
 function vandaagIso() {
     return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Amsterdam" }).format(new Date());
@@ -30,12 +34,22 @@ export function telt(b: BeurtMetContext) {
     return !!b.schoonmakerId && (b.status === "toegewezen" || b.status === "geaccepteerd" || b.status === "uitgevoerd");
 }
 
+// Te betalen: werk dat gedaan is (uitgevoerd) of had moeten zijn (datum voorbij), en nog niet betaald.
+export function teBetalen(b: BeurtMetContext, vandaag: string) {
+    return telt(b) && !b.betaald && (b.status === "uitgevoerd" || b.datum <= vandaag);
+}
+
+const keuzeStijl: React.CSSProperties = { padding: "7px 10px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "0.85rem", backgroundColor: "white", cursor: "pointer" };
+
 export default function SchoonmaakSectie({ data, herlaad, toon }: {
     data: SchoonmaakData | null;
     herlaad: () => Promise<void>;
     toon: (melding: string) => void;
 }) {
-    const [filter, setFilter] = useState<Filter>("komend");
+    const [periode, setPeriode] = useState<Periode>("komend");
+    const [status, setStatus] = useState<StatusKeuze>("alle");
+    const [betaling, setBetaling] = useState<Betaling>("alle");
+    const [wie, setWie] = useState<string>("alle");
     const [openId, setOpenId] = useState<string | null>(null);
     const [nieuwOpen, setNieuwOpen] = useState(false);
     const [maand, setMaand] = useState(vandaagIso().slice(0, 7));
@@ -44,30 +58,72 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
 
     const vandaag = vandaagIso();
     const naamVan = (id?: string) => data.schoonmakers.find(s => s.id === id)?.naam;
-    const filters: Record<Filter, { label: string; test: (b: BeurtMetContext) => boolean }> = {
-        komend: { label: "Komend", test: b => b.datum >= vandaag && b.status !== "vervallen" },
-        zonder: { label: "Zonder schoonmaakster", test: b => b.datum >= vandaag && b.status === "open" },
-        afgekeurd: { label: "Afgekeurd", test: b => b.status === "afgekeurd" },
-        onbetaald: { label: "Niet betaald", test: b => telt(b) && !b.betaald && b.datum <= vandaag },
-        alle: { label: "Alle", test: () => true },
+
+    const inPeriode = (b: BeurtMetContext) => periode === "alles" || (periode === "komend" ? b.datum >= vandaag : b.datum < vandaag);
+    const inBetaling = (b: BeurtMetContext) => betaling === "alle" || (betaling === "betaald" ? b.betaald : teBetalen(b, vandaag));
+    const vanWie = (b: BeurtMetContext) => wie === "alle" || (wie === "niemand" ? !b.schoonmakerId : b.schoonmakerId === wie);
+    const basis = data.beurten.filter(b => inPeriode(b) && inBetaling(b) && vanWie(b));
+    const gefilterd = basis.filter(b => status === "alle" || b.status === status);
+    const lijst = periode === "komend" ? gefilterd : [...gefilterd].reverse();
+
+    const zonderKomend = data.beurten.filter(b => b.datum >= vandaag && b.status === "open").length;
+    const afgekeurd = data.beurten.filter(b => b.status === "afgekeurd").length;
+    const openstaand = data.beurten.filter(b => teBetalen(b, vandaag));
+    const openBedrag = openstaand.reduce((t, b) => t + (b.bedrag || 0), 0);
+
+    const zet = (p: Periode, st: StatusKeuze, bet: Betaling, w = "alle") => {
+        setPeriode(p); setStatus(st); setBetaling(bet); setWie(w); setOpenId(null);
     };
-    const zichtbaar = data.beurten.filter(filters[filter].test);
-    const lijst = filter === "alle" || filter === "onbetaald" ? [...zichtbaar].reverse() : zichtbaar;
+    const standaard = periode === "komend" && status === "alle" && betaling === "alle" && wie === "alle";
+
+    const aandacht = [
+        zonderKomend > 0 && { tekst: `${zonderKomend} zonder schoonmaakster`, kleur: "#b91c1c", bg: "#fee2e2", klik: () => zet("komend", "open", "alle") },
+        afgekeurd > 0 && { tekst: `${afgekeurd} afgekeurd`, kleur: "#b91c1c", bg: "#fee2e2", klik: () => zet("alles", "afgekeurd", "alle") },
+        openstaand.length > 0 && { tekst: `${openstaand.length} nog te betalen (${formatEuro(openBedrag)})`, kleur: "#92400e", bg: "#fef3c7", klik: () => zet("alles", "alle", "tebetalen") },
+    ].filter(Boolean) as { tekst: string; kleur: string; bg: string; klik: () => void }[];
 
     return (
         <div style={{ marginTop: "15px" }}>
-            <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
-                {(Object.keys(filters) as Filter[]).map(f => {
-                    const aantal = data.beurten.filter(filters[f].test).length;
-                    const actief = filter === f;
-                    const alarm = (f === "afgekeurd" || f === "zonder") && aantal > 0;
-                    return (
-                        <button key={f} onClick={() => setFilter(f)} style={{ padding: "6px 14px", borderRadius: "20px", border: actief ? "1px solid #4A5D23" : alarm ? "1px solid #f5b5b5" : "1px solid #ddd", backgroundColor: actief ? "#4A5D23" : alarm ? "#fff1f1" : "white", color: actief ? "white" : alarm ? "#b91c1c" : "#666", fontSize: "0.82rem", fontWeight: "bold", cursor: "pointer" }}>
-                            {filters[f].label} ({aantal})
-                        </button>
-                    );
-                })}
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", marginBottom: "14px" }}>
+                <span style={{ fontSize: "0.82rem", color: "#666", fontWeight: "bold" }}>Aandacht:</span>
+                {aandacht.length === 0 && <span style={{ fontSize: "0.82rem", color: "#166534", backgroundColor: "#dcfce7", padding: "5px 12px", borderRadius: "20px", fontWeight: "bold" }}>✓ Alles is geregeld</span>}
+                {aandacht.map(a => (
+                    <button key={a.tekst} onClick={a.klik} title="Toon deze beurten" style={{ fontSize: "0.82rem", color: a.kleur, backgroundColor: a.bg, border: "none", padding: "6px 12px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer" }}>{a.tekst} →</button>
+                ))}
                 <button onClick={() => { setNieuwOpen(true); setOpenId(null); }} style={{ ...groeneKnop, marginLeft: "auto" }}>+ Schoonmaak toevoegen</button>
+            </div>
+
+            <div style={{ backgroundColor: "#f8f7f2", borderRadius: "10px", padding: "10px", marginBottom: "12px" }}>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+                    <div style={{ display: "flex", backgroundColor: "white", borderRadius: "8px", border: "1px solid #ddd", overflow: "hidden" }}>
+                        {(Object.keys(PERIODES) as Periode[]).map(p => (
+                            <button key={p} onClick={() => setPeriode(p)} style={{ padding: "7px 14px", border: "none", backgroundColor: periode === p ? "#4A5D23" : "white", color: periode === p ? "white" : "#555", fontWeight: "bold", fontSize: "0.85rem", cursor: "pointer" }}>{PERIODES[p]}</button>
+                        ))}
+                    </div>
+                    <select value={wie} onChange={e => setWie(e.target.value)} style={keuzeStijl} aria-label="Schoonmaakster">
+                        <option value="alle">Alle schoonmaaksters</option>
+                        <option value="niemand">Nog niemand</option>
+                        {data.schoonmakers.map(s => <option key={s.id} value={s.id}>{s.naam}</option>)}
+                    </select>
+                    <select value={betaling} onChange={e => setBetaling(e.target.value as Betaling)} style={keuzeStijl} aria-label="Betaling">
+                        <option value="alle">Betaald en onbetaald</option>
+                        <option value="tebetalen">Nog te betalen</option>
+                        <option value="betaald">Betaald</option>
+                    </select>
+                    {!standaard && <button onClick={() => zet("komend", "alle", "alle")} style={{ background: "none", border: "none", color: "#4A5D23", textDecoration: "underline", cursor: "pointer", fontSize: "0.82rem" }}>Filters wissen</button>}
+                </div>
+                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
+                    {(["alle", ...Object.keys(STATUS_LABEL)] as StatusKeuze[]).map(st => {
+                        const aantal = st === "alle" ? basis.length : basis.filter(b => b.status === st).length;
+                        const actief = status === st;
+                        const kleur = st === "alle" ? { bg: "#eee", color: "#444" } : STATUS_LABEL[st];
+                        return (
+                            <button key={st} onClick={() => setStatus(st)} disabled={aantal === 0 && !actief} style={{ padding: "5px 12px", borderRadius: "20px", border: actief ? `2px solid ${kleur.color}` : "2px solid transparent", backgroundColor: actief ? kleur.bg : "white", color: kleur.color, fontSize: "0.8rem", fontWeight: "bold", cursor: aantal === 0 && !actief ? "default" : "pointer", opacity: aantal === 0 && !actief ? 0.4 : 1 }}>
+                                {st === "alle" ? "Alle statussen" : STATUS_LABEL[st].label} ({aantal})
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {nieuwOpen && (
@@ -78,18 +134,24 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
                 {lijst.map(b => {
                     const st = STATUS_LABEL[b.status];
                     const isOpen = openId === b.id;
+                    const moetBetaald = teBetalen(b, vandaag);
                     return (
-                        <div key={b.id} style={{ padding: "10px 12px", backgroundColor: "white", borderRadius: "8px", border: b.status === "afgekeurd" ? "1px solid #f5b5b5" : isOpen ? "1px solid #4A5D23" : "1px solid #eee" }}>
-                            <div onClick={() => setOpenId(isOpen ? null : b.id)} style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", cursor: "pointer" }}>
+                        <div key={b.id} style={{ padding: "10px 12px", backgroundColor: "white", borderRadius: "8px", border: b.status === "afgekeurd" ? "1px solid #f5b5b5" : isOpen ? "1px solid #4A5D23" : "1px solid #eee", opacity: b.status === "vervallen" && !isOpen ? 0.6 : 1 }}>
+                            <div onClick={() => setOpenId(isOpen ? null : b.id)} style={{ display: "grid", gridTemplateColumns: "14px 96px minmax(0, 1fr) 125px 100px 135px", gap: "10px", alignItems: "center", cursor: "pointer" }}>
                                 <span style={{ fontSize: "0.9rem", color: "#4A5D23", transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>▶</span>
-                                <strong style={{ minWidth: "86px" }}>{formatDatumNL(b.datum)}</strong>
-                                <span style={{ flex: "1 1 160px", color: "#444" }}>
-                                    {b.gastNaam ? `Vertrek ${b.gastNaam}` : b.omschrijving || "Losse beurt"}
+                                <strong style={{ whiteSpace: "nowrap" }}>{formatDatumNL(b.datum)}</strong>
+                                <span style={{ color: "#444", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={b.gastNaam ? `Vertrek ${b.gastNaam}` : b.omschrijving}>
+                                    {!b.automatisch && <span style={{ fontSize: "0.68rem", backgroundColor: "#eef2e6", color: "#4A5D23", padding: "1px 6px", borderRadius: "8px", marginRight: "6px", fontWeight: "bold" }}>los</span>}
+                                    {b.automatisch ? b.gastNaam : b.omschrijving || b.gastNaam || "Losse beurt"}
                                     {b.boekingVerwijderd && <span style={{ marginLeft: "6px", fontSize: "0.7rem", backgroundColor: "#fff7ed", color: "#9a3412", padding: "1px 6px", borderRadius: "8px" }}>boeking verwijderd</span>}
                                 </span>
-                                <span style={{ color: b.schoonmakerId ? "#333" : "#aaa", fontSize: "0.85rem" }}>{naamVan(b.schoonmakerId) || "nog niemand"}</span>
-                                <span style={{ fontSize: "0.72rem", backgroundColor: st.bg, color: st.color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>{st.label}</span>
-                                <span style={{ fontSize: "0.85rem", color: "#555", minWidth: "70px", textAlign: "right" }}>{formatEuro(b.bedrag)}{b.betaald ? " ✓" : ""}</span>
+                                <span style={{ color: b.schoonmakerId ? "#333" : "#aaa", fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{naamVan(b.schoonmakerId) || "nog niemand"}</span>
+                                <span style={{ fontSize: "0.72rem", backgroundColor: st.bg, color: st.color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold", justifySelf: "start" }}>{st.label}</span>
+                                <span style={{ fontSize: "0.85rem", color: "#555", whiteSpace: "nowrap", display: "flex", gap: "6px", justifyContent: "flex-end", alignItems: "center" }}>
+                                    {formatEuro(b.bedrag)}
+                                    {b.betaald && <span style={{ fontSize: "0.7rem", backgroundColor: "#dcfce7", color: "#166534", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>Betaald</span>}
+                                    {moetBetaald && <span style={{ fontSize: "0.7rem", backgroundColor: "#fef3c7", color: "#92400e", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>Te betalen</span>}
+                                </span>
                             </div>
                             {isOpen && (
                                 <BeurtPaneel key={b.bijgewerkt} beurt={b} schoonmakers={data.schoonmakers} boekingen={data.boekingen} instellingen={data.instellingen} onSaved={herlaad} onClose={() => setOpenId(null)} toon={toon} />
@@ -97,7 +159,11 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
                         </div>
                     );
                 })}
-                {lijst.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen beurten in deze lijst.</p>}
+                {lijst.length === 0 && (
+                    <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>
+                        Geen beurten met deze filters.{!standaard && <> <button onClick={() => zet("komend", "alle", "alle")} style={{ background: "none", border: "none", color: "#4A5D23", textDecoration: "underline", cursor: "pointer", fontSize: "0.9rem", padding: 0 }}>Filters wissen</button></>}
+                    </p>
+                )}
             </div>
 
             <Maandoverzicht data={data} maand={maand} setMaand={setMaand} />
@@ -118,7 +184,7 @@ function Maandoverzicht({ data, maand, setMaand }: { data: SchoonmaakData; maand
         }).filter(r => r.aantal > 0);
     }, [data, maand]);
 
-    const totaalOpen = data.beurten.filter(b => telt(b) && !b.betaald && b.datum <= vandaagIso()).reduce((t, b) => t + (b.bedrag || 0), 0);
+    const totaalOpen = data.beurten.filter(b => teBetalen(b, vandaagIso())).reduce((t, b) => t + (b.bedrag || 0), 0);
     const cel: React.CSSProperties = { padding: "6px 8px", borderBottom: "1px solid #eee", textAlign: "right" };
 
     return (
