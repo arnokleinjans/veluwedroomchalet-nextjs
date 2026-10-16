@@ -6,8 +6,13 @@ import { metTestOverride } from './testModusServer';
 let kvInstance: Redis | null = null;
 export function getKV(): Redis {
     if (!kvInstance) {
+        const url = (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) as string;
+        // Lokaal alleen de TEST-Redis: lokale tests mogen nooit in de productiedata schrijven.
+        if (process.env.VERCEL !== "1" && !/^http:\/\/(127\.0\.0\.1|localhost)[:/]/.test(url || "")) {
+            throw new Error("Lokaal wijst KV_REST_API_URL niet naar de TEST-Redis. Zie docker-compose.test-db.yml en .env.local.");
+        }
         kvInstance = new Redis({
-            url: (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) as string,
+            url,
             token: (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN) as string,
         });
     }

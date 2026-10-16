@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "testdb:start": "docker compose -f docker-compose.test-db.yml up -d",
+    "testdb:stop": "docker compose -f docker-compose.test-db.yml stop",
+    "testdb:kopie": "node scripts/kopieer-productie-naar-test.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

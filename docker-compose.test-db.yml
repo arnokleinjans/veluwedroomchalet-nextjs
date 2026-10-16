@@ -1,0 +1,27 @@
+name: veluwedroomchalet-test-db
+
+services:
+  test-redis:
+    image: redis:7.4-alpine
+    container_name: TEST-veluwedroomchalet-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - test-redis-data:/data
+    restart: unless-stopped
+
+  test-redis-http:
+    image: hiett/serverless-redis-http:latest
+    container_name: TEST-veluwedroomchalet-redis-http
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: test-token-lokaal
+      SRH_CONNECTION_STRING: redis://test-redis:6379
+    ports:
+      - "127.0.0.1:8079:80"
+    depends_on:
+      - test-redis
+    restart: unless-stopped
+
+volumes:
+  test-redis-data:
+    name: TEST-veluwedroomchalet-redis-data
