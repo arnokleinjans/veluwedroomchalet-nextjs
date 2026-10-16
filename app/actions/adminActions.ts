@@ -2,6 +2,9 @@
 
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { getKV, getAppDataFresh, invalidateCache } from "../utils/db";
+import { isBeheer, startBeheerSessie, stopSessie, BEHEER_COOKIE, NIET_INGELOGD, pogingToegestaan, registreerMislukt, wisPogingen } from "../utils/sessie";
+import { hernoemBoekingInBeurten } from "../utils/schoonmaakStore";
+import { synchroniseerNaBoekingen } from "../utils/schoonmaakMail";
 
 // Helper to write the appData object back to Vercel KV
 async function saveToKV(newData: any) {
@@ -20,20 +23,39 @@ async function saveToKV(newData: any) {
     }
 }
 
-export async function verifyAdminPin(pin: string): Promise<boolean> {
+export async function verifyAdminPin(pin: string): Promise<{ ok: boolean; error?: string }> {
     const adminPin = process.env.ADMIN_PIN;
     if (!adminPin) throw new Error("ADMIN_PIN is niet geconfigureerd");
-    return pin === adminPin;
+    if (!(await pogingToegestaan("beheer"))) {
+        return { ok: false, error: "Te veel pogingen. Probeer het over een kwartier opnieuw." };
+    }
+    if (pin !== adminPin) {
+        await registreerMislukt("beheer");
+        return { ok: false, error: "Ongeldige PIN." };
+    }
+    await wisPogingen("beheer");
+    await startBeheerSessie();
+    return { ok: true };
+}
+
+export async function checkBeheerSessie(): Promise<boolean> {
+    return await isBeheer();
+}
+
+export async function logoutBeheer() {
+    await stopSessie(BEHEER_COOKIE);
 }
 
 // Securely fetch data for client-side Admin Panel (always fresh)
 export async function fetchAdminData() {
+    if (!(await isBeheer())) throw new Error("Niet ingelogd");
     return await getAppDataFresh();
 }
 
 // Batched save: General info + header image in ONE write instead of TWO
 export async function updateGeneralInfo(name: string, hostName: string, phone: string, subtitle: string, headerImage: string, keyCode: string = "", staanplaats: string = "", campingEmail: string = "") {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
 
@@ -51,6 +73,7 @@ export async function updateGeneralInfo(name: string, hostName: string, phone: s
 
 export async function updateExpiredPageContent(content: string) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
@@ -61,6 +84,7 @@ export async function updateExpiredPageContent(content: string) {
 // Keep individual functions for backward compatibility
 export async function updatePropertyInfo(name: string, hostName: string, phone: string, subtitle: string) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
 
@@ -74,6 +98,7 @@ export async function updatePropertyInfo(name: string, hostName: string, phone: 
 
 export async function updateHeaderImage(headerImage: string) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
 
@@ -83,6 +108,7 @@ export async function updateHeaderImage(headerImage: string) {
 
 export async function updateInsights(newInsights: any[]) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
 
@@ -92,6 +118,7 @@ export async function updateInsights(newInsights: any[]) {
 
 export async function updateVideos(newVideos: any[]) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
 
@@ -102,6 +129,7 @@ export async function updateVideos(newVideos: any[]) {
 // Batched save: Omgeving + AI settings in ONE write
 export async function updateOmgevingWithAi(newOmgeving: any[], aiPrompt: string, aiMaxChars: number) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
@@ -114,6 +142,7 @@ export async function updateOmgevingWithAi(newOmgeving: any[], aiPrompt: string,
 // Keep individual functions for backward compatibility
 export async function updateOmgeving(newOmgeving: any[]) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
 
@@ -123,6 +152,7 @@ export async function updateOmgeving(newOmgeving: any[]) {
 
 export async function updateChatbotContext(context: string) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
 
@@ -132,12 +162,22 @@ export async function updateChatbotContext(context: string) {
 
 export async function updateAiSettings(aiPrompt: string, aiMaxChars: number) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
     updatedData.aiPrompt = aiPrompt;
     updatedData.aiMaxChars = aiMaxChars;
     return await saveToKV(updatedData);
+}
+
+// Een fout in de schoonmaak mag het opslaan van een boeking nooit laten mislukken.
+async function schoonmaakBijwerken(bookings: any[]) {
+    try {
+        await synchroniseerNaBoekingen(bookings || []);
+    } catch (e) {
+        console.error("Schoonmaak bijwerken na boekingswijziging mislukt:", e);
+    }
 }
 
 function normalizeBookingId(raw: string): string {
@@ -161,6 +201,7 @@ function idTakenError(newId: string, bezet: any) {
 
 export async function addBooking(guestName: string, checkIn: string, checkOut: string, language: string = "nl", bookingNumber?: string) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
@@ -187,11 +228,14 @@ export async function addBooking(guestName: string, checkIn: string, checkOut: s
         language,
     });
 
-    return await saveToKV(updatedData);
+    const res = await saveToKV(updatedData);
+    if (res.success) await schoonmaakBijwerken(updatedData.bookings);
+    return res;
 }
 
 export async function updateBooking(id: string, checkIn: string, checkOut: string, language: string, bookingNumber?: string) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
@@ -212,11 +256,17 @@ export async function updateBooking(id: string, checkIn: string, checkOut: strin
         return updated;
     });
 
-    return await saveToKV(updatedData);
+    const res = await saveToKV(updatedData);
+    if (res.success) {
+        if (newId) await hernoemBoekingInBeurten(id, newId).catch(e => console.error("Beurten hernoemen mislukt:", e));
+        await schoonmaakBijwerken(updatedData.bookings);
+    }
+    return res;
 }
 
 export async function removeBooking(id: string) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData };
 
@@ -228,11 +278,14 @@ export async function removeBooking(id: string) {
 
     updatedData.bookings = updatedData.bookings.filter((b: any) => b.id !== id);
 
-    return await saveToKV(updatedData);
+    const res = await saveToKV(updatedData);
+    if (res.success) await schoonmaakBijwerken(updatedData.bookings);
+    return res;
 }
 
 export async function updateGames(newGames: any[]) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
@@ -242,6 +295,7 @@ export async function updateGames(newGames: any[]) {
 
 export async function updateTranslations(translations: Record<string, any>) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
@@ -252,6 +306,7 @@ export async function updateTranslations(translations: Record<string, any>) {
 // Per taal opslaan, zodat een mislukte taal de bestaande vertalingen niet wist.
 export async function updateTranslationsVoorTaal(code: string, vertaling: any) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
@@ -263,6 +318,7 @@ export async function updateTranslationsVoorTaal(code: string, vertaling: any) {
 
 export async function adminUpdateNachtregistratie(bookingId: string, registratie: any) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 
@@ -279,6 +335,7 @@ export async function adminUpdateNachtregistratie(bookingId: string, registratie
 
 export async function verstuurNachtregistratie(bookingId: string, registratie: any) {
     noStore();
+    if (!(await isBeheer())) return NIET_INGELOGD;
     const appData = await getAppDataFresh();
     const updatedData = { ...appData } as any;
 

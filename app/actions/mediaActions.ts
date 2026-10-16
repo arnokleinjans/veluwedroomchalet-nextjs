@@ -4,6 +4,7 @@ import fs from "fs";
 import { VERTAALTALEN } from "../utils/talen";
 import path from "path";
 import { getAppDataFresh } from "../utils/db";
+import { isBeheer } from "../utils/sessie";
 
 const IMAGE_EXTS = [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"];
 
@@ -210,6 +211,7 @@ export async function uploadMediaImage(
     base64: string,
     mode: "new" | "overwrite" | "rename" = "new"
 ): Promise<UploadResult> {
+    if (!(await isBeheer())) return { ok: false, reason: "error", message: "Niet ingelogd" };
     if (!GITHUB_TOKEN) return { ok: false, reason: "no-token" };
 
     let fileName = sanitizeFileName(originalFileName);
@@ -258,6 +260,7 @@ export type DeleteResult =
     | { ok: false; reason: "no-token" | "in-use" | "not-found" | "error"; locations?: string[]; message?: string };
 
 export async function deleteMediaImage(fileName: string): Promise<DeleteResult> {
+    if (!(await isBeheer())) return { ok: false, reason: "error", message: "Niet ingelogd" };
     if (!GITHUB_TOKEN) return { ok: false, reason: "no-token" };
 
     // Defense in depth: nogmaals checken, ook al heeft de UI dit al gedaan.

@@ -53,3 +53,16 @@ export async function verstuurNachtregistratieMail(
         ],
     });
 }
+
+const TEST_ONTVANGER = "akleinjans@me.com";
+
+// Buiten Vercel gaat elke schoonmaakmail naar het testadres, met de echte ontvanger in het onderwerp.
+export async function verstuurSchoonmaakMail(naar: string, onderwerp: string, tekst: string): Promise<void> {
+    const productie = process.env.VERCEL === "1";
+    await getTransport().sendMail({
+        from: `"Veluwe Droom Chalet" <${process.env.SMTP_USER}>`,
+        to: productie ? naar : TEST_ONTVANGER,
+        subject: productie ? onderwerp : `[TEST → ${naar}] ${onderwerp}`,
+        text: tekst,
+    });
+}

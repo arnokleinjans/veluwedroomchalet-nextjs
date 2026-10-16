@@ -5,9 +5,13 @@ import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
     updateChatbotContext, updateTranslationsVoorTaal, updateExpiredPageContent, updateGames,
-    verifyAdminPin
+    verifyAdminPin, checkBeheerSessie, logoutBeheer
 } from "../actions/adminActions";
 import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
+import SchoonmaakSectie, { type SchoonmaakData } from "../components/schoonmaak/SchoonmaakSectie";
+import BeurtPaneel from "../components/schoonmaak/BeurtPaneel";
+import { haalSchoonmaakData } from "../actions/schoonmaakActions";
+import { STATUS_LABEL } from "../utils/schoonmaakTypes";
 import { formatDatumNL } from "../utils/toeristenbelasting";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
 import { listMediaImages, getImageUsageMap, getImagePreviewMap, isGithubConfigured, uploadMediaImage, deleteMediaImage, MediaImage, ImageUsage } from "../actions/mediaActions";
@@ -76,7 +80,8 @@ function SortableItem({ id, children, accent }: { id: string, children: React.Re
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [pin, setPin] = useState("");
-    const [error, setError] = useState(false);
+    const [error, setError] = useState("");
+    const [sessieGecontroleerd, setSessieGecontroleerd] = useState(false);
 
     // Dropdown assets
     const [availableImages, setAvailableImages] = useState<string[]>([]);
@@ -145,6 +150,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValues, setEditValues] = useState<{ checkIn: string, checkOut: string, language: string, bookingNumber: string }>({ checkIn: "", checkOut: "", language: "nl", bookingNumber: "" });
     const [expandedRegId, setExpandedRegId] = useState<string | null>(null);
+    const [schoonmaak, setSchoonmaak] = useState<SchoonmaakData | null>(null);
+    const [expandedSchoonmaakId, setExpandedSchoonmaakId] = useState<string | null>(null);
     const [bookingFilter, setBookingFilter] = useState<"nieuw" | "verlopen" | "alle">("nieuw");
     const [bookingSearch, setBookingSearch] = useState("");
     const [staanplaats, setStaanplaats] = useState("");
@@ -160,9 +167,31 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [saveMessage, setSaveMessage] = useState("");
 
     useEffect(() => {
-        const auth = localStorage.getItem("veluwe_admin_auth");
-        if (auth === "true") setIsAuthenticated(true);
+        localStorage.removeItem("veluwe_admin_auth");
+        checkBeheerSessie().then(ok => {
+            setSessieGecontroleerd(true);
+            if (ok) {
+                setIsAuthenticated(true);
+                laadAlles();
+            }
+        });
+    }, []);
 
+    const herlaadSchoonmaak = async () => {
+        try {
+            setSchoonmaak(await haalSchoonmaakData());
+        } catch (e) {
+            console.error("Schoonmaak laden mislukt:", e);
+        }
+    };
+
+    const toonMelding = (melding: string) => {
+        setSaveMessage(melding);
+        if (!melding.startsWith("⏳")) setTimeout(() => setSaveMessage(""), melding.startsWith("❌") || melding.startsWith("⚠️") ? 6000 : 3500);
+    };
+
+    const laadAlles = () => {
+        herlaadSchoonmaak();
         fetchAvailableHeaderImages().then(setAvailableImages);
         fetchAvailableIcons().then(setAvailableIcons);
         fetchAvailableThumbnails().then(setAvailableThumbnails);
@@ -189,22 +218,22 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
             if ((data as any).aiMaxChars) setAiMaxChars((data as any).aiMaxChars);
         });
-    }, []);
+    };
 
     const handleLogin = async () => {
-        const ok = await verifyAdminPin(pin);
-        if (ok) {
+        const res = await verifyAdminPin(pin);
+        if (res.ok) {
             setIsAuthenticated(true);
-            localStorage.setItem("veluwe_admin_auth", "true");
-            setError(false);
+            setError("");
+            laadAlles();
         } else {
-            setError(true);
+            setError(res.error || "Ongeldige PIN.");
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await logoutBeheer();
         setIsAuthenticated(false);
-        localStorage.removeItem("veluwe_admin_auth");
         setPin("");
     };
 
@@ -528,6 +557,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const refreshBookings = async () => {
         const data = await fetchAdminData();
         setBookings(data.bookings || []);
+        await herlaadSchoonmaak();
     };
 
     const handleAddBooking = async () => {
@@ -602,6 +632,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         setTimeout(() => setCopiedId(null), 2000);
     };
 
+    if (!sessieGecontroleerd) {
+        return <div style={{ height: "100vh", backgroundColor: "#f4f4f4" }} />;
+    }
+
     if (!isAuthenticated) {
         return (
             <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#f4f4f4" }}>
@@ -616,7 +650,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         style={{ padding: "12px", width: "100%", fontSize: "1.2rem", textAlign: "center", borderRadius: "8px", border: "1px solid #ccc", marginBottom: "15px" }}
                         placeholder="PIN Code"
                     />
-                    {error && <p style={{ color: "red", fontSize: "0.9rem", marginBottom: "15px" }}>Ongeldige PIN.</p>}
+                    {error && <p style={{ color: "red", fontSize: "0.9rem", marginBottom: "15px" }}>{error}</p>}
                     <button onClick={handleLogin} style={{ backgroundColor: "#4A5D23", color: "white", padding: "12px 24px", border: "none", borderRadius: "8px", cursor: "pointer", width: "100%", fontSize: "1.1rem" }}>Inloggen</button>
                     <p style={{ marginTop: "20px", fontSize: "0.8rem", color: "#999" }}>Let op: Voor geautoriseerde hosts only.</p>
                 </div>
@@ -832,6 +866,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                             verstuurd: { label: "Verstuurd ✓", bg: "#dcfce7", color: "#166534" },
                                         }[regStatus];
                                         const isRegExpanded = expandedRegId === booking.id;
+                                        const beurt = schoonmaak?.beurten.find(b => b.automatisch && b.bookingId === booking.id);
+                                        const isSchoonmaakOpen = !!beurt && expandedSchoonmaakId === booking.id;
+                                        const schoonmakerNaam = beurt?.schoonmakerId ? schoonmaak?.schoonmakers.find(s => s.id === beurt.schoonmakerId)?.naam : undefined;
                                         return (
                                             <div key={booking.id} style={{ padding: "12px", backgroundColor: isExpired && !isEditing ? "#fafafa" : "white", borderRadius: "8px", border: isEditing ? "1px solid #4A5D23" : isExpired ? "1px solid #e0e0e0" : "1px solid #eee", opacity: isExpired && !isEditing ? 0.75 : 1, transition: "opacity 0.2s" }}>
                                                 {/* Header: naam + actieknoppen */}
@@ -840,6 +877,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <button onClick={() => setExpandedRegId(isRegExpanded ? null : booking.id)} title="Nachtregistratieformulier" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.9rem", color: "#4A5D23", padding: "0 2px", transform: isRegExpanded ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>▶</button>
                                                         <strong style={{ color: isExpired ? "#999" : "#333" }}>{booking.guestName}</strong>
                                                         <span style={{ fontSize: "0.7rem", backgroundColor: regBadge.bg, color: regBadge.color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>{regBadge.label}</span>
+                                                        {beurt && (
+                                                            <button onClick={() => setExpandedSchoonmaakId(isSchoonmaakOpen ? null : booking.id)} title="Schoonmaak na vertrek" style={{ fontSize: "0.7rem", backgroundColor: STATUS_LABEL[beurt.status].bg, color: STATUS_LABEL[beurt.status].color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold", border: isSchoonmaakOpen ? "1px solid currentColor" : "1px solid transparent", cursor: "pointer" }}>
+                                                                🧹 {schoonmakerNaam ? `${schoonmakerNaam} · ` : ""}{STATUS_LABEL[beurt.status].label}
+                                                            </button>
+                                                        )}
                                                         {isExpired && !isEditing && <span style={{ fontSize: "0.7rem", backgroundColor: "#f0f0f0", color: "#999", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>Verlopen</span>}
                                                         {isTestBooking && <span style={{ fontSize: "0.7rem", backgroundColor: "#4A5D23", color: "white", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>🧪 Testboeking</span>}
                                                     </div>
@@ -887,6 +929,18 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <div style={{ fontSize: "0.85rem", color: isExpired ? "#bbb" : "#4A5D23", marginTop: "4px", wordBreak: "break-all", textDecoration: isExpired ? "line-through" : "none" }}>{shareUrl}</div>
                                                     </div>
                                                 )}
+                                                {isSchoonmaakOpen && schoonmaak && (
+                                                    <BeurtPaneel
+                                                        key={beurt!.bijgewerkt}
+                                                        beurt={beurt}
+                                                        schoonmakers={schoonmaak.schoonmakers}
+                                                        boekingen={schoonmaak.boekingen}
+                                                        instellingen={schoonmaak.instellingen}
+                                                        onSaved={herlaadSchoonmaak}
+                                                        onClose={() => setExpandedSchoonmaakId(null)}
+                                                        toon={toonMelding}
+                                                    />
+                                                )}
                                                 {isRegExpanded && (
                                                     <NachtregistratieAdminPanel
                                                         key={`${booking.id}-${regStatus}`}
@@ -901,6 +955,19 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     {bookings.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen boekingen gevonden.</p>}
                                 </div>
                             </div>
+                        </details>
+
+                        {/* Sectie: Schoonmaak */}
+                        <details style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "20px", backgroundColor: "#fcfefc" }}>
+                            <summary style={{ fontSize: "1.3rem", color: "#4A5D23", borderBottom: "2px solid #e5ebe5", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>
+                                🧹 Schoonmaak
+                                {!!schoonmaak?.beurten.filter(b => b.status === "afgekeurd").length && (
+                                    <span style={{ marginLeft: "10px", fontSize: "0.75rem", backgroundColor: "#fee2e2", color: "#b91c1c", padding: "2px 10px", borderRadius: "10px", verticalAlign: "middle" }}>
+                                        {schoonmaak.beurten.filter(b => b.status === "afgekeurd").length} afgekeurd
+                                    </span>
+                                )}
+                            </summary>
+                            <SchoonmaakSectie data={schoonmaak} herlaad={herlaadSchoonmaak} toon={toonMelding} />
                         </details>
 
                         {/* Sectie: Algemeen */}

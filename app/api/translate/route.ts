@@ -2,11 +2,15 @@ import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { GEMINI_MODEL, GEMINI_THINKING } from '../../utils/gemini';
 import { checkRateLimit } from '../../utils/rateLimit';
+import { isBeheer } from '../../utils/sessie';
 import { VERTAALTALEN } from '../../utils/talen';
 
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
+    if (!(await isBeheer())) {
+        return NextResponse.json({ error: 'Niet ingelogd' }, { status: 401 });
+    }
     const limit = checkRateLimit('translate-api');
     if (!limit.allowed) {
         return NextResponse.json(
