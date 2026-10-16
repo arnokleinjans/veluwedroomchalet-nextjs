@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { bewaarBeurtActie, verwijderBeurtActie } from "../../actions/schoonmaakActions";
 import { STATUS_LABEL, type BeurtMetContext, type BeurtStatus, type SchoonmaakInstellingen, type SchoonmakerPubliek } from "../../utils/schoonmaakTypes";
 import { formatDatumNL } from "../../utils/toeristenbelasting";
@@ -9,6 +9,10 @@ import ConfirmDialog from "../ConfirmDialog";
 const veld: React.CSSProperties = { width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem", backgroundColor: "white", boxSizing: "border-box" };
 const label: React.CSSProperties = { display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" };
 const kolom: React.CSSProperties = { flex: "1 1 150px", minWidth: 0 };
+
+// Automatisch verversen in beheer wacht zolang er een beurt openstaat, anders gaan wijzigingen verloren.
+let aantalOpen = 0;
+export const beurtPaneelOpen = () => aantalOpen > 0;
 
 export type SchoonmaakBoeking = { id: string; guestName: string; checkIn: string; checkOut: string; isTest?: boolean };
 
@@ -26,7 +30,7 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
     const [omschrijving, setOmschrijving] = useState(beurt?.omschrijving || "");
     const [bookingId, setBookingId] = useState(beurt?.bookingId || "");
     const [datum, setDatum] = useState(beurt?.datum || "");
-    const [vertrektijd, setVertrektijd] = useState(beurt?.vertrektijd || "");
+    const [vertrektijd, setVertrektijd] = useState(beurt?.vertrektijd || instellingen.vertrektijd);
     const [schoonmakerId, setSchoonmakerId] = useState(beurt?.schoonmakerId || "");
     const [bedrag, setBedrag] = useState(beurt?.bedrag !== undefined ? String(beurt.bedrag) : "");
     const [status, setStatus] = useState<BeurtStatus>(beurt?.status || "open");
@@ -35,6 +39,11 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
     const [betaaldOp, setBetaaldOp] = useState(beurt?.betaaldOp || "");
     const [bezig, setBezig] = useState(false);
     const [verwijderVraag, setVerwijderVraag] = useState(false);
+
+    useEffect(() => {
+        aantalOpen++;
+        return () => { aantalOpen--; };
+    }, []);
 
     const andereSchoonmaker = (schoonmakerId || "") !== (beurt?.schoonmakerId || "");
     const kiesbaar = schoonmakers.filter(s => s.actief || s.id === beurt?.schoonmakerId);
@@ -56,7 +65,7 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
             bookingId: los ? (bookingId || undefined) : beurt?.bookingId,
             omschrijving: los ? omschrijving : undefined,
             datum,
-            vertrektijd: vertrektijd || undefined,
+            vertrektijd: vertrektijd && vertrektijd !== instellingen.vertrektijd ? vertrektijd : undefined,
             schoonmakerId: schoonmakerId || undefined,
             bedrag: bedrag.trim() === "" ? null : Number(bedrag.replace(",", ".")),
             betaald,
@@ -134,7 +143,6 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
                     <div style={kolom}>
                         <label style={label}>Gast vertrekt om</label>
                         <input type="time" value={vertrektijd} onChange={e => setVertrektijd(e.target.value)} style={veld} />
-                        {!vertrektijd && <span style={{ fontSize: "0.72rem", color: "#888" }}>standaard {instellingen.vertrektijd}</span>}
                     </div>
                 )}
                 <div style={kolom}>

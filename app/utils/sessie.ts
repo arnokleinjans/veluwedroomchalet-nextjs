@@ -3,8 +3,10 @@ import { cookies, headers } from "next/headers";
 import { getKV } from "./db";
 
 export const BEHEER_COOKIE = "vdc_beheer";
-export const SCHOONMAAK_COOKIE = "vdc_schoonmaak";
-const GELDIG_DAGEN = 30;
+// Eén cookie per schoonmaakster, zodat meerdere schoonmaaksters op één apparaat elkaar niet uitloggen.
+export const schoonmaakCookie = (id: string) => `vdc_schoonmaak_${id}`;
+const GELDIG_DAGEN_BEHEER = 30;
+const GELDIG_DAGEN_SCHOONMAAK = 180;
 const MAX_POGINGEN = 8;
 const BLOKKADE_SECONDEN = 15 * 60;
 
@@ -39,26 +41,26 @@ function controleer<T extends { exp: number }>(waarde: string | undefined): T | 
     }
 }
 
-async function zetCookie(naam: string, payload: object) {
+async function zetCookie(naam: string, payload: object, dagen: number) {
     (await cookies()).set(naam, onderteken(payload), {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: GELDIG_DAGEN * 24 * 60 * 60,
+        maxAge: dagen * 24 * 60 * 60,
     });
 }
 
-function vervaldatum() {
-    return Date.now() + GELDIG_DAGEN * 24 * 60 * 60 * 1000;
+function vervaldatum(dagen: number) {
+    return Date.now() + dagen * 24 * 60 * 60 * 1000;
 }
 
 export async function startBeheerSessie() {
-    await zetCookie(BEHEER_COOKIE, { rol: "beheer", exp: vervaldatum() });
+    await zetCookie(BEHEER_COOKIE, { rol: "beheer", exp: vervaldatum(GELDIG_DAGEN_BEHEER) }, GELDIG_DAGEN_BEHEER);
 }
 
 export async function startSchoonmakerSessie(id: string, pinVersie: number) {
-    await zetCookie(SCHOONMAAK_COOKIE, { rol: "schoonmaker", id, v: pinVersie, exp: vervaldatum() });
+    await zetCookie(schoonmaakCookie(id), { rol: "schoonmaker", id, v: pinVersie, exp: vervaldatum(GELDIG_DAGEN_SCHOONMAAK) }, GELDIG_DAGEN_SCHOONMAAK);
 }
 
 export async function stopSessie(naam: string) {
@@ -70,9 +72,9 @@ export async function isBeheer(): Promise<boolean> {
     return s?.rol === "beheer";
 }
 
-export async function huidigeSchoonmaker(): Promise<SchoonmakerSessie | null> {
-    const s = controleer<SchoonmakerSessie>((await cookies()).get(SCHOONMAAK_COOKIE)?.value);
-    return s?.rol === "schoonmaker" ? s : null;
+export async function sessieVanSchoonmaker(id: string): Promise<SchoonmakerSessie | null> {
+    const s = controleer<SchoonmakerSessie>((await cookies()).get(schoonmaakCookie(id))?.value);
+    return s?.rol === "schoonmaker" && s.id === id ? s : null;
 }
 
 async function clientIp(): Promise<string> {

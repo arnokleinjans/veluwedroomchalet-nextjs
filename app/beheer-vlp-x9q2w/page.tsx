@@ -9,7 +9,7 @@ import {
 } from "../actions/adminActions";
 import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
 import SchoonmaakSectie, { type SchoonmaakData } from "../components/schoonmaak/SchoonmaakSectie";
-import BeurtPaneel from "../components/schoonmaak/BeurtPaneel";
+import BeurtPaneel, { beurtPaneelOpen } from "../components/schoonmaak/BeurtPaneel";
 import { haalSchoonmaakData } from "../actions/schoonmaakActions";
 import { STATUS_LABEL } from "../utils/schoonmaakTypes";
 import { formatDatumNL } from "../utils/toeristenbelasting";
@@ -184,6 +184,21 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             console.error("Schoonmaak laden mislukt:", e);
         }
     };
+
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        const vernieuw = () => {
+            if (document.visibilityState === "visible" && !beurtPaneelOpen()) herlaadSchoonmaak();
+        };
+        const timer = setInterval(vernieuw, 60_000);
+        document.addEventListener("visibilitychange", vernieuw);
+        window.addEventListener("focus", vernieuw);
+        return () => {
+            clearInterval(timer);
+            document.removeEventListener("visibilitychange", vernieuw);
+            window.removeEventListener("focus", vernieuw);
+        };
+    }, [isAuthenticated]);
 
     const toonMelding = (melding: string) => {
         setSaveMessage(melding);

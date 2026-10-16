@@ -3,7 +3,7 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { getAppDataFresh } from "../utils/db";
 import {
-    huidigeSchoonmaker, pogingToegestaan, registreerMislukt, SCHOONMAAK_COOKIE,
+    sessieVanSchoonmaker, pogingToegestaan, registreerMislukt, schoonmaakCookie,
     startSchoonmakerSessie, stopSessie, wisPogingen,
 } from "../utils/sessie";
 import {
@@ -17,10 +17,10 @@ type Resultaat = { success: boolean; error?: string };
 
 // De ingelogde schoonmaakster, maar alleen als de sessie bij deze link hoort en nog geldig is.
 async function ingelogdeSchoonmaker(code: string): Promise<Schoonmaker | null> {
-    const sessie = await huidigeSchoonmaker();
-    if (!sessie) return null;
     const s = await vindSchoonmakerOpCode(code);
-    if (!s || !s.actief || s.id !== sessie.id || s.pinVersie !== sessie.v) return null;
+    if (!s || !s.actief) return null;
+    const sessie = await sessieVanSchoonmaker(s.id);
+    if (!sessie || s.pinVersie !== sessie.v) return null;
     return s;
 }
 
@@ -38,8 +38,9 @@ export async function loginSchoonmaker(code: string, pin: string): Promise<Resul
     return { success: true };
 }
 
-export async function logoutSchoonmaker() {
-    await stopSessie(SCHOONMAAK_COOKIE);
+export async function logoutSchoonmaker(code: string) {
+    const s = await vindSchoonmakerOpCode(code);
+    if (s) await stopSessie(schoonmaakCookie(s.id));
 }
 
 export async function haalMijnBeurten(code: string): Promise<{ naam: string; komend: BeurtVoorSchoonmaker[]; afgelopen: BeurtVoorSchoonmaker[] } | null> {

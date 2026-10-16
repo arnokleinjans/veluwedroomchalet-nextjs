@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginSchoonmaker, logoutSchoonmaker, reageerOpBeurt } from "../../actions/schoonmaakPortaalActions";
 import { STATUS_LABEL, datumLang, formatEuro, metHoofdletter, type BeurtVoorSchoonmaker } from "../../utils/schoonmaakTypes";
@@ -79,8 +79,21 @@ function Inloggen({ code, naam }: { code: string; naam: string }) {
 
 function Overzicht({ code, data }: { code: string; data: NonNullable<Data> }) {
     const router = useRouter();
+
+    // Elke minuut en bij terugkeren naar de app de beurten opnieuw ophalen. Wat ze aan het typen is, blijft staan.
+    useEffect(() => {
+        const vernieuw = () => { if (document.visibilityState === "visible") router.refresh(); };
+        const timer = setInterval(vernieuw, 60_000);
+        document.addEventListener("visibilitychange", vernieuw);
+        window.addEventListener("focus", vernieuw);
+        return () => {
+            clearInterval(timer);
+            document.removeEventListener("visibilitychange", vernieuw);
+            window.removeEventListener("focus", vernieuw);
+        };
+    }, [router]);
     const uitloggen = async () => {
-        await logoutSchoonmaker();
+        await logoutSchoonmaker(code);
         router.refresh();
     };
 
