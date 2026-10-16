@@ -22,7 +22,7 @@ const grijzeKnop: React.CSSProperties = { backgroundColor: "#e0e0e0", color: "#3
 
 type Periode = "komend" | "afgelopen" | "alles";
 type Betaling = "alle" | "tebetalen" | "betaald";
-type StatusKeuze = BeurtStatus | "alle";
+type StatusKeuze = BeurtStatus | "alle" | "nietafgemeld";
 
 const PERIODES: Record<Periode, string> = { komend: "Komend", afgelopen: "Afgelopen", alles: "Alles" };
 
@@ -30,13 +30,18 @@ function vandaagIso() {
     return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Amsterdam" }).format(new Date());
 }
 
-export function telt(b: BeurtMetContext) {
-    return !!b.schoonmakerId && (b.status === "toegewezen" || b.status === "geaccepteerd" || b.status === "uitgevoerd");
+export function gepland(b: BeurtMetContext) {
+    return !!b.schoonmakerId && (b.status === "toegewezen" || b.status === "geaccepteerd");
 }
 
-// Te betalen: werk dat gedaan is (uitgevoerd) of had moeten zijn (datum voorbij), en nog niet betaald.
-export function teBetalen(b: BeurtMetContext, vandaag: string) {
-    return telt(b) && !b.betaald && (b.status === "uitgevoerd" || b.datum <= vandaag);
+// Betalen gebeurt pas als het werk gedaan is: alleen een uitgevoerde, onbetaalde beurt is te betalen.
+export function teBetalen(b: BeurtMetContext) {
+    return !!b.schoonmakerId && b.status === "uitgevoerd" && !b.betaald;
+}
+
+// Datum voorbij, maar door niemand als klaar gemeld. Zonder deze melding zou zo'n beurt nergens opvallen.
+export function nietAfgemeld(b: BeurtMetContext, vandaag: string) {
+    return gepland(b) && b.datum < vandaag;
 }
 
 const keuzeStijl: React.CSSProperties = { padding: "7px 10px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "0.85rem", backgroundColor: "white", cursor: "pointer" };
@@ -60,15 +65,16 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
     const naamVan = (id?: string) => data.schoonmakers.find(s => s.id === id)?.naam;
 
     const inPeriode = (b: BeurtMetContext) => periode === "alles" || (periode === "komend" ? b.datum >= vandaag : b.datum < vandaag);
-    const inBetaling = (b: BeurtMetContext) => betaling === "alle" || (betaling === "betaald" ? b.betaald : teBetalen(b, vandaag));
+    const inBetaling = (b: BeurtMetContext) => betaling === "alle" || (betaling === "betaald" ? b.betaald : teBetalen(b));
     const vanWie = (b: BeurtMetContext) => wie === "alle" || (wie === "niemand" ? !b.schoonmakerId : b.schoonmakerId === wie);
     const basis = data.beurten.filter(b => inPeriode(b) && inBetaling(b) && vanWie(b));
-    const gefilterd = basis.filter(b => status === "alle" || b.status === status);
+    const gefilterd = basis.filter(b => status === "alle" || (status === "nietafgemeld" ? nietAfgemeld(b, vandaag) : b.status === status));
     const lijst = periode === "komend" ? gefilterd : [...gefilterd].reverse();
 
     const zonderKomend = data.beurten.filter(b => b.datum >= vandaag && b.status === "open").length;
     const afgekeurd = data.beurten.filter(b => b.status === "afgekeurd").length;
-    const openstaand = data.beurten.filter(b => teBetalen(b, vandaag));
+    const openstaand = data.beurten.filter(teBetalen);
+    const vergeten = data.beurten.filter(b => nietAfgemeld(b, vandaag)).length;
     const openBedrag = openstaand.reduce((t, b) => t + (b.bedrag || 0), 0);
 
     const zet = (p: Periode, st: StatusKeuze, bet: Betaling, w = "alle") => {
@@ -79,6 +85,7 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
     const aandacht = [
         zonderKomend > 0 && { tekst: `${zonderKomend} zonder schoonmaakster`, kleur: "#b91c1c", bg: "#fee2e2", klik: () => zet("komend", "open", "alle") },
         afgekeurd > 0 && { tekst: `${afgekeurd} afgekeurd`, kleur: "#b91c1c", bg: "#fee2e2", klik: () => zet("alles", "afgekeurd", "alle") },
+        vergeten > 0 && { tekst: `${vergeten} niet afgemeld`, kleur: "#1e40af", bg: "#dbeafe", klik: () => zet("afgelopen", "nietafgemeld", "alle") },
         openstaand.length > 0 && { tekst: `${openstaand.length} nog te betalen (${formatEuro(openBedrag)})`, kleur: "#92400e", bg: "#fef3c7", klik: () => zet("alles", "alle", "tebetalen") },
     ].filter(Boolean) as { tekst: string; kleur: string; bg: string; klik: () => void }[];
 
@@ -113,13 +120,13 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
                     {!standaard && <button onClick={() => zet("komend", "alle", "alle")} style={{ background: "none", border: "none", color: "#4A5D23", textDecoration: "underline", cursor: "pointer", fontSize: "0.82rem" }}>Filters wissen</button>}
                 </div>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
-                    {(["alle", ...Object.keys(STATUS_LABEL)] as StatusKeuze[]).map(st => {
-                        const aantal = st === "alle" ? basis.length : basis.filter(b => b.status === st).length;
+                    {(["alle", ...Object.keys(STATUS_LABEL), ...(status === "nietafgemeld" ? ["nietafgemeld"] : [])] as StatusKeuze[]).map(st => {
+                        const aantal = st === "alle" ? basis.length : st === "nietafgemeld" ? basis.filter(b => nietAfgemeld(b, vandaag)).length : basis.filter(b => b.status === st).length;
                         const actief = status === st;
-                        const kleur = st === "alle" ? { bg: "#eee", color: "#444" } : STATUS_LABEL[st];
+                        const kleur = st === "alle" ? { bg: "#eee", color: "#444" } : st === "nietafgemeld" ? { bg: "#dbeafe", color: "#1e40af" } : STATUS_LABEL[st];
                         return (
                             <button key={st} onClick={() => setStatus(st)} disabled={aantal === 0 && !actief} style={{ padding: "5px 12px", borderRadius: "20px", border: actief ? `2px solid ${kleur.color}` : "2px solid transparent", backgroundColor: actief ? kleur.bg : "white", color: kleur.color, fontSize: "0.8rem", fontWeight: "bold", cursor: aantal === 0 && !actief ? "default" : "pointer", opacity: aantal === 0 && !actief ? 0.4 : 1 }}>
-                                {st === "alle" ? "Alle statussen" : STATUS_LABEL[st].label} ({aantal})
+                                {st === "alle" ? "Alle statussen" : st === "nietafgemeld" ? "Niet afgemeld" : STATUS_LABEL[st].label} ({aantal})
                             </button>
                         );
                     })}
@@ -134,7 +141,7 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
                 {lijst.map(b => {
                     const st = STATUS_LABEL[b.status];
                     const isOpen = openId === b.id;
-                    const moetBetaald = teBetalen(b, vandaag);
+                    const moetBetaald = teBetalen(b);
                     return (
                         <div key={b.id} style={{ padding: "10px 12px", backgroundColor: "white", borderRadius: "8px", border: b.status === "afgekeurd" ? "1px solid #f5b5b5" : isOpen ? "1px solid #4A5D23" : "1px solid #eee", opacity: b.status === "vervallen" && !isOpen ? 0.6 : 1 }}>
                             <div onClick={() => setOpenId(isOpen ? null : b.id)} style={{ display: "grid", gridTemplateColumns: "14px 96px minmax(0, 1fr) 125px 100px 135px", gap: "10px", alignItems: "center", cursor: "pointer" }}>
@@ -174,25 +181,50 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
 }
 
 function Maandoverzicht({ data, maand, setMaand }: { data: SchoonmaakData; maand: string; setMaand: (m: string) => void }) {
+    const som = (lijst: BeurtMetContext[]) => lijst.reduce((t, b) => t + (b.bedrag || 0), 0);
     const rijen = useMemo(() => {
-        const inMaand = data.beurten.filter(b => telt(b) && b.datum.startsWith(maand));
+        const inMaand = data.beurten.filter(b => b.datum.startsWith(maand));
         return data.schoonmakers.map(s => {
             const mijn = inMaand.filter(b => b.schoonmakerId === s.id);
-            const totaal = mijn.reduce((t, b) => t + (b.bedrag || 0), 0);
-            const betaald = mijn.filter(b => b.betaald).reduce((t, b) => t + (b.bedrag || 0), 0);
-            return { s, aantal: mijn.length, totaal, betaald, open: totaal - betaald };
-        }).filter(r => r.aantal > 0);
+            const klaar = mijn.filter(b => b.status === "uitgevoerd");
+            const plan = mijn.filter(gepland);
+            return {
+                s,
+                aantal: klaar.length,
+                totaal: som(klaar),
+                betaald: som(klaar.filter(b => b.betaald)),
+                open: som(klaar.filter(b => !b.betaald)),
+                gepland: plan.length,
+                geplandBedrag: som(plan),
+            };
+        }).filter(r => r.aantal > 0 || r.gepland > 0);
     }, [data, maand]);
 
-    const totaalOpen = data.beurten.filter(b => teBetalen(b, vandaagIso())).reduce((t, b) => t + (b.bedrag || 0), 0);
-    const cel: React.CSSProperties = { padding: "6px 8px", borderBottom: "1px solid #eee", textAlign: "right" };
+    const totaal = rijen.reduce((t, r) => ({
+        aantal: t.aantal + r.aantal, totaal: t.totaal + r.totaal, betaald: t.betaald + r.betaald,
+        open: t.open + r.open, gepland: t.gepland + r.gepland, geplandBedrag: t.geplandBedrag + r.geplandBedrag,
+    }), { aantal: 0, totaal: 0, betaald: 0, open: 0, gepland: 0, geplandBedrag: 0 });
+    const totaalOpen = som(data.beurten.filter(teBetalen));
+    const cel: React.CSSProperties = { padding: "6px 8px", borderBottom: "1px solid #eee", textAlign: "right", whiteSpace: "nowrap" };
+    const grijs: React.CSSProperties = { ...cel, color: "#999", borderLeft: "1px solid #eee" };
+
+    const regel = (naam: string, r: typeof totaal, vet = false) => (
+        <tr key={naam} style={vet ? { fontWeight: "bold", backgroundColor: "#fafaf7" } : undefined}>
+            <td style={{ ...cel, textAlign: "left" }}>{naam}</td>
+            <td style={cel}>{r.aantal}</td>
+            <td style={cel}>{formatEuro(r.totaal)}</td>
+            <td style={cel}>{formatEuro(r.betaald)}</td>
+            <td style={{ ...cel, fontWeight: "bold", color: r.open > 0 ? "#b91c1c" : "#166534" }}>{formatEuro(r.open)}</td>
+            <td style={grijs}>{r.gepland ? `${r.gepland} · ${formatEuro(r.geplandBedrag)}` : "—"}</td>
+        </tr>
+    );
 
     return (
         <details style={blok}>
             <summary style={blokKop}>📅 Maandoverzicht</summary>
             <div style={{ display: "flex", gap: "10px", alignItems: "center", margin: "12px 0", flexWrap: "wrap" }}>
                 <input type="month" value={maand} onChange={e => setMaand(e.target.value)} style={{ ...veld, width: "auto" }} />
-                <span style={{ fontSize: "0.82rem", color: "#666" }}>Over alle maanden staat nog {formatEuro(totaalOpen)} open voor uitgevoerde of verstreken beurten.</span>
+                <span style={{ fontSize: "0.82rem", color: "#666" }}>Over alle maanden staat nog {formatEuro(totaalOpen)} open voor uitgevoerde beurten.</span>
             </div>
             {rijen.length === 0 ? (
                 <p style={{ fontSize: "0.85rem", color: "#888", fontStyle: "italic" }}>Geen beurten in deze maand.</p>
@@ -202,27 +234,21 @@ function Maandoverzicht({ data, maand, setMaand }: { data: SchoonmaakData; maand
                         <thead>
                             <tr style={{ color: "#555" }}>
                                 <th style={{ ...cel, textAlign: "left" }}>Schoonmaakster</th>
-                                <th style={cel}>Beurten</th>
+                                <th style={cel}>Uitgevoerd</th>
                                 <th style={cel}>Totaal</th>
                                 <th style={cel}>Betaald</th>
                                 <th style={cel}>Nog te betalen</th>
+                                <th style={{ ...grijs, color: "#888" }}>Nog gepland</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {rijen.map(r => (
-                                <tr key={r.s.id}>
-                                    <td style={{ ...cel, textAlign: "left" }}>{r.s.naam}</td>
-                                    <td style={cel}>{r.aantal}</td>
-                                    <td style={cel}>{formatEuro(r.totaal)}</td>
-                                    <td style={cel}>{formatEuro(r.betaald)}</td>
-                                    <td style={{ ...cel, fontWeight: "bold", color: r.open > 0 ? "#b91c1c" : "#166534" }}>{formatEuro(r.open)}</td>
-                                </tr>
-                            ))}
+                            {rijen.map(r => regel(r.s.naam, r))}
+                            {rijen.length > 1 && regel("Totaal", totaal, true)}
                         </tbody>
                     </table>
                 </div>
             )}
-            <p style={{ fontSize: "0.75rem", color: "#888", margin: "8px 0 0" }}>Telt beurten die toegewezen, geaccepteerd of uitgevoerd zijn. Afgekeurde en vervallen beurten tellen niet mee.</p>
+            <p style={{ fontSize: "0.75rem", color: "#888", margin: "8px 0 0" }}>Totaal, betaald en nog te betalen tellen alleen uitgevoerde beurten. Nog gepland zijn toegewezen en geaccepteerde beurten in deze maand.</p>
         </details>
     );
 }

@@ -54,7 +54,7 @@ Elke boeking met een vertrekdatum vanaf vandaag krijgt automatisch een beurt zon
 
 Een sectie "🧹 Schoonmaak" onder de gastenlinks, met alle beurten op datum. Filters: komend, zonder schoonmaakster, afgekeurd, niet betaald, alle. Daaronder het maandoverzicht per schoonmaakster (aantal beurten, totaal, betaald, nog te betalen), het beheer van de schoonmaaksters en de instellingen (standaard vertrektijd, e-mailadres voor meldingen). In de kop staat een rode teller als er beurten zijn afgekeurd.
 
-Het maandoverzicht telt beurten die toegewezen, geaccepteerd of uitgevoerd zijn.
+Betalen gebeurt pas als het werk gedaan is. Het maandoverzicht telt bij totaal, betaald en nog te betalen alleen uitgevoerde beurten. Toegewezen en geaccepteerde beurten staan in een aparte grijze kolom "Nog gepland". Een beurt waarvan de datum voorbij is maar die niet als klaar is gemeld, verschijnt in de aandachtsbalk als "niet afgemeld".
 
 ### 3.4 Losse beurt toevoegen
 
