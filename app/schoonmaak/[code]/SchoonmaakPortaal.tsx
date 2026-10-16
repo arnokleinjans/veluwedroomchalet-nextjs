@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { loginSchoonmaker, logoutSchoonmaker, reageerOpBeurt } from "../../actions/schoonmaakPortaalActions";
 import { STATUS_LABEL, datumLang, formatEuro, metHoofdletter, type BeurtVoorSchoonmaker } from "../../utils/schoonmaakTypes";
@@ -30,6 +30,24 @@ const tekstvak: React.CSSProperties = {
 };
 
 type Data = { naam: string; komend: BeurtVoorSchoonmaker[]; afgelopen: BeurtVoorSchoonmaker[] } | null;
+
+type Filter = "tedoen" | "klaar" | "alles";
+const FILTERS: Record<Filter, { label: string; leeg: string }> = {
+    tedoen: { label: "Te doen", leeg: "Er staat niets voor je klaar. 🎉" },
+    klaar: { label: "Klaar", leeg: "Nog geen afgeronde beurten." },
+    alles: { label: "Alles", leeg: "Er staan geen beurten op jouw naam." },
+};
+const FILTER_OPSLAG = "vdc_schoonmaak_filter";
+
+function leesOpgeslagenFilter(): Filter | null {
+    try {
+        const f = localStorage.getItem(FILTER_OPSLAG);
+        return f && f in FILTERS ? (f as Filter) : null;
+    } catch {
+        return null;
+    }
+}
+const geenAbonnement = () => () => { };
 
 export default function SchoonmaakPortaal({ code, naam, data }: { code: string; naam: string; data: Data }) {
     return (
@@ -79,6 +97,22 @@ function Inloggen({ code, naam }: { code: string; naam: string }) {
 
 function Overzicht({ code, data }: { code: string; data: NonNullable<Data> }) {
     const router = useRouter();
+    const opgeslagen = useSyncExternalStore(geenAbonnement, leesOpgeslagenFilter, () => null);
+    const [gekozen, setGekozen] = useState<Filter | null>(null);
+    const filter: Filter = gekozen ?? opgeslagen ?? "tedoen";
+    const vandaag = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Amsterdam" }).format(new Date());
+
+    const kies = (f: Filter) => {
+        setGekozen(f);
+        try { localStorage.setItem(FILTER_OPSLAG, f); } catch { }
+    };
+
+    // Te doen: alles wat nog niet klaar is. Een verstreken beurt die nog niet is afgemeld, blijft hier staan.
+    const lijsten: Record<Filter, BeurtVoorSchoonmaker[]> = {
+        tedoen: [...data.afgelopen.filter(b => b.status === "geaccepteerd" || b.status === "toegewezen").reverse(), ...data.komend.filter(b => b.status !== "uitgevoerd")],
+        klaar: [...data.komend.filter(b => b.status === "uitgevoerd").reverse(), ...data.afgelopen.filter(b => b.status === "uitgevoerd")],
+        alles: [...data.komend, ...data.afgelopen],
+    };
 
     // Elke minuut en bij terugkeren naar de app de beurten opnieuw ophalen. Wat ze aan het typen is, blijft staan.
     useEffect(() => {
@@ -107,23 +141,25 @@ function Overzicht({ code, data }: { code: string; data: NonNullable<Data> }) {
                 <button onClick={uitloggen} style={{ background: "none", border: "1px solid #ccc", borderRadius: "8px", padding: "8px 12px", color: "#666", cursor: "pointer", flexShrink: 0 }}>Uitloggen</button>
             </div>
 
-            {data.komend.length === 0 && (
+            <div role="tablist" style={{ display: "flex", gap: "6px", backgroundColor: "white", borderRadius: "14px", padding: "5px", marginBottom: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", position: "sticky", top: "8px", zIndex: 5 }}>
+                {(Object.keys(FILTERS) as Filter[]).map(f => {
+                    const actief = filter === f;
+                    return (
+                        <button key={f} role="tab" aria-selected={actief} onClick={() => kies(f)} style={{ flex: 1, padding: "11px 6px", borderRadius: "10px", border: "none", backgroundColor: actief ? GROEN : "transparent", color: actief ? "white" : "#555", fontWeight: "bold", fontSize: "0.95rem", cursor: "pointer" }}>
+                            {FILTERS[f].label} <span style={{ opacity: 0.8, fontWeight: "normal" }}>({lijsten[f].length})</span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            {lijsten[filter].length === 0 && (
                 <div style={{ backgroundColor: "white", borderRadius: "14px", padding: "24px", color: "#666", textAlign: "center" }}>
-                    Er staan geen beurten voor je klaar.
+                    {FILTERS[filter].leeg}
                 </div>
             )}
             <div style={{ display: "grid", gap: "16px" }}>
-                {data.komend.map(b => <BeurtKaart key={b.id} code={code} beurt={b} />)}
+                {lijsten[filter].map(b => <BeurtKaart key={b.id} code={code} beurt={b} afgelopen={b.datum < vandaag} />)}
             </div>
-
-            {data.afgelopen.length > 0 && (
-                <details style={{ marginTop: "28px" }}>
-                    <summary style={{ cursor: "pointer", color: GROEN, fontWeight: "bold", marginBottom: "12px" }}>Afgelopen beurten ({data.afgelopen.length})</summary>
-                    <div style={{ display: "grid", gap: "16px", marginTop: "12px" }}>
-                        {data.afgelopen.map(b => <BeurtKaart key={b.id} code={code} beurt={b} afgelopen />)}
-                    </div>
-                </details>
-            )}
         </>
     );
 }
@@ -161,7 +197,7 @@ function BeurtKaart({ code, beurt, afgelopen = false }: { code: string; beurt: B
     };
 
     return (
-        <div style={{ backgroundColor: "white", borderRadius: "14px", padding: "18px", boxShadow: "0 4px 14px rgba(0,0,0,0.05)", opacity: afgelopen ? 0.85 : 1 }}>
+        <div style={{ backgroundColor: "white", borderRadius: "14px", padding: "18px", boxShadow: "0 4px 14px rgba(0,0,0,0.05)", opacity: afgelopen && beurt.status !== "geaccepteerd" && beurt.status !== "toegewezen" ? 0.85 : 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
                 <strong style={{ fontSize: "1.1rem" }}>{metHoofdletter(datumLang(beurt.datum))}</strong>
                 <span style={{ fontSize: "0.8rem", backgroundColor: status.bg, color: status.color, padding: "3px 10px", borderRadius: "12px", fontWeight: "bold", whiteSpace: "nowrap" }}>{status.label}</span>
@@ -184,6 +220,12 @@ function BeurtKaart({ code, beurt, afgelopen = false }: { code: string; beurt: B
                 <p style={{ backgroundColor: "#fee2e2", color: "#b91c1c", borderRadius: "8px", padding: "10px 12px", marginTop: "12px" }}>
                     Je hebt deze beurt afgekeurd{beurt.redenAfkeuring ? `: ${beurt.redenAfkeuring}` : ""}. Kitty zoekt iemand anders.
                 </p>
+            )}
+
+            {afgelopen && (beurt.status === "geaccepteerd" || beurt.status === "toegewezen") && (
+                <div style={{ display: "flex", marginTop: "14px" }}>
+                    <button disabled={bezig} onClick={() => doe("uitgevoerd", opmerking)} style={knop(GROEN)}>Schoonmaak is klaar</button>
+                </div>
             )}
 
             {!afgelopen && (
