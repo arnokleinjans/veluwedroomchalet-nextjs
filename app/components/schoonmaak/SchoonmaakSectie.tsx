@@ -91,13 +91,15 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
 
     return (
         <div style={{ marginTop: "15px" }}>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", marginBottom: "14px" }}>
+            <div style={{ display: "flex", gap: "12px", alignItems: "flex-start", marginBottom: "14px" }}>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", flex: 1, minWidth: 0 }}>
                 <span style={{ fontSize: "0.82rem", color: "#666", fontWeight: "bold" }}>Aandacht:</span>
                 {aandacht.length === 0 && <span style={{ fontSize: "0.82rem", color: "#166534", backgroundColor: "#dcfce7", padding: "5px 12px", borderRadius: "20px", fontWeight: "bold" }}>✓ Alles is geregeld</span>}
                 {aandacht.map(a => (
                     <button key={a.tekst} onClick={a.klik} title="Toon deze beurten" style={{ fontSize: "0.82rem", color: a.kleur, backgroundColor: a.bg, border: "none", padding: "6px 12px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer" }}>{a.tekst} →</button>
                 ))}
-                <button onClick={() => { setNieuwOpen(true); setOpenId(null); }} style={{ ...groeneKnop, marginLeft: "auto" }}>+ Schoonmaak toevoegen</button>
+            </div>
+                <button onClick={() => { setNieuwOpen(true); setOpenId(null); }} style={{ ...groeneKnop, flexShrink: 0, whiteSpace: "nowrap" }}>+ Schoonmaak toevoegen</button>
             </div>
 
             <div style={{ backgroundColor: "#f8f7f2", borderRadius: "10px", padding: "10px", marginBottom: "12px" }}>
@@ -117,7 +119,6 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
                         <option value="tebetalen">Nog te betalen</option>
                         <option value="betaald">Betaald</option>
                     </select>
-                    {!standaard && <button onClick={() => zet("komend", "alle", "alle")} style={{ background: "none", border: "none", color: "#4A5D23", textDecoration: "underline", cursor: "pointer", fontSize: "0.82rem" }}>Filters wissen</button>}
                 </div>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
                     {(["alle", ...Object.keys(STATUS_LABEL), ...(status === "nietafgemeld" ? ["nietafgemeld"] : [])] as StatusKeuze[]).map(st => {
@@ -130,6 +131,9 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
                             </button>
                         );
                     })}
+                </div>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px", visibility: standaard ? "hidden" : "visible" }}>
+                    <button onClick={() => zet("komend", "alle", "alle")} style={{ background: "none", border: "none", color: "#4A5D23", textDecoration: "underline", cursor: "pointer", fontSize: "0.82rem", padding: 0 }}>Filters wissen</button>
                 </div>
             </div>
 
