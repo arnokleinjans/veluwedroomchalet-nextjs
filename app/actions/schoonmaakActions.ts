@@ -9,7 +9,7 @@ import {
     synchroniseerBeurten, vandaag, verrijk, verwijderBeurt, zonderPin,
 } from "../utils/schoonmaakStore";
 import type { Beurt, BeurtMetContext, BeurtStatus, SchoonmaakInstellingen, Schoonmaker, SchoonmakerPubliek } from "../utils/schoonmaakTypes";
-import { mailToegewezen, mailIngetrokken, mailVerplaatst, mailVeilig, portaalLink, verstuurVerplaatstMails } from "../utils/schoonmaakMail";
+import { mailToegewezen, mailIngetrokken, mailVerplaatst, mailVervallen, mailVeilig, portaalLink, verstuurVerplaatstMails } from "../utils/schoonmaakMail";
 
 type Resultaat = { success: boolean; error?: string; waarschuwing?: string };
 
@@ -204,8 +204,13 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
 
     await bewaarBeurt(beurt);
 
+    const wasActief = oudeStatus === "toegewezen" || oudeStatus === "geaccepteerd";
     if (andereSchoonmaker && nieuweSchoonmaker) {
         await mailVeilig(() => mailToegewezen(nieuweSchoonmaker, beurt, verrijk(beurt, bookings), inst), "aan schoonmaakster", waarschuwingen);
+    } else if (!andereSchoonmaker && oudeSchoonmaker && wasActief && beurt.status === "vervallen") {
+        await mailVeilig(() => mailVervallen(oudeSchoonmaker, beurt), "over vervallen", waarschuwingen);
+    } else if (!andereSchoonmaker && oudeSchoonmaker && oudeStatus === "vervallen" && beurt.status === "toegewezen") {
+        await mailVeilig(() => mailToegewezen(oudeSchoonmaker, beurt, verrijk(beurt, bookings), inst), "aan schoonmaakster", waarschuwingen);
     } else if (!andereSchoonmaker && oudeSchoonmaker && beurt.datum !== oudeDatum && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) {
         await mailVeilig(() => mailVerplaatst(oudeSchoonmaker, beurt, oudeDatum), "over verplaatsing", waarschuwingen);
     }
@@ -224,5 +229,11 @@ export async function verwijderBeurtActie(id: string): Promise<Resultaat> {
         }
     }
     await verwijderBeurt(id);
-    return { success: true };
+
+    const waarschuwingen: string[] = [];
+    if (beurt.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) {
+        const s = (await leesSchoonmakers()).find(x => x.id === beurt.schoonmakerId);
+        if (s) await mailVeilig(() => mailVervallen(s, beurt), "aan schoonmaakster", waarschuwingen);
+    }
+    return { success: true, waarschuwing: waarschuwingen.join(", ") || undefined };
 }

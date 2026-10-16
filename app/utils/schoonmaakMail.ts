@@ -106,3 +106,13 @@ export async function mailGeaccepteerd(naar: string, s: Schoonmaker, beurt: Beur
         `${await basisUrl()}/beheer-vlp-x9q2w`,
     ].join("\n"));
 }
+
+export async function mailVervallen(s: Schoonmaker, beurt: Beurt) {
+    await verstuurSchoonmaakMail(s.email, `Schoonmaak ${datumLang(beurt.datum)} vervalt`, [
+        `Hoi ${s.naam},`, ``,
+        `De schoonmaakbeurt van ${datumLang(beurt.datum)} gaat niet door. Er is die dag geen schoonmaak nodig.`,
+        beurt.omschrijving ? `Het ging om: ${beurt.omschrijving}` : ``,
+        `Je hoeft hiervoor niets te doen. De beurt staat niet meer op je pagina.`, ``,
+        `Groet,`, `Kitty`,
+    ].filter((r, i, a) => !(r === `` && a[i - 1] === ``)).join("\n"));
+}

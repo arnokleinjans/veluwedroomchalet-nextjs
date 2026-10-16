@@ -93,7 +93,7 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
             toon("❌ " + res.error);
             return;
         }
-        toon("✅ Beurt verwijderd");
+        toon(res.waarschuwing ? `⚠️ Verwijderd, maar ${res.waarschuwing}` : "✅ Beurt verwijderd");
         await onSaved();
         onClose?.();
     };
@@ -177,6 +177,12 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
             {andereSchoonmaker && beurt?.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd") && (
                 <p style={{ fontSize: "0.78rem", color: "#666", margin: "8px 0 0" }}>{naamVan(beurt.schoonmakerId)} krijgt een mail dat de beurt is ingetrokken.</p>
             )}
+            {!andereSchoonmaker && beurt?.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd") && status === "vervallen" && (
+                <p style={{ fontSize: "0.82rem", color: "#92400e", backgroundColor: "#fffbeb", padding: "6px 10px", borderRadius: "6px", margin: "8px 0 0" }}>📧 {naamVan(beurt.schoonmakerId)} krijgt na opslaan een mail dat de schoonmaak vervalt.</p>
+            )}
+            {!andereSchoonmaker && beurt?.schoonmakerId && beurt.status === "vervallen" && status === "toegewezen" && (
+                <p style={{ fontSize: "0.82rem", color: "#666", margin: "8px 0 0" }}>📧 {naamVan(beurt.schoonmakerId)} krijgt na opslaan opnieuw een mail met deze beurt.</p>
+            )}
 
             <div style={{ marginTop: "10px" }}>
                 <label style={label}>Bericht aan de schoonmaakster</label>
@@ -234,7 +240,9 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
             <ConfirmDialog
                 open={verwijderVraag}
                 title="Beurt verwijderen?"
-                message="De beurt verdwijnt ook uit het portaal van de schoonmaakster. Er gaat geen mail uit."
+                message={beurt?.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")
+                    ? `De beurt verdwijnt uit het portaal van ${naamVan(beurt.schoonmakerId)}. Zij krijgt een mail dat de schoonmaak vervalt.`
+                    : "De beurt verdwijnt definitief."}
                 confirmLabel="Ja, verwijderen"
                 variant="danger"
                 onConfirm={verwijderen}

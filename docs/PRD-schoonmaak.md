@@ -183,6 +183,7 @@ Via de bestaande Hostnet-SMTP (`mailer.ts`):
 - Naar de schoonmaakster bij toewijzen
 - Naar de vorige schoonmaakster als Kitty een beurt aan iemand anders geeft
 - Naar de schoonmaakster als de datum verandert
+- Naar de schoonmaakster als Kitty de beurt op "Vervallen" zet of verwijdert
 - Naar het meldingsadres (instellingen) bij afkeuren
 - Naar het meldingsadres als een schoonmaakster een beurt accepteert, met een eigen tekst als ze hem eerder had afgekeurd
 
