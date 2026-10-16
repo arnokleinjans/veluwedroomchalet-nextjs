@@ -89,3 +89,12 @@ export async function mailAfgekeurd(naar: string, s: Schoonmaker, beurt: Beurt, 
         `${await basisUrl()}/beheer-vlp-x9q2w`,
     ].join("\n"));
 }
+
+export async function mailTochGeaccepteerd(naar: string, s: Schoonmaker, beurt: Beurt, gastNaam: string | undefined) {
+    await verstuurSchoonmaakMail(naar, `${s.naam} kan toch op ${datumLang(beurt.datum)}`, [
+        `${s.naam} had de schoonmaakbeurt van ${datumLang(beurt.datum)} afgekeurd, maar heeft hem nu toch geaccepteerd.`,
+        `De beurt staat weer op haar naam. Je hoeft niemand anders te zoeken.`, ``,
+        gastNaam ? `Vertrek van: ${gastNaam}` : `Beurt: ${beurt.omschrijving || "losse schoonmaak"}`, ``,
+        `${await basisUrl()}/beheer-vlp-x9q2w`,
+    ].join("\n"));
+}

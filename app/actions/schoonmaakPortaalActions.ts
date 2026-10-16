@@ -10,7 +10,7 @@ import {
     alleBeurten, bewaarBeurt, leesBeurt, leesInstellingen, pinKlopt, regel,
     vandaag, verrijk, vindSchoonmakerOpCode, voorSchoonmaker,
 } from "../utils/schoonmaakStore";
-import { mailAfgekeurd, mailVeilig } from "../utils/schoonmaakMail";
+import { mailAfgekeurd, mailTochGeaccepteerd, mailVeilig } from "../utils/schoonmaakMail";
 import type { BeurtVoorSchoonmaker, Schoonmaker } from "../utils/schoonmaakTypes";
 
 type Resultaat = { success: boolean; error?: string };
@@ -78,13 +78,14 @@ export async function reageerOpBeurt(
         return { success: false, error: "Deze beurt staat niet (meer) op jouw naam. Ververs de pagina." };
     }
     const toelichting = (tekst || "").trim().slice(0, 1000);
+    const vorigeStatus = beurt.status;
     const waarschuwingen: string[] = [];
 
     if (actie === "accepteren") {
         if (beurt.status !== "toegewezen" && beurt.status !== "afgekeurd") return { success: false, error: "Deze beurt kan niet meer worden geaccepteerd." };
         beurt.status = "geaccepteerd";
         beurt.redenAfkeuring = undefined;
-        beurt.historie.push(regel("geaccepteerd", s.id));
+        beurt.historie.push(regel(vorigeStatus === "afgekeurd" ? "toch geaccepteerd" : "geaccepteerd", s.id));
     } else if (actie === "afkeuren") {
         if (beurt.status !== "toegewezen" && beurt.status !== "geaccepteerd") return { success: false, error: "Deze beurt kan niet meer worden afgekeurd." };
         if (!toelichting) return { success: false, error: "Geef een reden op, dan weet Kitty waar ze aan toe is." };
@@ -106,11 +107,17 @@ export async function reageerOpBeurt(
 
     await bewaarBeurt(beurt);
 
-    if (actie === "afkeuren") {
+    const tochGeaccepteerd = actie === "accepteren" && vorigeStatus === "afgekeurd";
+    if (actie === "afkeuren" || tochGeaccepteerd) {
         const appData: any = await getAppDataFresh();
         const boeking = (appData.bookings || []).find((b: any) => b.id === beurt.bookingId);
         const inst = await leesInstellingen();
-        await mailVeilig(() => mailAfgekeurd(inst.meldingEmail, s, beurt, boeking?.guestName, toelichting), "aan Kitty", waarschuwingen);
+        await mailVeilig(
+            () => tochGeaccepteerd
+                ? mailTochGeaccepteerd(inst.meldingEmail, s, beurt, boeking?.guestName)
+                : mailAfgekeurd(inst.meldingEmail, s, beurt, boeking?.guestName, toelichting),
+            "aan Kitty", waarschuwingen,
+        );
     }
     return { success: true, waarschuwing: waarschuwingen.length ? "Kitty kon niet worden gemaild. Laat het haar even weten." : undefined };
 }
