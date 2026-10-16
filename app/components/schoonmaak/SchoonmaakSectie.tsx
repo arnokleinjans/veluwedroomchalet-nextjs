@@ -92,11 +92,11 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
     return (
         <div style={{ marginTop: "15px" }}>
             <div style={{ display: "flex", gap: "12px", alignItems: "flex-start", marginBottom: "14px" }}>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center", flex: 1, minWidth: 0 }}>
                 <span style={{ fontSize: "0.82rem", color: "#666", fontWeight: "bold" }}>Aandacht:</span>
                 {aandacht.length === 0 && <span style={{ fontSize: "0.82rem", color: "#166534", backgroundColor: "#dcfce7", padding: "5px 12px", borderRadius: "20px", fontWeight: "bold" }}>✓ Alles is geregeld</span>}
                 {aandacht.map(a => (
-                    <button key={a.tekst} onClick={a.klik} title="Toon deze beurten" style={{ fontSize: "0.82rem", color: a.kleur, backgroundColor: a.bg, border: "none", padding: "6px 12px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer" }}>{a.tekst} →</button>
+                    <button key={a.tekst} onClick={a.klik} title="Toon deze beurten" style={{ fontSize: "0.8rem", color: a.kleur, backgroundColor: a.bg, border: "none", padding: "5px 10px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", whiteSpace: "nowrap" }}>{a.tekst}</button>
                 ))}
             </div>
                 <button onClick={() => { setNieuwOpen(true); setOpenId(null); }} style={{ ...groeneKnop, flexShrink: 0, whiteSpace: "nowrap" }}>+ Schoonmaak toevoegen</button>
