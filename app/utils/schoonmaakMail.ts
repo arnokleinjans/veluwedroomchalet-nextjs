@@ -98,3 +98,11 @@ export async function mailTochGeaccepteerd(naar: string, s: Schoonmaker, beurt: 
         `${await basisUrl()}/beheer-vlp-x9q2w`,
     ].join("\n"));
 }
+
+export async function mailGeaccepteerd(naar: string, s: Schoonmaker, beurt: Beurt, gastNaam: string | undefined) {
+    await verstuurSchoonmaakMail(naar, `${s.naam} komt op ${datumLang(beurt.datum)}`, [
+        `${s.naam} heeft de schoonmaakbeurt van ${datumLang(beurt.datum)} geaccepteerd.`, ``,
+        gastNaam ? `Vertrek van: ${gastNaam}` : `Beurt: ${beurt.omschrijving || "losse schoonmaak"}`, ``,
+        `${await basisUrl()}/beheer-vlp-x9q2w`,
+    ].join("\n"));
+}

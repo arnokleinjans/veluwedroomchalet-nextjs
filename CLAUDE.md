@@ -57,6 +57,7 @@ Voor het genereren van nieuwe 3D bladeren voor de video-instructies, gebruik de 
 
 | Datum | Omschrijving |
 |---|---|
+| 2026-10-16 (mail bij accepteren) | Op verzoek Arno krijgt het meldingsadres ook bij een gewone acceptatie een mail (`mailGeaccepteerd`: "<naam> komt op <datum>"). Bij accepteren na afkeuren blijft het de mail "kan toch". Getest met een tijdelijke schoonmaakster (daarna verwijderd). |
 | 2026-10-16 (toch geaccepteerd) | Accepteert een schoonmaakster een beurt die ze eerder had afgekeurd, dan krijgt het meldingsadres een mail (`mailTochGeaccepteerd`: "<naam> kan toch op <datum>", met "je hoeft niemand anders te zoeken"). In de historie staat "toch geaccepteerd". Een gewone acceptatie stuurt nog steeds geen mail. Getest met een tijdelijke schoonmaakster (daarna verwijderd): status, historie en mail zonder fout. |
 | 2026-10-16 (aandachtsknoppen) | Aandachtsknoppen zonder pijl en iets compacter, zodat ze naast elkaar en naast "+ Schoonmaak toevoegen" passen. Op een smal scherm lopen ze nog door op een tweede regel. |
 | 2026-10-16 (indeling filter) | Schoonmaaksectie: "+ Schoonmaak toevoegen" rechtsboven naast de aandachtsbalk (die vult de rest en loopt door op een tweede regel), "Filters wissen" rechtsonder in het filterblok. De link houdt zijn plek ook als hij verborgen is, zodat de lijst niet verspringt. |

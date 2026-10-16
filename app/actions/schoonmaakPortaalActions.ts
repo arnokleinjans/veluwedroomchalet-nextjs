@@ -10,7 +10,7 @@ import {
     alleBeurten, bewaarBeurt, leesBeurt, leesInstellingen, pinKlopt, regel,
     vandaag, verrijk, vindSchoonmakerOpCode, voorSchoonmaker,
 } from "../utils/schoonmaakStore";
-import { mailAfgekeurd, mailTochGeaccepteerd, mailVeilig } from "../utils/schoonmaakMail";
+import { mailAfgekeurd, mailGeaccepteerd, mailTochGeaccepteerd, mailVeilig } from "../utils/schoonmaakMail";
 import type { BeurtVoorSchoonmaker, Schoonmaker } from "../utils/schoonmaakTypes";
 
 type Resultaat = { success: boolean; error?: string };
@@ -107,15 +107,16 @@ export async function reageerOpBeurt(
 
     await bewaarBeurt(beurt);
 
-    const tochGeaccepteerd = actie === "accepteren" && vorigeStatus === "afgekeurd";
-    if (actie === "afkeuren" || tochGeaccepteerd) {
+    if (actie === "afkeuren" || actie === "accepteren") {
         const appData: any = await getAppDataFresh();
         const boeking = (appData.bookings || []).find((b: any) => b.id === beurt.bookingId);
         const inst = await leesInstellingen();
         await mailVeilig(
-            () => tochGeaccepteerd
-                ? mailTochGeaccepteerd(inst.meldingEmail, s, beurt, boeking?.guestName)
-                : mailAfgekeurd(inst.meldingEmail, s, beurt, boeking?.guestName, toelichting),
+            () => actie === "afkeuren"
+                ? mailAfgekeurd(inst.meldingEmail, s, beurt, boeking?.guestName, toelichting)
+                : vorigeStatus === "afgekeurd"
+                    ? mailTochGeaccepteerd(inst.meldingEmail, s, beurt, boeking?.guestName)
+                    : mailGeaccepteerd(inst.meldingEmail, s, beurt, boeking?.guestName),
             "aan Kitty", waarschuwingen,
         );
     }

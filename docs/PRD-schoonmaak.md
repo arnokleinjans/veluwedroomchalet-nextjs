@@ -184,7 +184,7 @@ Via de bestaande Hostnet-SMTP (`mailer.ts`):
 - Naar de vorige schoonmaakster als Kitty een beurt aan iemand anders geeft
 - Naar de schoonmaakster als de datum verandert
 - Naar het meldingsadres (instellingen) bij afkeuren
-- Naar het meldingsadres als een schoonmaakster een afgekeurde beurt toch accepteert
+- Naar het meldingsadres als een schoonmaakster een beurt accepteert, met een eigen tekst als ze hem eerder had afgekeurd
 
 Buiten Vercel gaat elke schoonmaakmail naar akleinjans@me.com, met de echte ontvanger in het onderwerp. Een mislukte mail blokkeert het opslaan niet, maar wordt wel gemeld.
 
