@@ -255,7 +255,14 @@ function BeurtKaart({ code, beurt, afgelopen = false }: { code: string; beurt: B
                 </div>
             )}
 
-            {beurt.status !== "vervallen" && (
+            {beurt.status === "uitgevoerd" && beurt.opmerkingSchoonmaker && (
+                <div style={{ marginTop: "16px" }}>
+                    <div style={{ fontSize: "0.9rem", fontWeight: "bold", marginBottom: "6px", color: "#888" }}>Jouw opmerking voor Kitty</div>
+                    <div style={{ ...tekstvak, backgroundColor: "#f0f0f0", color: "#777", borderColor: "#e0e0e0", whiteSpace: "pre-wrap" }}>{beurt.opmerkingSchoonmaker}</div>
+                </div>
+            )}
+
+            {beurt.status !== "vervallen" && beurt.status !== "uitgevoerd" && (
                 <div style={{ marginTop: "16px" }}>
                     <label style={{ display: "block", fontSize: "0.9rem", fontWeight: "bold", marginBottom: "6px", color: "#444" }}>Opmerking voor Kitty</label>
                     <textarea value={opmerking} onChange={e => setOpmerking(e.target.value)} rows={2} style={tekstvak} placeholder="Bijvoorbeeld: de thee was op" />

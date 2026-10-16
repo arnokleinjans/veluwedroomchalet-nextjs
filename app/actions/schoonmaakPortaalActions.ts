@@ -97,6 +97,7 @@ export async function reageerOpBeurt(
         if (toelichting) beurt.opmerkingSchoonmaker = toelichting;
         beurt.historie.push(regel("uitgevoerd", s.id));
     } else if (actie === "opmerking") {
+        if (beurt.status === "uitgevoerd") return { success: false, error: "Deze beurt is al afgerond. De opmerking kan niet meer worden aangepast." };
         beurt.opmerkingSchoonmaker = toelichting || undefined;
         beurt.historie.push(regel(toelichting ? "opmerking geplaatst" : "opmerking gewist", s.id, toelichting || undefined));
     } else {
