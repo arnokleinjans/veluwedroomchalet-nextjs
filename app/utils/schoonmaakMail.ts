@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
-import { verstuurSchoonmaakMail } from "./mailer";
-import { leesSchoonmakers, synchroniseerBeurten } from "./schoonmaakStore";
+import { TEST_ONTVANGER, verstuurSchoonmaakMail } from "./mailer";
+import { bewaarBeurt, leesSchoonmakers, regel, synchroniseerBeurten } from "./schoonmaakStore";
 import type { Beurt, BeurtMetContext, SchoonmaakInstellingen, Schoonmaker } from "./schoonmaakTypes";
 import { datumLang } from "./schoonmaakTypes";
 
@@ -26,12 +26,17 @@ function beurtRegels(beurt: Beurt, vertrektijd: string, volgendeAankomst?: strin
     ].filter(Boolean);
 }
 
-export async function mailVeilig(fn: () => Promise<void>, wat: string, waarschuwingen: string[]) {
+// Verstuurt een mail zonder dat een fout het opslaan blokkeert, en zet in de geschiedenis van de beurt
+// welke mail naar wie ging en of dat lukte. De aanroeper slaat de beurt daarna op.
+export async function mailVeilig(beurt: Beurt | null, wat: string, naar: string, fn: () => Promise<void>, waarschuwingen: string[]) {
+    const omgeleid = process.env.VERCEL === "1" ? "" : ` (test: omgeleid naar ${TEST_ONTVANGER})`;
     try {
         await fn();
+        beurt?.historie.push(regel(`${wat} verstuurd naar ${naar}${omgeleid}`));
     } catch (e: any) {
         console.error(`Schoonmaakmail mislukt (${wat}):`, e);
-        waarschuwingen.push(`mail ${wat} niet verstuurd`);
+        waarschuwingen.push(`mail ${wat.toLowerCase()} niet verstuurd`);
+        beurt?.historie.push(regel(`${wat} NIET verstuurd naar ${naar}`, undefined, e?.message || "onbekende fout"));
     }
 }
 
@@ -70,7 +75,10 @@ export async function verstuurVerplaatstMails(verschoven: Beurt[], schoonmakers:
     for (const beurt of verschoven) {
         const s = schoonmakers.find(x => x.id === beurt.schoonmakerId);
         const oud = beurt.historie.at(-1)?.toelichting?.split(" → ")[0];
-        if (s && oud) await mailVeilig(() => mailVerplaatst(s, beurt, oud), "verplaatsing", waarschuwingen);
+        if (s && oud) {
+            await mailVeilig(beurt, "Verplaatsing", s.email, () => mailVerplaatst(s, beurt, oud), waarschuwingen);
+            await bewaarBeurt(beurt);
+        }
     }
 }
 

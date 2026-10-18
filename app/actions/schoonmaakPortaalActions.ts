@@ -111,14 +111,19 @@ export async function reageerOpBeurt(
         const appData: any = await getAppDataFresh();
         const boeking = (appData.bookings || []).find((b: any) => b.id === beurt.bookingId);
         const inst = await leesInstellingen();
+        const tochGeaccepteerd = actie === "accepteren" && vorigeStatus === "afgekeurd";
         await mailVeilig(
+            beurt,
+            actie === "afkeuren" ? "Melding afkeuring" : tochGeaccepteerd ? "Melding toch geaccepteerd" : "Melding acceptatie",
+            inst.meldingEmail,
             () => actie === "afkeuren"
                 ? mailAfgekeurd(inst.meldingEmail, s, beurt, boeking?.guestName, toelichting)
-                : vorigeStatus === "afgekeurd"
+                : tochGeaccepteerd
                     ? mailTochGeaccepteerd(inst.meldingEmail, s, beurt, boeking?.guestName)
                     : mailGeaccepteerd(inst.meldingEmail, s, beurt, boeking?.guestName),
-            "aan Kitty", waarschuwingen,
+            waarschuwingen,
         );
+        await bewaarBeurt(beurt);
     }
     return { success: true, waarschuwing: waarschuwingen.length ? "Kitty kon niet worden gemaild. Laat het haar even weten." : undefined };
 }

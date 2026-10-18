@@ -54,7 +54,7 @@ export async function verstuurNachtregistratieMail(
     });
 }
 
-const TEST_ONTVANGER = "akleinjans@me.com";
+export const TEST_ONTVANGER = "akleinjans@me.com";
 
 // Buiten Vercel gaat elke schoonmaakmail naar het testadres, met de echte ontvanger in het onderwerp.
 export async function verstuurSchoonmaakMail(naar: string, onderwerp: string, tekst: string): Promise<void> {

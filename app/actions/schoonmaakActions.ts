@@ -151,7 +151,10 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
         };
         if (nieuweSchoonmaker) beurt.historie.push(regel("toegewezen", nieuweSchoonmaker.id));
         await bewaarBeurt(beurt);
-        if (nieuweSchoonmaker) await mailVeilig(() => mailToegewezen(nieuweSchoonmaker, beurt, verrijk(beurt, bookings), inst), "aan schoonmaakster", waarschuwingen);
+        if (nieuweSchoonmaker) {
+            await mailVeilig(beurt, "Toewijzing", nieuweSchoonmaker.email, () => mailToegewezen(nieuweSchoonmaker, beurt, verrijk(beurt, bookings), inst), waarschuwingen);
+            await bewaarBeurt(beurt);
+        }
         return { success: true, waarschuwing: waarschuwingen.join(", ") || undefined };
     }
 
@@ -189,7 +192,7 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
     if (andereSchoonmaker) {
         if (oudeSchoonmaker && (oudeStatus === "toegewezen" || oudeStatus === "geaccepteerd")) {
             beurt.historie.push(regel("ingetrokken", oudeSchoonmaker.id));
-            await mailVeilig(() => mailIngetrokken(oudeSchoonmaker, beurt), "aan vorige schoonmaakster", waarschuwingen);
+            await mailVeilig(beurt, "Intrekking", oudeSchoonmaker.email, () => mailIngetrokken(oudeSchoonmaker, beurt), waarschuwingen);
         }
         if (beurt.opmerkingSchoonmaker) beurt.historie.push(regel("opmerking vorige schoonmaakster", beurt.schoonmakerId, beurt.opmerkingSchoonmaker));
         beurt.opmerkingSchoonmaker = undefined;
@@ -205,15 +208,17 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
     await bewaarBeurt(beurt);
 
     const wasActief = oudeStatus === "toegewezen" || oudeStatus === "geaccepteerd";
+    const aantalRegels = beurt.historie.length;
     if (andereSchoonmaker && nieuweSchoonmaker) {
-        await mailVeilig(() => mailToegewezen(nieuweSchoonmaker, beurt, verrijk(beurt, bookings), inst), "aan schoonmaakster", waarschuwingen);
+        await mailVeilig(beurt, "Toewijzing", nieuweSchoonmaker.email, () => mailToegewezen(nieuweSchoonmaker, beurt, verrijk(beurt, bookings), inst), waarschuwingen);
     } else if (!andereSchoonmaker && oudeSchoonmaker && wasActief && beurt.status === "vervallen") {
-        await mailVeilig(() => mailVervallen(oudeSchoonmaker, beurt), "over vervallen", waarschuwingen);
+        await mailVeilig(beurt, "Vervalbericht", oudeSchoonmaker.email, () => mailVervallen(oudeSchoonmaker, beurt), waarschuwingen);
     } else if (!andereSchoonmaker && oudeSchoonmaker && oudeStatus === "vervallen" && beurt.status === "toegewezen") {
-        await mailVeilig(() => mailToegewezen(oudeSchoonmaker, beurt, verrijk(beurt, bookings), inst), "aan schoonmaakster", waarschuwingen);
+        await mailVeilig(beurt, "Toewijzing", oudeSchoonmaker.email, () => mailToegewezen(oudeSchoonmaker, beurt, verrijk(beurt, bookings), inst), waarschuwingen);
     } else if (!andereSchoonmaker && oudeSchoonmaker && beurt.datum !== oudeDatum && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) {
-        await mailVeilig(() => mailVerplaatst(oudeSchoonmaker, beurt, oudeDatum), "over verplaatsing", waarschuwingen);
+        await mailVeilig(beurt, "Verplaatsing", oudeSchoonmaker.email, () => mailVerplaatst(oudeSchoonmaker, beurt, oudeDatum), waarschuwingen);
     }
+    if (beurt.historie.length > aantalRegels) await bewaarBeurt(beurt);
     return { success: true, waarschuwing: waarschuwingen.join(", ") || undefined };
 }
 
@@ -233,7 +238,7 @@ export async function verwijderBeurtActie(id: string): Promise<Resultaat> {
     const waarschuwingen: string[] = [];
     if (beurt.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) {
         const s = (await leesSchoonmakers()).find(x => x.id === beurt.schoonmakerId);
-        if (s) await mailVeilig(() => mailVervallen(s, beurt), "aan schoonmaakster", waarschuwingen);
+        if (s) await mailVeilig(null, "Vervalbericht", s.email, () => mailVervallen(s, beurt), waarschuwingen);
     }
     return { success: true, waarschuwing: waarschuwingen.join(", ") || undefined };
 }
