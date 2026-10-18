@@ -876,9 +876,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         const reg = (booking as any).nachtregistratie;
                                         const regStatus: "leeg" | "ingevuld" | "verstuurd" = !reg ? "leeg" : reg.status;
                                         const regBadge = {
-                                            leeg: { label: "Formulier leeg", bg: "#f0f0f0", color: "#888" },
-                                            ingevuld: { label: "Ingevuld", bg: "#fef3c7", color: "#92400e" },
-                                            verstuurd: { label: "Verstuurd ✓", bg: "#dcfce7", color: "#166534" },
+                                            leeg: { label: "📋 Formulier leeg", bg: "#f0f0f0", color: "#888" },
+                                            ingevuld: { label: "📋 Ingevuld", bg: "#fef3c7", color: "#92400e" },
+                                            verstuurd: { label: "📋 Verstuurd ✓", bg: "#dcfce7", color: "#166534" },
                                         }[regStatus];
                                         const isRegExpanded = expandedRegId === booking.id;
                                         const beurt = schoonmaak?.beurten.find(b => b.automatisch && b.bookingId === booking.id);
