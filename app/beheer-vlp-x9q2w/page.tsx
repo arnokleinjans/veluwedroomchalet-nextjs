@@ -22,6 +22,7 @@ import { CSS } from "@dnd-kit/utilities";
 import RichTextEditor from "../components/RichTextEditor";
 import { FASES_VOOR_TEGELS, TEST_FASES, fasesVanTegel, vraagtOmNachtregistratie, toontOpMobiel, toontOpDesktop, accentVanTegel, isUitgelicht } from "../utils/testModus";
 import ConfirmDialog from "../components/ConfirmDialog";
+import DatumBereik from "../components/DatumBereik";
 import ImageLightbox from "../components/ImageLightbox";
 import { TALEN, VERTAALTALEN, vlagVan, naamVan } from "../utils/talen";
 
@@ -768,14 +769,13 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Boekingsnummer</label>
                                             <input type="text" value={newBookingNumber} onChange={e => setNewBookingNumber(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Voyando-nr" />
                                         </div>
-                                        <div style={{ flex: "1 1 120px" }}>
-                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Aankomst</label>
-                                            <input type="date" value={newCheckIn} onChange={e => setNewCheckIn(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                        </div>
-                                        <div style={{ flex: "1 1 120px" }}>
-                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Vertrek</label>
-                                            <input type="date" value={newCheckOut} onChange={e => setNewCheckOut(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
-                                        </div>
+                                        <DatumBereik
+                                            aankomst={newCheckIn}
+                                            vertrek={newCheckOut}
+                                            onChange={(a, v) => { setNewCheckIn(a); setNewCheckOut(v); }}
+                                            labelStyle={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}
+                                            veldStyle={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                                        />
                                         <div style={{ flex: "1 1 120px" }}>
                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Weergavetaal</label>
                                             <select value={newLanguage} onChange={e => setNewLanguage(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white" }}>
@@ -922,14 +922,14 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Boekingsnummer</label>
                                                             <input type="text" value={editValues.bookingNumber} onChange={e => setEditValues(v => ({ ...v, bookingNumber: e.target.value }))} placeholder="Bijv: 12345 (Voyando)" style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
                                                         </div>
-                                                        <div style={{ flex: "1 1 130px" }}>
-                                                            <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Aankomst</label>
-                                                            <input type="date" value={editValues.checkIn} onChange={e => setEditValues(v => ({ ...v, checkIn: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
-                                                        </div>
-                                                        <div style={{ flex: "1 1 130px" }}>
-                                                            <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Vertrek</label>
-                                                            <input type="date" value={editValues.checkOut} onChange={e => setEditValues(v => ({ ...v, checkOut: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
-                                                        </div>
+                                                        <DatumBereik
+                                                            aankomst={editValues.checkIn}
+                                                            vertrek={editValues.checkOut}
+                                                            onChange={(a, v) => setEditValues(w => ({ ...w, checkIn: a, checkOut: v }))}
+                                                            labelStyle={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}
+                                                            veldStyle={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }}
+                                                            flex="1 1 130px"
+                                                        />
                                                         <div style={{ flex: "1 1 130px" }}>
                                                             <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Taal</label>
                                                             <select value={editValues.language} onChange={e => setEditValues(v => ({ ...v, language: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white", fontSize: "0.85rem" }}>

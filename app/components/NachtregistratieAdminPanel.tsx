@@ -4,6 +4,7 @@ import { useState } from "react";
 import { adminUpdateNachtregistratie, verstuurNachtregistratie } from "../actions/adminActions";
 import { berekenBedrag, formatBedrag, formatDatumNL } from "../utils/toeristenbelasting";
 import ConfirmDialog from "./ConfirmDialog";
+import DatumBereik from "./DatumBereik";
 
 const DEFAULT_OPMERKING: Record<string, string> = {
     receptie: "Huurder betaalt de toeristenbelasting bij aankomst zelf bij de receptie",
@@ -156,14 +157,13 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
                     <label style={labelStyle}>Personen</label>
                     <input type="number" min={1} value={aantalPersonen} onChange={e => setAantalPersonen(e.target.value)} style={veldStyle} />
                 </div>
-                <div style={{ flex: "1 1 120px" }}>
-                    <label style={labelStyle}>Aankomst</label>
-                    <input type="date" value={aankomst} onChange={e => { setAankomst(e.target.value); setBedrag(String(berekenBedrag(e.target.value, vertrek))); }} style={veldStyle} />
-                </div>
-                <div style={{ flex: "1 1 120px" }}>
-                    <label style={labelStyle}>Vertrek</label>
-                    <input type="date" value={vertrek} onChange={e => { setVertrek(e.target.value); setBedrag(String(berekenBedrag(aankomst, e.target.value))); }} style={veldStyle} />
-                </div>
+                <DatumBereik
+                    aankomst={aankomst}
+                    vertrek={vertrek}
+                    onChange={(a, v) => { setAankomst(a); setVertrek(v); if (a && v) setBedrag(String(berekenBedrag(a, v))); }}
+                    labelStyle={labelStyle}
+                    veldStyle={veldStyle}
+                />
                 <div style={{ flex: "1 1 90px" }}>
                     <label style={labelStyle}>Bedrag (€)</label>
                     <input type="text" value={bedrag} onChange={e => setBedrag(e.target.value)} style={veldStyle} />
