@@ -156,6 +156,7 @@ export async function hernoemBoekingInBeurten(oudId: string, nieuwId: string) {
 
 export function verrijk(beurt: Beurt, bookings: any[]): BeurtMetContext {
     const boeking = beurt.bookingId ? bookings.find(b => b.id === beurt.bookingId) : undefined;
+    // De eerstvolgende gast die op of na de schoonmaakdatum aankomt. Voor die gast wordt het chalet klaargemaakt.
     const volgende = bookings
         .filter(b => !b.isTest && b.id !== beurt.bookingId && b.checkIn && b.checkIn >= beurt.datum)
         .sort((a, b) => a.checkIn.localeCompare(b.checkIn))[0];
@@ -164,7 +165,7 @@ export function verrijk(beurt: Beurt, bookings: any[]): BeurtMetContext {
         gastNaam: boeking?.guestName,
         boekingVerwijderd: !!beurt.bookingId && !boeking,
         vertrekBoeking: boeking?.checkOut,
-        aantalPersonen: boeking?.nachtregistratie?.aantalPersonen || undefined,
+        personenVolgende: volgende?.nachtregistratie?.aantalPersonen || undefined,
         volgendeAankomst: volgende?.checkIn,
     };
 }
@@ -176,7 +177,7 @@ export function voorSchoonmaker(beurt: BeurtMetContext, instellingen: Schoonmaak
         omschrijving: beurt.bookingId ? undefined : beurt.omschrijving,
         vertrektijd: beurt.vertrektijd || instellingen.vertrektijd,
         volgendeAankomst: beurt.volgendeAankomst,
-        aantalPersonen: beurt.aantalPersonen,
+        personenVolgende: beurt.personenVolgende,
         berichtAanSchoonmaker: beurt.berichtAanSchoonmaker,
         opmerkingSchoonmaker: beurt.opmerkingSchoonmaker,
         redenAfkeuring: beurt.redenAfkeuring,

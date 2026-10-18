@@ -17,11 +17,11 @@ export async function portaalLink(s: { linkCode: string }): Promise<string> {
     return `${await basisUrl()}/schoonmaak/${s.linkCode}`;
 }
 
-function beurtRegels(beurt: Beurt, vertrektijd: string, volgendeAankomst?: string): string[] {
+function beurtRegels(beurt: Beurt, vertrektijd: string, volgendeAankomst?: string, personenVolgende?: number): string[] {
     return [
         `Datum: ${datumLang(beurt.datum)}`,
         beurt.bookingId ? `Gast vertrekt: ${beurt.vertrektijd || vertrektijd}` : `Wat: ${beurt.omschrijving || "schoonmaak"}`,
-        volgendeAankomst ? `Volgende gast komt: ${datumLang(volgendeAankomst)}` : "",
+        volgendeAankomst ? `Volgende gast komt: ${datumLang(volgendeAankomst)}${personenVolgende ? ` (${personenVolgende} personen)` : ""}` : "",
         beurt.berichtAanSchoonmaker ? `Bericht van Kitty: ${beurt.berichtAanSchoonmaker}` : "",
     ].filter(Boolean);
 }
@@ -39,7 +39,7 @@ export async function mailToegewezen(s: Schoonmaker, beurt: Beurt, ctx: BeurtMet
     await verstuurSchoonmaakMail(s.email, `Schoonmaak ${datumLang(beurt.datum)}`, [
         `Hoi ${s.naam},`, ``,
         `Kitty heeft je een schoonmaakbeurt toegewezen.`, ``,
-        ...beurtRegels(beurt, inst.vertrektijd, ctx.volgendeAankomst), ``,
+        ...beurtRegels(beurt, inst.vertrektijd, ctx.volgendeAankomst, ctx.personenVolgende), ``,
         `Accepteren of afkeuren doe je op je eigen pagina:`,
         await portaalLink(s), ``,
         `Groet,`, `Kitty`,

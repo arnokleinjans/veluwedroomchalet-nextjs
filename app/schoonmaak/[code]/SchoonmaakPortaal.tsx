@@ -206,7 +206,7 @@ function BeurtKaart({ code, beurt, afgelopen = false }: { code: string; beurt: B
             {beurt.omschrijving && <Regel label="Wat">{beurt.omschrijving}</Regel>}
             {!beurt.omschrijving && <Regel label="Gast vertrekt">{beurt.vertrektijd} uur</Regel>}
             <Regel label="Volgende gast komt">{beurt.volgendeAankomst ? datumLang(beurt.volgendeAankomst) : "nog niet bekend"}</Regel>
-            {!beurt.omschrijving && <Regel label="Aantal personen">{beurt.aantalPersonen ?? "nog niet bekend"}</Regel>}
+            {beurt.volgendeAankomst && <Regel label="Personen volgende gast">{beurt.personenVolgende ?? "nog niet bekend"}</Regel>}
             <Regel label="Bedrag">{formatEuro(beurt.bedrag)}{beurt.betaald ? " · betaald ✓" : ""}</Regel>
 
             {beurt.berichtAanSchoonmaker && (

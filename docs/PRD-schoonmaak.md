@@ -16,7 +16,7 @@ De schoonmaak is op de vertrekdag van de gast. Kitty kan die datum per beurt aan
 2. **Tarief.** Vast bedrag per schoonmaakster, per beurt aan te passen.
 3. **Betalen.** Per beurt een vinkje "betaald", plus een maandoverzicht per schoonmaakster.
 4. **Afkeuren.** Kitty krijgt een mail en de beurt staat rood in beheer. Kitty wijst iemand anders toe (§3.5).
-5. **Wat ziet de schoonmaakster.** Datum, vertrektijd van de gast, aankomstdatum van de volgende gast, aantal personen, het bericht van Kitty en haar eigen opmerking voor Kitty.
+5. **Wat ziet de schoonmaakster.** Datum, vertrektijd van de gast, aankomstdatum en aantal personen van de volgende gast, het bericht van Kitty en haar eigen opmerking voor Kitty.
 6. **Beurten zonder boeking.** Ja (§3.4).
 7. **Inloggen.** Persoonlijke link met pincode.
 8. **Mail bij toewijzen.** Ja.
@@ -96,7 +96,7 @@ Ze ziet een lijst met haar eigen beurten: eerst de komende, daarna de afgelopen.
 
 - Datum en tijdstip waarop de gast vertrekt
 - Aankomstdatum van de volgende gast
-- Aantal personen van de vertrekkende gast, uit de nachtregistratie. Is die nog niet ingevuld, dan staat er "nog niet bekend".
+- Aantal personen van de volgende gast, uit diens nachtregistratie. Voor die gast wordt het chalet klaargemaakt. Is de nachtregistratie nog niet ingevuld, dan staat er "nog niet bekend".
 - Het bericht van Kitty
 - Bedrag en of het betaald is
 - Haar eigen opmerking voor Kitty, altijd aan te passen

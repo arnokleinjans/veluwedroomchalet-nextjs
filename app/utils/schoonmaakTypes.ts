@@ -51,7 +51,7 @@ export type BeurtMetContext = Beurt & {
     gastNaam?: string;
     boekingVerwijderd: boolean;
     vertrekBoeking?: string;
-    aantalPersonen?: number;
+    personenVolgende?: number;
     volgendeAankomst?: string;
 };
 
@@ -62,7 +62,7 @@ export type BeurtVoorSchoonmaker = {
     omschrijving?: string;
     vertrektijd: string;
     volgendeAankomst?: string;
-    aantalPersonen?: number;
+    personenVolgende?: number;
     berichtAanSchoonmaker?: string;
     opmerkingSchoonmaker?: string;
     redenAfkeuring?: string;
