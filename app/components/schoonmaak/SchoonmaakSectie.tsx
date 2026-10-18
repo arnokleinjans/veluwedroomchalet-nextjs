@@ -75,6 +75,7 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
     const afgekeurd = data.beurten.filter(b => b.status === "afgekeurd").length;
     const openstaand = data.beurten.filter(teBetalen);
     const vergeten = data.beurten.filter(b => nietAfgemeld(b, vandaag)).length;
+    const oudZonder = data.beurten.filter(b => b.datum < vandaag && !b.schoonmakerId && b.status !== "vervallen").length;
     const openBedrag = openstaand.reduce((t, b) => t + (b.bedrag || 0), 0);
 
     const zet = (p: Periode, st: StatusKeuze, bet: Betaling, w = "alle") => {
@@ -84,6 +85,7 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
 
     const aandacht = [
         zonderKomend > 0 && { tekst: `${zonderKomend} zonder schoonmaakster`, kleur: "#b91c1c", bg: "#fee2e2", klik: () => zet("komend", "open", "alle") },
+        oudZonder > 0 && { tekst: `${oudZonder} afgelopen zonder schoonmaakster`, kleur: "#555", bg: "#eee", klik: () => zet("afgelopen", "alle", "alle", "niemand") },
         afgekeurd > 0 && { tekst: `${afgekeurd} afgekeurd`, kleur: "#b91c1c", bg: "#fee2e2", klik: () => zet("alles", "afgekeurd", "alle") },
         vergeten > 0 && { tekst: `${vergeten} niet afgemeld`, kleur: "#1e40af", bg: "#dbeafe", klik: () => zet("afgelopen", "nietafgemeld", "alle") },
         openstaand.length > 0 && { tekst: `${openstaand.length} nog te betalen (${formatEuro(openBedrag)})`, kleur: "#92400e", bg: "#fef3c7", klik: () => zet("alles", "alle", "tebetalen") },

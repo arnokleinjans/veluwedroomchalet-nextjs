@@ -123,6 +123,8 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
     const schoonmakers = await leesSchoonmakers();
     const inst = await leesInstellingen();
     const waarschuwingen: string[] = [];
+    // Een beurt in het verleden wordt achteraf bijgewerkt: geen mails, en een andere schoonmaakster zet de status niet terug.
+    const verleden = invoer.datum < vandaag();
     const nieuweSchoonmaker = invoer.schoonmakerId ? schoonmakers.find(s => s.id === invoer.schoonmakerId) : undefined;
     if (invoer.schoonmakerId && !nieuweSchoonmaker) return { success: false, error: "Schoonmaakster niet gevonden." };
     const bedrag = invoer.bedrag === null || invoer.bedrag === undefined || isNaN(Number(invoer.bedrag)) ? undefined : Number(invoer.bedrag);
@@ -144,14 +146,14 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
             bedrag,
             betaald: !!invoer.betaald,
             betaaldOp: invoer.betaald ? (invoer.betaaldOp || vandaag()) : undefined,
-            status: nieuweSchoonmaker ? "toegewezen" : "open",
+            status: verleden ? "uitgevoerd" : nieuweSchoonmaker ? "toegewezen" : "open",
             berichtAanSchoonmaker: invoer.berichtAanSchoonmaker?.trim() || undefined,
-            historie: [regel("losse beurt aangemaakt")],
+            historie: [regel(verleden ? "losse beurt achteraf aangemaakt" : "losse beurt aangemaakt")],
             bijgewerkt: "",
         };
-        if (nieuweSchoonmaker) beurt.historie.push(regel("toegewezen", nieuweSchoonmaker.id));
+        if (nieuweSchoonmaker) beurt.historie.push(regel(verleden ? "schoonmaakster achteraf ingevuld" : "toegewezen", nieuweSchoonmaker.id));
         await bewaarBeurt(beurt);
-        if (nieuweSchoonmaker) {
+        if (nieuweSchoonmaker && !verleden) {
             await mailVeilig(beurt, "Toewijzing", nieuweSchoonmaker.email, () => mailToegewezen(nieuweSchoonmaker, beurt, verrijk(beurt, bookings), inst), waarschuwingen);
             await bewaarBeurt(beurt);
         }
@@ -190,7 +192,7 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
 
     const andereSchoonmaker = (invoer.schoonmakerId || undefined) !== (beurt.schoonmakerId || undefined);
     if (andereSchoonmaker) {
-        if (oudeSchoonmaker && (oudeStatus === "toegewezen" || oudeStatus === "geaccepteerd")) {
+        if (oudeSchoonmaker && !verleden && (oudeStatus === "toegewezen" || oudeStatus === "geaccepteerd")) {
             beurt.historie.push(regel("ingetrokken", oudeSchoonmaker.id));
             await mailVeilig(beurt, "Intrekking", oudeSchoonmaker.email, () => mailIngetrokken(oudeSchoonmaker, beurt), waarschuwingen);
         }
@@ -198,8 +200,13 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
         beurt.opmerkingSchoonmaker = undefined;
         beurt.redenAfkeuring = undefined;
         beurt.schoonmakerId = nieuweSchoonmaker?.id;
-        beurt.status = nieuweSchoonmaker ? "toegewezen" : "open";
-        beurt.historie.push(regel(nieuweSchoonmaker ? "toegewezen" : "niemand toegewezen", nieuweSchoonmaker?.id));
+        if (verleden) {
+            if (invoer.status && invoer.status !== beurt.status) beurt.status = invoer.status;
+            beurt.historie.push(regel(nieuweSchoonmaker ? "schoonmaakster achteraf ingevuld" : "schoonmaakster weggehaald", nieuweSchoonmaker?.id));
+        } else {
+            beurt.status = nieuweSchoonmaker ? "toegewezen" : "open";
+            beurt.historie.push(regel(nieuweSchoonmaker ? "toegewezen" : "niemand toegewezen", nieuweSchoonmaker?.id));
+        }
     } else if (invoer.status && invoer.status !== beurt.status) {
         beurt.status = invoer.status;
         beurt.historie.push(regel(`status door Kitty op ${invoer.status} gezet`));
@@ -209,13 +216,13 @@ export async function bewaarBeurtActie(invoer: BeurtInvoer): Promise<Resultaat> 
 
     const wasActief = oudeStatus === "toegewezen" || oudeStatus === "geaccepteerd";
     const aantalRegels = beurt.historie.length;
-    if (andereSchoonmaker && nieuweSchoonmaker) {
+    if (!verleden && andereSchoonmaker && nieuweSchoonmaker) {
         await mailVeilig(beurt, "Toewijzing", nieuweSchoonmaker.email, () => mailToegewezen(nieuweSchoonmaker, beurt, verrijk(beurt, bookings), inst), waarschuwingen);
-    } else if (!andereSchoonmaker && oudeSchoonmaker && wasActief && beurt.status === "vervallen") {
+    } else if (!verleden && !andereSchoonmaker && oudeSchoonmaker && wasActief && beurt.status === "vervallen") {
         await mailVeilig(beurt, "Vervalbericht", oudeSchoonmaker.email, () => mailVervallen(oudeSchoonmaker, beurt), waarschuwingen);
-    } else if (!andereSchoonmaker && oudeSchoonmaker && oudeStatus === "vervallen" && beurt.status === "toegewezen") {
+    } else if (!verleden && !andereSchoonmaker && oudeSchoonmaker && oudeStatus === "vervallen" && beurt.status === "toegewezen") {
         await mailVeilig(beurt, "Toewijzing", oudeSchoonmaker.email, () => mailToegewezen(oudeSchoonmaker, beurt, verrijk(beurt, bookings), inst), waarschuwingen);
-    } else if (!andereSchoonmaker && oudeSchoonmaker && beurt.datum !== oudeDatum && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) {
+    } else if (!verleden && !andereSchoonmaker && oudeSchoonmaker && beurt.datum !== oudeDatum && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) {
         await mailVeilig(beurt, "Verplaatsing", oudeSchoonmaker.email, () => mailVerplaatst(oudeSchoonmaker, beurt, oudeDatum), waarschuwingen);
     }
     if (beurt.historie.length > aantalRegels) await bewaarBeurt(beurt);
@@ -236,7 +243,7 @@ export async function verwijderBeurtActie(id: string): Promise<Resultaat> {
     await verwijderBeurt(id);
 
     const waarschuwingen: string[] = [];
-    if (beurt.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) {
+    if (beurt.schoonmakerId && beurt.datum >= vandaag() && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) {
         const s = (await leesSchoonmakers()).find(x => x.id === beurt.schoonmakerId);
         if (s) await mailVeilig(null, "Vervalbericht", s.email, () => mailVervallen(s, beurt), waarschuwingen);
     }

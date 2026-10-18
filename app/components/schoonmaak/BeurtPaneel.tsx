@@ -46,6 +46,7 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
     }, []);
 
     const andereSchoonmaker = (schoonmakerId || "") !== (beurt?.schoonmakerId || "");
+    const verleden = !!datum && datum < new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Amsterdam" }).format(new Date());
     const kiesbaar = schoonmakers.filter(s => s.actief || s.id === beurt?.schoonmakerId);
     const naamVan = (id?: string) => schoonmakers.find(s => s.id === id)?.naam || "onbekend";
     const afwijkendeDatum = !!beurt?.automatisch && !!beurt.vertrekBoeking && datum !== beurt.vertrekBoeking;
@@ -158,10 +159,10 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
                 </div>
                 <div style={kolom}>
                     <label style={label}>Status</label>
-                    {andereSchoonmaker ? (
+                    {andereSchoonmaker && !verleden ? (
                         <div style={{ ...veld, backgroundColor: "#f0f0f0", color: "#666" }}>{schoonmakerId ? "wordt Toegewezen" : "wordt Open"}</div>
                     ) : (
-                        <select value={status} onChange={e => setStatus(e.target.value as BeurtStatus)} style={veld} disabled={nieuw}>
+                        <select value={nieuw && verleden ? "uitgevoerd" : status} onChange={e => setStatus(e.target.value as BeurtStatus)} style={veld} disabled={nieuw}>
                             {(Object.keys(STATUS_LABEL) as BeurtStatus[]).map(s => <option key={s} value={s}>{STATUS_LABEL[s].label}</option>)}
                         </select>
                     )}
@@ -174,13 +175,16 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
                     <button onClick={() => setDatum(beurt!.vertrekBoeking!)} style={{ background: "none", border: "none", color: "#4A5D23", textDecoration: "underline", cursor: "pointer", padding: 0, fontSize: "0.78rem" }}>Terug naar vertrekdatum</button>
                 </p>
             )}
-            {andereSchoonmaker && beurt?.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd") && (
+            {verleden && (
+                <p style={{ fontSize: "0.78rem", color: "#666", margin: "8px 0 0" }}>Datum ligt in het verleden: er gaan geen mails naar de schoonmaakster.</p>
+            )}
+            {!verleden && andereSchoonmaker && beurt?.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd") && (
                 <p style={{ fontSize: "0.78rem", color: "#666", margin: "8px 0 0" }}>{naamVan(beurt.schoonmakerId)} krijgt een mail dat de beurt is ingetrokken.</p>
             )}
-            {!andereSchoonmaker && beurt?.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd") && status === "vervallen" && (
+            {!verleden && !andereSchoonmaker && beurt?.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd") && status === "vervallen" && (
                 <p style={{ fontSize: "0.82rem", color: "#92400e", backgroundColor: "#fffbeb", padding: "6px 10px", borderRadius: "6px", margin: "8px 0 0" }}>📧 {naamVan(beurt.schoonmakerId)} krijgt na opslaan een mail dat de schoonmaak vervalt.</p>
             )}
-            {!andereSchoonmaker && beurt?.schoonmakerId && beurt.status === "vervallen" && status === "toegewezen" && (
+            {!verleden && !andereSchoonmaker && beurt?.schoonmakerId && beurt.status === "vervallen" && status === "toegewezen" && (
                 <p style={{ fontSize: "0.82rem", color: "#666", margin: "8px 0 0" }}>📧 {naamVan(beurt.schoonmakerId)} krijgt na opslaan opnieuw een mail met deze beurt.</p>
             )}
 

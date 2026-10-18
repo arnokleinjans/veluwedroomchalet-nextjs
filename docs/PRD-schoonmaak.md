@@ -81,7 +81,13 @@ De beurt verdwijnt uit het portaal van A. De afwijzing van A blijft in beheer zi
 
 Dezelfde keuzelijst werkt ook als er niets is afgekeurd. Kitty kan een beurt altijd aan iemand anders geven. A krijgt dan een mail dat de beurt is ingetrokken.
 
-### 3.6 Datum en boeking
+### 3.6 Oude schoonmaak achteraf
+
+Vertrekken van vóór de livegang krijgen eenmalig een beurt via `scripts/schoonmaak-verleden-aanvullen.mjs`: status "Uitgevoerd", zonder schoonmaakster en bedrag, niet betaald, met "overgenomen uit oude boeking" in de geschiedenis. Kitty vult per beurt de schoonmaakster in; het bedrag springt dan naar het tarief. De aandachtsbalk toont "afgelopen zonder schoonmaakster" als ingang.
+
+Voor elke beurt met een datum vóór vandaag geldt: er gaan geen mails uit, en een andere schoonmaakster kiezen zet de status niet terug naar "Toegewezen".
+
+### 3.7 Datum en boeking
 
 - Verandert de vertrekdatum van een boeking, dan schuift de schoonmaakdatum mee. Heeft Kitty de datum zelf aangepast, dan blijft die staan.
 - Wordt een boeking verwijderd, dan blijft de beurt bestaan met de melding "boeking verwijderd". Kitty ruimt die zelf op.
