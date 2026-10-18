@@ -155,21 +155,29 @@ export default function DatumBereik({ aankomst, vertrek, onChange, labelStyle, v
         return (
             <div style={{ flex }} ref={f === "aankomst" ? ankerRef : vertrekRef}>
                 <label style={labelStyle}>{label}</label>
-                <button
-                    type="button"
-                    onClick={() => openen(f)}
-                    style={{
-                        ...veldStyle,
-                        display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px",
-                        backgroundColor: "white", cursor: "pointer", textAlign: "left", font: "inherit", fontSize: veldStyle.fontSize,
-                        color: waarde ? "#333" : "#999",
-                        borderColor: actief ? GROEN : undefined,
-                        boxShadow: actief ? `0 0 0 2px ${GROEN}33` : undefined,
-                    }}
-                >
-                    <span>{waarde ? toonDatum(waarde) : "dd-mm-jjjj"}</span>
-                    <span aria-hidden style={{ fontSize: "0.9em" }}>📅</span>
-                </button>
+                <div style={{ position: "relative" }}>
+                    <input
+                        readOnly
+                        value={waarde ? toonDatum(waarde) : ""}
+                        placeholder="dd-mm-jjjj"
+                        onClick={() => openen(f)}
+                        onKeyDown={e => { if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") { e.preventDefault(); openen(f); } }}
+                        style={{
+                            ...veldStyle,
+                            cursor: "pointer",
+                            paddingRight: "28px",
+                            boxSizing: "border-box",
+                            // Volledige rand i.p.v. alleen borderColor: anders valt de rand na sluiten terug op zwart.
+                            border: actief ? `1px solid ${GROEN}` : (veldStyle.border || "1px solid #ccc"),
+                            boxShadow: actief ? `0 0 0 2px ${GROEN}33` : "none",
+                            outline: "none",
+                        }}
+                    />
+                    <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", right: "9px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                        <path d="M3 10h18M8 3v4M16 3v4" />
+                    </svg>
+                </div>
             </div>
         );
     };
