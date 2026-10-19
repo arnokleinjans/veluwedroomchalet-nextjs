@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useBooking } from "../../context/BookingContext";
 import { parseTemplateString } from "../../utils/templateParser";
-import { tegelZichtbaar, toontOpMobiel, toontOpDesktop, accentVanTegel } from "../../utils/testModus";
+import { tegelZichtbaar, toontOpMobiel, toontOpDesktop, accentVanTegel, vraagtOmNachtregistratie } from "../../utils/testModus";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +74,7 @@ export default function Home() {
             </>
           );
 
-          if ((insight as any).visibility === "nachtregistratie") {
+          if (vraagtOmNachtregistratie(insight)) {
             return (
               <Link
                 key={index}
