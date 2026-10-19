@@ -140,8 +140,20 @@ export async function synchroniseerBeurten(bookings: any[]): Promise<Beurt[]> {
             if (beurt.schoonmakerId && (beurt.status === "toegewezen" || beurt.status === "geaccepteerd")) verschoven.push(beurt);
         }
     }
+
+    // Boeking bestaat niet meer en de schoonmaak is nog niet gedaan: dan is er niets meer schoon te maken.
+    const bestaand = new Set((bookings || []).map(b => b?.id));
+    for (const beurt of beurten) {
+        if (beurt.bookingId && !bestaand.has(beurt.bookingId) && NOG_TE_DOEN.includes(beurt.status)) {
+            beurt.status = "vervallen";
+            beurt.historie.push(regel("vervallen: boeking bestaat niet meer"));
+            await bewaarBeurt(beurt);
+        }
+    }
     return verschoven;
 }
+
+export const NOG_TE_DOEN: Beurt["status"][] = ["open", "toegewezen", "geaccepteerd", "afgekeurd"];
 
 export async function hernoemBoekingInBeurten(oudId: string, nieuwId: string) {
     for (const beurt of await alleBeurten()) {

@@ -108,7 +108,9 @@ export default function BeurtPaneel({ beurt, schoonmakers, boekingen, instelling
 
             {beurt?.boekingVerwijderd && (
                 <p style={{ fontSize: "0.82rem", backgroundColor: "#fff7ed", color: "#9a3412", padding: "8px 10px", borderRadius: "6px", margin: "0 0 12px" }}>
-                    De boeking bij deze beurt is verwijderd. Verwijder de beurt als hij niet meer nodig is.
+                    {beurt.status === "uitgevoerd"
+                        ? "De boeking bij deze beurt is verwijderd. De schoonmaak is wel uitgevoerd en telt mee in de totalen."
+                        : "De boeking bij deze beurt is verwijderd, daarom is de beurt vervallen. Verwijder hem als je hem niet meer wilt zien."}
                 </p>
             )}
 

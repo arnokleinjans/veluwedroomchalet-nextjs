@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { TEST_ONTVANGER, verstuurSchoonmaakMail } from "./mailer";
-import { bewaarBeurt, leesSchoonmakers, regel, synchroniseerBeurten } from "./schoonmaakStore";
+import { NOG_TE_DOEN, alleBeurten, bewaarBeurt, leesSchoonmakers, regel, synchroniseerBeurten, vandaag } from "./schoonmaakStore";
 import type { Beurt, BeurtMetContext, SchoonmaakInstellingen, Schoonmaker } from "./schoonmaakTypes";
 import { datumLang } from "./schoonmaakTypes";
 
@@ -123,4 +123,22 @@ export async function mailVervallen(s: Schoonmaker, beurt: Beurt) {
         `Je hoeft hiervoor niets te doen. De beurt staat niet meer op je pagina.`, ``,
         `Groet,`, `Kitty`,
     ].filter((r, i, a) => !(r === `` && a[i - 1] === ``)).join("\n"));
+}
+
+// Bij het verwijderen van een boeking: beurten die nog niet gedaan zijn vervallen, en wie er al op stond krijgt bericht.
+// Een uitgevoerde beurt blijft staan: die schoonmaak is gedaan en telt mee in de totalen.
+export async function vervalBeurtenVanBoeking(bookingId: string) {
+    const schoonmakers = await leesSchoonmakers();
+    const waarschuwingen: string[] = [];
+    for (const beurt of await alleBeurten()) {
+        if (beurt.bookingId !== bookingId || !NOG_TE_DOEN.includes(beurt.status)) continue;
+        const wasActief = beurt.status === "toegewezen" || beurt.status === "geaccepteerd";
+        beurt.status = "vervallen";
+        beurt.historie.push(regel("vervallen: boeking verwijderd"));
+        const s = schoonmakers.find(x => x.id === beurt.schoonmakerId);
+        if (s && wasActief && beurt.datum >= vandaag()) {
+            await mailVeilig(beurt, "Vervalbericht", s.email, () => mailVervallen(s, beurt), waarschuwingen);
+        }
+        await bewaarBeurt(beurt);
+    }
 }

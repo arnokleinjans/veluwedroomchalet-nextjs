@@ -4,7 +4,7 @@ import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { getKV, getAppDataFresh, invalidateCache } from "../utils/db";
 import { isBeheer, startBeheerSessie, stopSessie, BEHEER_COOKIE, NIET_INGELOGD, pogingToegestaan, registreerMislukt, wisPogingen } from "../utils/sessie";
 import { hernoemBoekingInBeurten } from "../utils/schoonmaakStore";
-import { synchroniseerNaBoekingen } from "../utils/schoonmaakMail";
+import { synchroniseerNaBoekingen, vervalBeurtenVanBoeking } from "../utils/schoonmaakMail";
 
 // Helper to write the appData object back to Vercel KV
 async function saveToKV(newData: any) {
@@ -279,7 +279,11 @@ export async function removeBooking(id: string) {
     updatedData.bookings = updatedData.bookings.filter((b: any) => b.id !== id);
 
     const res = await saveToKV(updatedData);
-    if (res.success) await schoonmaakBijwerken(updatedData.bookings);
+    if (res.success) {
+        // Eerst vervallen mét bericht aan de schoonmaakster; de synchronisatie daarna zou ze anders stil laten vervallen.
+        await vervalBeurtenVanBoeking(id).catch(e => console.error("Beurten laten vervallen mislukt:", e));
+        await schoonmaakBijwerken(updatedData.bookings);
+    }
     return res;
 }
 
