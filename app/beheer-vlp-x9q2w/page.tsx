@@ -889,9 +889,17 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                 {/* Header: naam + actieknoppen */}
                                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: isEditing ? "12px" : "4px" }}>
                                                     <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                                                        <button onClick={() => setExpandedRegId(isRegExpanded ? null : booking.id)} title="Nachtregistratieformulier" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.9rem", color: "#4A5D23", padding: "0 2px", transform: isRegExpanded ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>▶</button>
+                                                        <button
+                                                            onClick={() => {
+                                                                const ietsOpen = isRegExpanded || isSchoonmaakOpen;
+                                                                setExpandedRegId(ietsOpen ? null : booking.id);
+                                                                setExpandedSchoonmaakId(ietsOpen || !beurt ? null : booking.id);
+                                                            }}
+                                                            title={isRegExpanded || isSchoonmaakOpen ? "Inklappen" : "Formulier en schoonmaak openen"}
+                                                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.9rem", color: "#4A5D23", padding: "0 2px", transform: isRegExpanded || isSchoonmaakOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}
+                                                        >▶</button>
                                                         <strong style={{ color: isExpired ? "#999" : "#333" }}>{booking.guestName}</strong>
-                                                        <span style={{ fontSize: "0.7rem", backgroundColor: regBadge.bg, color: regBadge.color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>{regBadge.label}</span>
+                                                        <button onClick={() => setExpandedRegId(isRegExpanded ? null : booking.id)} title="Nachtregistratieformulier" style={{ fontSize: "0.7rem", backgroundColor: regBadge.bg, color: regBadge.color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold", border: isRegExpanded ? "1px solid currentColor" : "1px solid transparent", cursor: "pointer" }}>{regBadge.label}</button>
                                                         {beurt && (
                                                             <button onClick={() => setExpandedSchoonmaakId(isSchoonmaakOpen ? null : booking.id)} title="Schoonmaak na vertrek" style={{ fontSize: "0.7rem", backgroundColor: STATUS_LABEL[beurt.status].bg, color: STATUS_LABEL[beurt.status].color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold", border: isSchoonmaakOpen ? "1px solid currentColor" : "1px solid transparent", cursor: "pointer" }}>
                                                                 🧹 {schoonmakerNaam ? `${schoonmakerNaam} · ` : ""}{STATUS_LABEL[beurt.status].label}
@@ -944,6 +952,14 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         <div style={{ fontSize: "0.85rem", color: isExpired ? "#bbb" : "#4A5D23", marginTop: "4px", wordBreak: "break-all", textDecoration: isExpired ? "line-through" : "none" }}>{shareUrl}</div>
                                                     </div>
                                                 )}
+                                                {isRegExpanded && (
+                                                    <NachtregistratieAdminPanel
+                                                        key={`${booking.id}-${regStatus}`}
+                                                        booking={booking as any}
+                                                        onSaved={refreshBookings}
+                                                        setToast={setSaveMessage}
+                                                    />
+                                                )}
                                                 {isSchoonmaakOpen && schoonmaak && (
                                                     <BeurtPaneel
                                                         key={beurt!.bijgewerkt}
@@ -954,14 +970,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         onSaved={herlaadSchoonmaak}
                                                         onClose={() => setExpandedSchoonmaakId(null)}
                                                         toon={toonMelding}
-                                                    />
-                                                )}
-                                                {isRegExpanded && (
-                                                    <NachtregistratieAdminPanel
-                                                        key={`${booking.id}-${regStatus}`}
-                                                        booking={booking as any}
-                                                        onSaved={refreshBookings}
-                                                        setToast={setSaveMessage}
                                                     />
                                                 )}
                                             </div>
