@@ -5,6 +5,7 @@ import { bewaarSchoonmaakInstellingen, bewaarSchoonmaker, haalPortaalLink, maakN
 import { STATUS_LABEL, formatEuro, type BeurtMetContext, type BeurtStatus, type SchoonmaakInstellingen, type SchoonmakerPubliek } from "../../utils/schoonmaakTypes";
 import { formatDatumNL } from "../../utils/toeristenbelasting";
 import BeurtPaneel, { type SchoonmaakBoeking } from "./BeurtPaneel";
+import { exporteerSchoonmaak } from "./exportExcel";
 
 export type SchoonmaakData = {
     beurten: BeurtMetContext[];
@@ -187,6 +188,15 @@ export default function SchoonmaakSectie({ data, herlaad, toon }: {
 }
 
 function Maandoverzicht({ data, maand, setMaand }: { data: SchoonmaakData; maand: string; setMaand: (m: string) => void }) {
+    const [bezig, setBezig] = useState<"maand" | "jaar" | null>(null);
+    const exporteer = async (soort: "maand" | "jaar") => {
+        setBezig(soort);
+        try {
+            await exporteerSchoonmaak(soort === "maand" ? maand : maand.slice(0, 4), data.beurten, data.schoonmakers);
+        } finally {
+            setBezig(null);
+        }
+    };
     const som = (lijst: BeurtMetContext[]) => lijst.reduce((t, b) => t + (b.bedrag || 0), 0);
     const rijen = useMemo(() => {
         const inMaand = data.beurten.filter(b => b.datum.startsWith(maand));
@@ -230,7 +240,11 @@ function Maandoverzicht({ data, maand, setMaand }: { data: SchoonmaakData; maand
             <summary style={blokKop}>📅 Maandoverzicht</summary>
             <div style={{ display: "flex", gap: "10px", alignItems: "center", margin: "12px 0", flexWrap: "wrap" }}>
                 <input type="month" value={maand} onChange={e => setMaand(e.target.value)} style={{ ...veld, width: "auto" }} />
-                <span style={{ fontSize: "0.82rem", color: "#666" }}>Over alle maanden staat nog {formatEuro(totaalOpen)} open voor uitgevoerde beurten.</span>
+                <span style={{ fontSize: "0.82rem", color: "#666", flex: "1 1 220px" }}>Over alle maanden staat nog {formatEuro(totaalOpen)} open voor uitgevoerde beurten.</span>
+                <div style={{ display: "flex", gap: "6px" }}>
+                    <button onClick={() => exporteer("maand")} disabled={!!bezig} title="Alle beurten van deze maand met totalen" style={{ ...grijzeKnop, padding: "6px 12px" }}>{bezig === "maand" ? "⏳ Bezig..." : `⬇ Excel ${new Date(Number(maand.slice(0, 4)), Number(maand.slice(5, 7)) - 1, 1).toLocaleDateString("nl-NL", { month: "long" })}`}</button>
+                    <button onClick={() => exporteer("jaar")} disabled={!!bezig} title="Alle beurten van dit jaar met totalen per jaar en per kwartaal" style={{ ...grijzeKnop, padding: "6px 12px" }}>{bezig === "jaar" ? "⏳ Bezig..." : `⬇ Excel ${maand.slice(0, 4)}`}</button>
+                </div>
             </div>
             {rijen.length === 0 ? (
                 <p style={{ fontSize: "0.85rem", color: "#888", fontStyle: "italic" }}>Geen beurten in deze maand.</p>
