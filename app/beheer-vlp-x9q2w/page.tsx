@@ -31,6 +31,17 @@ const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: str
     nachtregistratie: { bg: "#fdecea", border: "#b3362a", label: "📋 Nachtregistratieformulier" },
 };
 
+const rijKnop: React.CSSProperties = { backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem", whiteSpace: "nowrap" };
+const labelKnop: React.CSSProperties = { fontSize: "0.72rem", padding: "3px 10px", borderRadius: "12px", fontWeight: "bold", cursor: "pointer", whiteSpace: "nowrap" };
+
+// "23-10 → 26-10-2026 · 3 nachten"; het jaar staat er twee keer als de boeking over de jaarwisseling loopt.
+function periodeKort(checkIn: string, checkOut: string): string {
+    if (!checkIn || !checkOut) return "";
+    const n = Math.round((Date.parse(checkOut + "T12:00:00Z") - Date.parse(checkIn + "T12:00:00Z")) / 86400000);
+    const van = checkIn.slice(0, 4) === checkOut.slice(0, 4) ? formatDatumNL(checkIn).slice(0, 5) : formatDatumNL(checkIn);
+    return `${van} → ${formatDatumNL(checkOut)} · ${n} ${n === 1 ? "nacht" : "nachten"}`;
+}
+
 function samenvattingZichtbaarheid(item: any): string {
     const delen: string[] = [];
     const fases = fasesVanTegel(item);
@@ -722,6 +733,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                     <style dangerouslySetInnerHTML={{
                         __html: `
                         @keyframes toastSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                        .sectie[open] > .sectie-kop { border-bottom: 2px solid #eef0ea; padding-bottom: 10px; }
                         @keyframes toastFade { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
                     `}} />
                     {saveMessage && (
@@ -751,10 +763,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </div>
                     )}
 
-                    <div style={{ display: "grid", gap: "30px" }}>
+                    <div style={{ display: "grid", gap: "14px" }}>
                         {/* Sectie: Boekingen */}
-                        <details style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "20px", backgroundColor: "#fcfefc" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#4A5D23", borderBottom: "2px solid #e5ebe5", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>✨ Gepersonaliseerde Gasten Links</summary>
+                        <details className="sectie" style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "14px 18px", backgroundColor: "#fcfefc" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>✨ Gepersonaliseerde Gasten Links</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
 
@@ -886,42 +898,53 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         const schoonmakerNaam = beurt?.schoonmakerId ? schoonmaak?.schoonmakers.find(s => s.id === beurt.schoonmakerId)?.naam : undefined;
                                         return (
                                             <div key={booking.id} style={{ padding: "12px", backgroundColor: isExpired && !isEditing ? "#fafafa" : "white", borderRadius: "8px", border: isEditing ? "1px solid #4A5D23" : isExpired ? "1px solid #e0e0e0" : "1px solid #eee", opacity: isExpired && !isEditing ? 0.75 : 1, transition: "opacity 0.2s" }}>
-                                                {/* Header: naam + actieknoppen */}
-                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: isEditing ? "12px" : "4px" }}>
-                                                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                                                        <button
-                                                            onClick={() => {
-                                                                const ietsOpen = isRegExpanded || isSchoonmaakOpen;
-                                                                setExpandedRegId(ietsOpen ? null : booking.id);
-                                                                setExpandedSchoonmaakId(ietsOpen || !beurt ? null : booking.id);
-                                                            }}
-                                                            title={isRegExpanded || isSchoonmaakOpen ? "Inklappen" : "Formulier en schoonmaak openen"}
-                                                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.9rem", color: "#4A5D23", padding: "0 2px", transform: isRegExpanded || isSchoonmaakOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}
-                                                        >▶</button>
-                                                        <strong style={{ color: isExpired ? "#999" : "#333" }}>{booking.guestName}</strong>
-                                                        <button onClick={() => setExpandedRegId(isRegExpanded ? null : booking.id)} title="Nachtregistratieformulier" style={{ fontSize: "0.7rem", backgroundColor: regBadge.bg, color: regBadge.color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold", border: isRegExpanded ? "1px solid currentColor" : "1px solid transparent", cursor: "pointer" }}>{regBadge.label}</button>
-                                                        {beurt && (
-                                                            <button onClick={() => setExpandedSchoonmaakId(isSchoonmaakOpen ? null : booking.id)} title="Schoonmaak na vertrek" style={{ fontSize: "0.7rem", backgroundColor: STATUS_LABEL[beurt.status].bg, color: STATUS_LABEL[beurt.status].color, padding: "2px 8px", borderRadius: "10px", fontWeight: "bold", border: isSchoonmaakOpen ? "1px solid currentColor" : "1px solid transparent", cursor: "pointer" }}>
-                                                                🧹 {schoonmakerNaam ? `${schoonmakerNaam} · ` : ""}{STATUS_LABEL[beurt.status].label}
-                                                            </button>
+                                                {/* Rij 1: naam, periode en acties */}
+                                                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                                                    <button
+                                                        onClick={() => {
+                                                            const ietsOpen = isRegExpanded || isSchoonmaakOpen;
+                                                            setExpandedRegId(ietsOpen ? null : booking.id);
+                                                            setExpandedSchoonmaakId(ietsOpen || !beurt ? null : booking.id);
+                                                        }}
+                                                        title={isRegExpanded || isSchoonmaakOpen ? "Inklappen" : "Formulier en schoonmaak openen"}
+                                                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.9rem", color: "#4A5D23", padding: "0 2px", width: "16px", transform: isRegExpanded || isSchoonmaakOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}
+                                                    >▶</button>
+                                                    <div style={{ flex: "1 1 0", minWidth: "150px", display: "flex", alignItems: "baseline", columnGap: "10px", rowGap: "2px", flexWrap: "wrap" }}>
+                                                        <strong style={{ color: isExpired ? "#999" : "#333", fontSize: "1rem" }}>{booking.guestName}</strong>
+                                                        {!isEditing && (
+                                                            <span style={{ fontSize: "0.82rem", color: isExpired ? "#aaa" : "#777", whiteSpace: "nowrap" }}>
+                                                                {periodeKort(booking.checkIn, booking.checkOut)}
+                                                                {booking.language && booking.language !== "nl" && <span style={{ marginLeft: "6px" }}>{vlagVan(booking.language)}</span>}
+                                                            </span>
                                                         )}
-                                                        {isExpired && !isEditing && <span style={{ fontSize: "0.7rem", backgroundColor: "#f0f0f0", color: "#999", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>Verlopen</span>}
-                                                        {isTestBooking && <span style={{ fontSize: "0.7rem", backgroundColor: "#4A5D23", color: "white", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>🧪 Testboeking</span>}
                                                     </div>
-                                                    <div style={{ display: "flex", gap: "8px", flexShrink: 0, marginLeft: "10px" }}>
+                                                    <div style={{ display: "flex", gap: "6px", marginLeft: "auto" }}>
                                                         {isEditing ? (
                                                             <>
-                                                                <button onClick={handleSaveBooking} disabled={isSaving} style={{ backgroundColor: "#4A5D23", color: "white", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }}>Opslaan</button>
-                                                                <button onClick={() => setEditingId(null)} style={{ backgroundColor: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Annuleer</button>
+                                                                <button onClick={handleSaveBooking} disabled={isSaving} style={{ ...rijKnop, backgroundColor: "#4A5D23", color: "white", fontWeight: "bold" }}>Opslaan</button>
+                                                                <button onClick={() => setEditingId(null)} style={{ ...rijKnop, backgroundColor: "#f5f5f5", color: "#555", border: "1px solid #ddd" }}>Annuleer</button>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={{ backgroundColor: "#e0e0e0", color: "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Bewerk</button>
-                                                                <button onClick={() => !isExpired && copyToClipboard(shareUrl, booking.id)} disabled={isExpired} style={{ backgroundColor: isExpired ? "#f0f0f0" : copiedId === booking.id ? "#4A5D23" : "#e0e0e0", color: isExpired ? "#bbb" : copiedId === booking.id ? "white" : "#333", border: "none", borderRadius: "4px", padding: "6px 12px", cursor: isExpired ? "not-allowed" : "pointer", fontSize: "0.85rem", fontWeight: "bold", transition: "all 0.2s" }}>{copiedId === booking.id ? "✓ Gekopieerd" : "Kopieer"}</button>
-                                                                {!isTestBooking && <button onClick={() => handleRemoveBooking(booking.id)} style={{ backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc", borderRadius: "4px", padding: "6px 12px", cursor: "pointer", fontSize: "0.85rem" }}>Verwijder</button>}
+                                                                <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={rijKnop}>Bewerk</button>
+                                                                <button onClick={() => !isExpired && copyToClipboard(shareUrl, booking.id)} disabled={isExpired} title={isExpired ? "Verlopen boeking" : shareUrl} style={{ ...rijKnop, backgroundColor: isExpired ? "#f0f0f0" : copiedId === booking.id ? "#4A5D23" : "#e0e0e0", color: isExpired ? "#bbb" : copiedId === booking.id ? "white" : "#333", cursor: isExpired ? "not-allowed" : "pointer", fontWeight: "bold", transition: "all 0.2s" }}>{copiedId === booking.id ? "✓ Gekopieerd" : "Kopieer link"}</button>
+                                                                {!isTestBooking && <button onClick={() => handleRemoveBooking(booking.id)} style={{ ...rijKnop, backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc" }}>Verwijder</button>}
                                                             </>
                                                         )}
                                                     </div>
+                                                </div>
+
+                                                {/* Rij 2: statuslabels en link */}
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "8px", marginBottom: isEditing ? "12px" : 0, paddingLeft: "24px" }}>
+                                                    <button onClick={() => setExpandedRegId(isRegExpanded ? null : booking.id)} title="Nachtregistratieformulier" style={{ ...labelKnop, backgroundColor: regBadge.bg, color: regBadge.color, border: isRegExpanded ? "1px solid currentColor" : "1px solid transparent" }}>{regBadge.label}</button>
+                                                    {beurt && (
+                                                        <button onClick={() => setExpandedSchoonmaakId(isSchoonmaakOpen ? null : booking.id)} title="Schoonmaak na vertrek" style={{ ...labelKnop, backgroundColor: STATUS_LABEL[beurt.status].bg, color: STATUS_LABEL[beurt.status].color, border: isSchoonmaakOpen ? "1px solid currentColor" : "1px solid transparent" }}>
+                                                            🧹 {schoonmakerNaam ? `${schoonmakerNaam} · ` : ""}{STATUS_LABEL[beurt.status].label}
+                                                        </button>
+                                                    )}
+                                                    {isExpired && !isEditing && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#f0f0f0", color: "#999", border: "1px solid transparent" }}>Verlopen</span>}
+                                                    {isTestBooking && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#4A5D23", color: "white", border: "1px solid transparent" }}>🧪 Testboeking</span>}
+                                                    <a href={shareUrl} target="_blank" rel="noreferrer" title={shareUrl} style={{ marginLeft: "auto", fontSize: "0.78rem", color: isExpired ? "#bbb" : "#4A5D23", textDecoration: isExpired ? "line-through" : "none", whiteSpace: "nowrap" }}>/b/{booking.id} ↗</a>
                                                 </div>
 
                                                 {isEditing ? (
@@ -945,13 +968,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             </select>
                                                         </div>
                                                     </div>
-                                                ) : (
-                                                    <div>
-                                                        <span style={{ fontSize: "0.85rem", color: isExpired ? "#aaa" : "#777" }}>{formatDatumNL(booking.checkIn)} t/m {formatDatumNL(booking.checkOut)}</span>
-                                                        {booking.language && booking.language !== "nl" && <span style={{ fontSize: "0.8rem", color: "#888", marginLeft: "10px" }}>{vlagVan(booking.language)}</span>}
-                                                        <div style={{ fontSize: "0.85rem", color: isExpired ? "#bbb" : "#4A5D23", marginTop: "4px", wordBreak: "break-all", textDecoration: isExpired ? "line-through" : "none" }}>{shareUrl}</div>
-                                                    </div>
-                                                )}
+                                                ) : null}
                                                 {isRegExpanded && (
                                                     <NachtregistratieAdminPanel
                                                         key={`${booking.id}-${regStatus}`}
@@ -981,8 +998,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Schoonmaak */}
-                        <details style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "20px", backgroundColor: "#fcfefc" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#4A5D23", borderBottom: "2px solid #e5ebe5", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>
+                        <details className="sectie" style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "14px 18px", backgroundColor: "#fcfefc" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>
                                 🧹 Schoonmaak
                                 {!!schoonmaak?.beurten.filter(b => b.status === "afgekeurd").length && (
                                     <span style={{ marginLeft: "10px", fontSize: "0.75rem", backgroundColor: "#fee2e2", color: "#b91c1c", padding: "2px 10px", borderRadius: "10px", verticalAlign: "middle" }}>
@@ -994,8 +1011,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Algemeen */}
-                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🏡 Algemene Informatie</summary>
+                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🏡 Algemene Informatie</summary>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <div>
                                     <label style={{ display: "block", fontSize: "0.9rem", color: "#555", marginBottom: "5px" }}>Naam Huisje</label>
@@ -1051,8 +1068,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Home Items */}
-                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📱 Home Pagina Items (Uw verblijf)</summary>
+                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📱 Home Pagina Items (Uw verblijf)</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>, <code>@sleutelcode</code>.</p>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
@@ -1229,8 +1246,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Videoinstructies */}
-                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎥 Videoinstructies</summary>
+                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎥 Videoinstructies</summary>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(videos, setVideos)}>
                                     <SortableContext items={videos.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
@@ -1333,8 +1350,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Omgeving */}
-                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🌲 Omgeving TIPS</summary>
+                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🌲 Omgeving TIPS</summary>
                             <div style={{ marginTop: "15px" }}>
 
                                 {/* AI Prompt */}
@@ -1445,8 +1462,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
 
                         {/* Sectie: Verlopen Boeking Pagina */}
-                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>⏰ Verlopen Boeking Pagina</summary>
+                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>⏰ Verlopen Boeking Pagina</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Deze pagina wordt getoond wanneer een gast zijn/haar link opent nadat de vertrekdatum is verstreken. Gebruik de editor om een persoonlijke boodschap samen te stellen.</p>
                                 <RichTextEditor content={expiredPageContent} onChange={setExpiredPageContent} images={availableImages} />
@@ -1456,10 +1473,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                         {/* Sectie: Mediabibliotheek */}
                         <details
-                            style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}
+                            className="sectie"
+                            style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}
                             onToggle={(e) => { if ((e.target as HTMLDetailsElement).open) loadMediaLibrary(); }}
                         >
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🖼️ Mediabibliotheek</summary>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🖼️ Mediabibliotheek</summary>
                             <div style={{ marginTop: "15px" }}>
                                 {isLoadingMedia && <p style={{ fontSize: "0.85rem", color: "#666" }}>⏳ Laden...</p>}
                                 {mediaLoaded && (
@@ -1594,8 +1612,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
 
                         {/* Sectie: Gameroom */}
-                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎮 Gameroom</summary>
+                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎮 Gameroom</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Beheer de spellen in de gameroom. De ID wordt gebruikt in de URL (bijv. <code>tetris</code> → <code>/gameroom/tetris</code>). Het pad verwijst naar het HTML-bestand in <code>/public</code>.</p>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -1630,8 +1648,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             </div>
                         </details>
 
-                        <details style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
-                            <summary style={{ fontSize: "1.3rem", color: "#333", borderBottom: "2px solid #eee", paddingBottom: "10px", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>
+                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Alles wat je hier invoert wordt als extra context meegegeven aan de Digitale Conciërge. Hoe meer detail, hoe beter de chatbot kan antwoorden.</p>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
