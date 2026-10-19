@@ -37,6 +37,7 @@ export default function WeatherWidget() {
 
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [mislukt, setMislukt] = useState(false);
 
   useEffect(() => {
     // Hoenderloo coordinates
@@ -44,19 +45,29 @@ export default function WeatherWidget() {
     const lon = 5.875;
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FAmsterdam&forecast_days=3`;
 
-    fetch(url)
-      .then((res) => res.json())
+    const afbreken = new AbortController();
+    fetch(url, { signal: afbreken.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((json) => {
         setData(json);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Geen weerdata kunnen ophalen", err);
+        if (afbreken.signal.aborted) return;
+        // Waarschuwing i.p.v. fout: het weer is bijzaak, en een fout zet lokaal een rode melding in beeld.
+        console.warn("Geen weerdata kunnen ophalen", err);
+        setMislukt(true);
         setLoading(false);
       });
+    return () => afbreken.abort();
   }, []);
 
-  if (loading || !data) {
+  if (mislukt) return null;
+
+  if (loading || !data?.current) {
     return (
       <div className="w-64 h-64 rounded-3xl bg-black/20 backdrop-blur-md border border-white/20 animate-pulse"></div>
     );
