@@ -62,7 +62,7 @@ try {
     await page.goto(B + "/beheer-vlp-x9q2w", { waitUntil: "networkidle2" });
     await page.type("input[type=password]", PIN);
     await page.locator("::-p-text(Inloggen)").click();
-    await page.waitForSelector("::-p-text(Geheim Beheer)", { timeout: 20000 });
+    await page.waitForSelector("::-p-text(Beheer Veluwe Droomchalet Webapp)", { timeout: 20000 });
     await wacht(3000);
     check(true, "inloggen beheer");
 

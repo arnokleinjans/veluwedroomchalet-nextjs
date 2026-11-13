@@ -50,7 +50,7 @@ try {
     await page.goto(`${BASIS}/beheer-vlp-x9q2w`, { waitUntil: "networkidle2" });
     await page.type("input[type=password]", PIN);
     await page.locator("::-p-text(Inloggen)").click();
-    await page.waitForSelector("::-p-text(Geheim Beheer)", { timeout: 20000 });
+    await page.waitForSelector("::-p-text(Beheer Veluwe Droomchalet Webapp)", { timeout: 20000 });
     await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
     check(!!(await page.waitForSelector("::-p-text(Boekingen komen uit Voyando)", { timeout: 20000 }).catch(() => null)), "statusbalk Voyando zichtbaar");
     const tekst = () => page.evaluate(() => document.body.innerText);
@@ -68,7 +68,7 @@ try {
     }).concat([{ id: String(GEANNULEERD.id), guestName: "Test Annulering", checkIn: plus(verAnn, -3), checkOut: verAnn, language: "nl",
         voyando: { id: GEANNULEERD.id, status: "accepted", kanaal: null, checkIn: plus(verAnn, -3), checkOut: verAnn, volwassenen: 2, kinderen: 0, babys: 0, huisdieren: 0, naam: "Test Annulering", updatedAt: "oud" } }]));
     await page.reload({ waitUntil: "networkidle2" });
-    await page.waitForSelector("::-p-text(Geheim Beheer)", { timeout: 20000 });
+    await page.waitForSelector("::-p-text(Beheer Veluwe Droomchalet Webapp)", { timeout: 20000 });
     await wacht(2500);
     check((await beurtVan(String(GEANNULEERD.id)))?.status === "open", "beurt bestaat voor de boeking die geannuleerd gaat worden");
     check((await beurtVan(idA))?.datum === plus(A.check_out, 1), "beurt A staat op het verschoven vertrek");

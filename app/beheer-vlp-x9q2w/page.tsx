@@ -672,7 +672,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "white", borderRadius: "16px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", overflow: "hidden" }}>
                 <div style={{ backgroundColor: "#4A5D23", padding: "12px 24px", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
                     <div>
-                        <h1 style={{ margin: 0, fontSize: "1.35rem", fontFamily: "'Lora', serif", color: "white" }}>Geheim Beheer</h1>
+                        <h1 style={{ margin: 0, fontSize: "1.35rem", fontFamily: "'Lora', serif", color: "white" }}>Beheer Veluwe Droomchalet Webapp</h1>
                     </div>
                     <div style={{ display: "flex", gap: "10px" }}>
                         <div style={{ position: "relative" }}>
