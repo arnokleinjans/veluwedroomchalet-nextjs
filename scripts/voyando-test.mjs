@@ -51,7 +51,6 @@ try {
     await page.type("input[type=password]", PIN);
     await page.locator("::-p-text(Inloggen)").click();
     await page.waitForSelector("::-p-text(Beheer Veluwe Droomchalet Webapp)", { timeout: 20000 });
-    await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
     check(!!(await page.waitForSelector("::-p-text(Boekingen komen uit Voyando)", { timeout: 20000 }).catch(() => null)), "statusbalk Voyando zichtbaar");
     const tekst = () => page.evaluate(() => document.body.innerText);
     check(!/CSV/i.test(await tekst()), "CSV-import is weg");
@@ -73,7 +72,6 @@ try {
     check((await beurtVan(String(GEANNULEERD.id)))?.status === "open", "beurt bestaat voor de boeking die geannuleerd gaat worden");
     check((await beurtVan(idA))?.datum === plus(A.check_out, 1), "beurt A staat op het verschoven vertrek");
 
-    await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
     await page.locator("::-p-text(Laatste wijzigingen)").click();
     await page.locator("::-p-text(Nu ophalen)").click();
     await wacht(300);
@@ -133,7 +131,6 @@ try {
     if (gevuld) check((await waarden(gevuld.id)).includes(String(gevuld.nachtregistratie.aantalPersonen)), "ingevuld formulier toont de eigen gegevens", gevuld.id);
 
     await page.reload({ waitUntil: "networkidle2" });
-    await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
     await page.type("input[placeholder*='Zoek op naam']", leeg.id);
     await page.waitForFunction((id) => [...document.querySelectorAll("a")].some(a => a.textContent.trim().startsWith(`/b/${id} `)), { timeout: 20000 }, leeg.id);
     await (await rij(leeg.id)).evaluate(el => [...el.querySelectorAll("button")].find(b => b.textContent.includes("Formulier leeg")).click());

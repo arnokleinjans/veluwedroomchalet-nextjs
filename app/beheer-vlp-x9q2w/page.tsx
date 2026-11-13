@@ -58,7 +58,8 @@ function samenvattingZichtbaarheid(item: any): string {
     return delen.join(" · ");
 }
 
-function SortableItem({ id, children, accent }: { id: string, children: React.ReactNode, accent?: string }) {
+function SortableItem({ id, children, accent, titel }: { id: string, children: React.ReactNode, accent?: string, titel?: string }) {
+    const [open, setOpen] = useState(titel === undefined);
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -85,7 +86,13 @@ function SortableItem({ id, children, accent }: { id: string, children: React.Re
                     ☰
                 </div>
                 <div style={{ marginLeft: "30px", marginTop: accentStyle ? "18px" : "0" }}>
-                    {children}
+                    {titel !== undefined && (
+                        <button onClick={() => setOpen(o => !o)} title={open ? "Inklappen" : "Openen om te bewerken"} style={{ display: "block", width: open ? "calc(100% - 110px)" : "100%", textAlign: "left", background: "none", border: "none", padding: "2px 0", cursor: "pointer", fontSize: "0.95rem", fontWeight: "bold", color: "#333", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            <span style={{ display: "inline-block", width: "16px", color: "#4A5D23", fontSize: "0.8rem", transform: open ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>▶</span>
+                            {titel || "(zonder titel)"}
+                        </button>
+                    )}
+                    {open && children}
                 </div>
             </div>
         </div>
@@ -174,6 +181,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [voyando, setVoyando] = useState<{ actief: boolean; stand: VoyandoStand } | null>(null);
     const [voyandoBezig, setVoyandoBezig] = useState(false);
     const [voyandoUitleg, setVoyandoUitleg] = useState(false);
+    const [inrichtenOpen, setInrichtenOpen] = useState(false);
+    const telInrichten = () => setInrichtenOpen(document.querySelectorAll("details.inrichten[open]").length > 0);
     const eerder = useMemo(() => eerdereVerblijven(bookings), [bookings]);
     // De timer hieronder leeft langer dan één render en ziet anders een oude waarde.
     const magBoekingenVerversen = useRef(true);
@@ -473,14 +482,15 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const handleSaveAll = async () => {
         setIsSaving(true);
         setSaveMessage("⏳ Alles aan het opslaan...");
-        const results = await Promise.all([
-            updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
-            updateInsights(insights),
-            updateVideos(videos),
-            updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
-            updateChatbotContext(chatbotContext),
-            updateExpiredPageContent(expiredPageContent)
-        ]);
+        // Na elkaar: elke actie leest en schrijft dezelfde sleutel, tegelijk zouden ze elkaars wijziging overschrijven.
+        const results = [
+            await updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
+            await updateInsights(insights),
+            await updateVideos(videos),
+            await updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
+            await updateChatbotContext(chatbotContext),
+            await updateExpiredPageContent(expiredPageContent),
+        ];
         setIsSaving(false);
         if (results.every(r => r.success)) {
             setSaveMessage("✅ Alle wijzigingen zijn succesvol opgeslagen!");
@@ -668,8 +678,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     }
 
     return (
-        <div style={{ backgroundColor: "#f9f9f9", minHeight: "100vh", padding: "40px 20px" }}>
-            <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "white", borderRadius: "16px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", overflow: "hidden" }}>
+        <div className="beheer-buiten" style={{ backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+            <div className="beheer-kaart" style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "white", borderRadius: "16px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", overflow: "hidden" }}>
                 <div style={{ backgroundColor: "#4A5D23", padding: "12px 24px", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
                     <div>
                         <h1 style={{ margin: 0, fontSize: "1.35rem", fontFamily: "'Lora', serif", color: "white" }}>Beheer Veluwe Droomchalet Webapp</h1>
@@ -679,9 +689,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             <button
                                 onClick={() => setToonVertaalMenu(v => !v)}
                                 disabled={!!isTranslating}
-                                style={{ backgroundColor: "#ffb400", border: "none", borderRadius: "6px", color: "#333", padding: "8px 16px", cursor: isTranslating ? "wait" : "pointer", fontWeight: "bold", opacity: isTranslating ? 0.7 : 1 }}
+                                title="Vertaal de teksten van de gast-app" style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: "6px", color: "white", padding: "8px 16px", cursor: isTranslating ? "wait" : "pointer", fontWeight: "bold", opacity: isTranslating ? 0.7 : 1 }}
                             >
-                                {isTranslating ? `⏳ ${naamVan(isTranslating)}...` : "🌟 Vertaal ▾"}
+                                {isTranslating ? `⏳ ${naamVan(isTranslating)}...` : "Vertaal ▾"}
                             </button>
                             {toonVertaalMenu && !isTranslating && (
                                 <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 30, backgroundColor: "white", borderRadius: "10px", boxShadow: "0 10px 24px rgba(0,0,0,0.18)", padding: "6px", minWidth: "190px" }}>
@@ -710,11 +720,20 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                     </div>
                 </div>
 
-                <div style={{ padding: "30px" }}>
+                <div className="beheer-inhoud">
                     <style dangerouslySetInnerHTML={{
                         __html: `
                         @keyframes toastSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
                         .sectie[open] > .sectie-kop { border-bottom: 2px solid #eef0ea; padding-bottom: 10px; }
+                        .beheer-buiten { padding: 40px 20px; }
+                        .beheer-inhoud { padding: 30px; }
+                        .groepskop { font-size: 0.72rem; font-weight: bold; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8f80; padding-left: 4px; margin-bottom: -6px; }
+                        @media (max-width: 600px) {
+                            .beheer-buiten { padding: 0; }
+                            .beheer-kaart { border-radius: 0 !important; box-shadow: none !important; }
+                            .beheer-inhoud { padding: 12px 10px; }
+                            .sectie { padding: 10px 12px !important; }
+                        }
                         @keyframes toastFade { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
                     `}} />
                     {saveMessage && (
@@ -745,9 +764,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                     )}
 
                     <div style={{ display: "grid", gap: "14px" }}>
+                        <div className="groepskop">Dagelijks</div>
                         {/* Sectie: Boekingen */}
-                        <details className="sectie" style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "14px 18px", backgroundColor: "#fcfefc" }}>
-                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>✨ Gepersonaliseerde Gasten Links</summary>
+                        <details open className="sectie" style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "14px 18px", backgroundColor: "#fcfefc" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📅 Boekingen</summary>
                             <div style={{ marginTop: "15px" }}>
                                 {voyando?.actief ? (
                                     <div style={{ marginBottom: "16px", backgroundColor: voyando.stand.gelukt === false ? "#fff4f2" : "#f3f8ec", padding: "10px 15px", borderRadius: "8px", border: `1px solid ${voyando.stand.gelukt === false ? "#e5b4ac" : "#cfdcb8"}`, fontSize: "0.85rem", color: "#444" }}>
@@ -775,38 +795,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                 ) : (
                                     <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
                                 )}
-
-                                <details open={voyando ? !voyando.actief : false} style={{ marginBottom: "20px", backgroundColor: "white", padding: "12px 15px", borderRadius: "8px", border: "1px solid #ccc" }}>
-                                    <summary style={{ fontSize: "0.95rem", color: "#333", cursor: "pointer", fontWeight: "bold" }}>{voyando?.actief ? "Losse link aanmaken (zonder Voyando-boeking)" : "Nieuwe Link Aanmaken"}</summary>
-                                    {voyando?.actief && <p style={{ fontSize: "0.8rem", color: "#777", margin: "8px 0 0" }}>Voor familie, een schoonmaakster of een proeflink. Een gewone boeking hoef je hier niet in te voeren.</p>}
-                                    <div style={{ height: "10px" }} />
-                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                                        <div style={{ flex: "1 1 200px" }}>
-                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
-                                            <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
-                                        </div>
-                                        {!voyando?.actief && (
-                                        <div style={{ flex: "1 1 140px" }}>
-                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Boekingsnummer</label>
-                                            <input type="text" value={newBookingNumber} onChange={e => setNewBookingNumber(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Voyando-nr" />
-                                        </div>
-                                        )}
-                                        <DatumBereik
-                                            aankomst={newCheckIn}
-                                            vertrek={newCheckOut}
-                                            onChange={(a, v) => { setNewCheckIn(a); setNewCheckOut(v); }}
-                                            labelStyle={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}
-                                            veldStyle={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-                                        />
-                                        <div style={{ flex: "1 1 120px" }}>
-                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Weergavetaal</label>
-                                            <select value={newLanguage} onChange={e => setNewLanguage(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white" }}>
-                                                {TALEN.map(t => <option key={t.code} value={t.code}>{t.vlag} {t.naam}</option>)}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
-                                </details>
 
                                 {/* Filter: nieuw / verlopen / alle */}
                                 <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
@@ -952,6 +940,38 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     })}
                                     {bookings.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen boekingen gevonden.</p>}
                                 </div>
+
+                                <details open={voyando ? !voyando.actief : false} style={{ marginTop: "16px", backgroundColor: "white", padding: "12px 15px", borderRadius: "8px", border: "1px solid #ccc" }}>
+                                    <summary style={{ fontSize: "0.95rem", color: "#333", cursor: "pointer", fontWeight: "bold" }}>{voyando?.actief ? "Losse link aanmaken (zonder Voyando-boeking)" : "Nieuwe Link Aanmaken"}</summary>
+                                    {voyando?.actief && <p style={{ fontSize: "0.8rem", color: "#777", margin: "8px 0 0" }}>Voor familie, een schoonmaakster of een proeflink. Een gewone boeking hoef je hier niet in te voeren.</p>}
+                                    <div style={{ height: "10px" }} />
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                        <div style={{ flex: "1 1 200px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
+                                            <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
+                                        </div>
+                                        {!voyando?.actief && (
+                                        <div style={{ flex: "1 1 140px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Boekingsnummer</label>
+                                            <input type="text" value={newBookingNumber} onChange={e => setNewBookingNumber(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Voyando-nr" />
+                                        </div>
+                                        )}
+                                        <DatumBereik
+                                            aankomst={newCheckIn}
+                                            vertrek={newCheckOut}
+                                            onChange={(a, v) => { setNewCheckIn(a); setNewCheckOut(v); }}
+                                            labelStyle={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}
+                                            veldStyle={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                                        />
+                                        <div style={{ flex: "1 1 120px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Weergavetaal</label>
+                                            <select value={newLanguage} onChange={e => setNewLanguage(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white" }}>
+                                                {TALEN.map(t => <option key={t.code} value={t.code}>{t.vlag} {t.naam}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
+                                </details>
                             </div>
                         </details>
 
@@ -968,8 +988,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             <SchoonmaakSectie data={schoonmaak} herlaad={herlaadSchoonmaak} toon={toonMelding} />
                         </details>
 
+                        <div className="groepskop" style={{ marginTop: "14px" }}>Gast-app inrichten</div>
                         {/* Sectie: Algemeen */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🏡 Algemene Informatie</summary>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <div>
@@ -1026,7 +1047,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Home Items */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📱 Home Pagina Items (Uw verblijf)</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>, <code>@sleutelcode</code>.</p>
@@ -1034,7 +1055,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
                                         <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                             {insights.map((item, idx) => (
-                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)}>
+                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)} titel={item.title}>
                                                     <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
                                                     <details style={{ marginTop: "34px", marginBottom: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>
@@ -1204,7 +1225,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Videoinstructies */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎥 Videoinstructies</summary>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(videos, setVideos)}>
@@ -1308,7 +1329,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Omgeving */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🌲 Omgeving TIPS</summary>
                             <div style={{ marginTop: "15px" }}>
 
@@ -1420,7 +1441,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
 
                         {/* Sectie: Verlopen Boeking Pagina */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>⏰ Verlopen Boeking Pagina</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Deze pagina wordt getoond wanneer een gast zijn/haar link opent nadat de vertrekdatum is verstreken. Gebruik de editor om een persoonlijke boodschap samen te stellen.</p>
@@ -1431,9 +1452,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                         {/* Sectie: Mediabibliotheek */}
                         <details
-                            className="sectie"
+                            className="sectie inrichten"
                             style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}
-                            onToggle={(e) => { if ((e.target as HTMLDetailsElement).open) loadMediaLibrary(); }}
+                            onToggle={(e) => { if (e.target !== e.currentTarget) return; telInrichten(); if (e.currentTarget.open) loadMediaLibrary(); }}
                         >
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🖼️ Mediabibliotheek</summary>
                             <div style={{ marginTop: "15px" }}>
@@ -1569,7 +1590,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         />
 
 
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Alles wat je hier invoert wordt als extra context meegegeven aan de Digitale Conciërge. Hoe meer detail, hoe beter de chatbot kan antwoorden.</p>
@@ -1589,8 +1610,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 </div>
             </div>
 
-            {/* Zwevende Alle Wijzigingen Opslaan Knop */}
-            <button
+            {/* Zwevende Alle Wijzigingen Opslaan Knop: alleen als er een inrichtingssectie openstaat. Boekingen en schoonmaak slaan zelf op. */}
+            {inrichtenOpen && <button
                 onClick={handleSaveAll}
                 disabled={isSaving}
                 className="hover:scale-105 transition-transform"
@@ -1617,7 +1638,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 {/* @ts-ignore */}
                 <ion-icon name="save-outline" style={{ fontSize: "1.4rem" }}></ion-icon>
                 Alles Opslaan
-            </button>
+            </button>}
 
             <style>{`@keyframes vdcSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
 
