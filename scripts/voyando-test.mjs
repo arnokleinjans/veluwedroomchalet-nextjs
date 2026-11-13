@@ -53,7 +53,6 @@ try {
     await page.waitForSelector("::-p-text(Geheim Beheer)", { timeout: 20000 });
     await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
     check(!!(await page.waitForSelector("::-p-text(Boekingen komen uit Voyando)", { timeout: 20000 }).catch(() => null)), "statusbalk Voyando zichtbaar");
-    await page.waitForSelector("::-p-text(Laatst opgehaald)", { timeout: 30000 }).catch(() => null);
     const tekst = () => page.evaluate(() => document.body.innerText);
     check(!/CSV/i.test(await tekst()), "CSV-import is weg");
     check((await tekst()).includes("Losse link aanmaken"), "losse link staat ingeklapt");
@@ -75,6 +74,7 @@ try {
     check((await beurtVan(idA))?.datum === plus(A.check_out, 1), "beurt A staat op het verschoven vertrek");
 
     await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
+    await page.locator("::-p-text(Laatste wijzigingen)").click();
     await page.locator("::-p-text(Nu ophalen)").click();
     await wacht(300);
     await page.waitForFunction(() => ![...document.querySelectorAll("button")].some(b => b.textContent.trim() === "Bezig…"), { timeout: 90000 });
@@ -107,12 +107,15 @@ try {
     const rij = (id) => page.evaluateHandle((id) => [...document.querySelectorAll("a")].find(a => a.textContent.trim().startsWith(`/b/${id} `))?.parentElement?.parentElement, id);
     const knoppen = async (id) => (await rij(id)).evaluate(el => [...el.querySelectorAll("button")].map(b => b.textContent.trim()));
     check(!(await knoppen(idB)).includes("Verwijder"), "geen knop Verwijder bij een Voyando-boeking");
-    await (await rij(idB)).evaluate(el => [...el.querySelectorAll("button")].find(b => b.textContent.trim() === "Bewerk").click());
-    await wacht(500);
-    const bewerk = await (await rij(idB)).evaluate(el => ({ tekst: el.innerText, velden: el.querySelectorAll("input").length, keuzes: el.querySelectorAll("select").length }));
-    check(bewerk.tekst.includes("Nummer en datums komen uit Voyando") && bewerk.velden === 0 && bewerk.keuzes === 1, "bewerken toont alleen de taal bij een Voyando-boeking");
+    const rijB = await (await rij(idB)).evaluate(el => ({ knoppen: [...el.querySelectorAll("button")].map(b => b.textContent.trim()), keuzes: el.querySelectorAll("select").length }));
+    check(!rijB.knoppen.includes("Bewerk") && rijB.keuzes === 1, "Voyando-boeking heeft een taalkeuze in plaats van Bewerk");
+    const taalVoor = (await boeking(idB)).language || "nl";
+    await (await rij(idB)).evaluate(el => { const s = el.querySelector("select"); const zet = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value").set; zet.call(s, "de"); s.dispatchEvent(new Event("change", { bubbles: true })); });
+    await wacht(2500);
+    const naTaal = await boeking(idB);
+    check(naTaal.language === "de" && naTaal.checkIn === B.check_in && naTaal.checkOut === B.check_out, "taal wijzigen via de keuzelijst, datums ongemoeid");
+    await pasAan(bs => bs.map(x => x.id === idB ? { ...x, language: taalVoor } : x));
     if (SCHERM) await page.screenshot({ path: SCHERM.replace(".png", "-bewerk.png") });
-    await page.locator("::-p-text(Annuleer)").click();
     await page.click("input[placeholder*='Zoek op naam']", { clickCount: 3 });
     await page.keyboard.press("Backspace");
     await wacht(500);
@@ -132,7 +135,7 @@ try {
     await page.reload({ waitUntil: "networkidle2" });
     await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
     await page.type("input[placeholder*='Zoek op naam']", leeg.id);
-    await wacht(800);
+    await page.waitForFunction((id) => [...document.querySelectorAll("a")].some(a => a.textContent.trim().startsWith(`/b/${id} `)), { timeout: 20000 }, leeg.id);
     await (await rij(leeg.id)).evaluate(el => [...el.querySelectorAll("button")].find(b => b.textContent.includes("Formulier leeg")).click());
     await wacht(800);
     const wp = await (await rij(leeg.id)).evaluate(el => [...el.querySelectorAll("input")].map(i => i.value));
@@ -148,6 +151,8 @@ try {
 } finally {
     await browser.close();
     await pasAan(bs => bs.filter(b => b.id !== String(GEANNULEERD.id)));
+    // De testgevallen staan anders als "laatste wijzigingen" in beheer.
+    await db.del("voyando:sync");
 }
 console.log(fouten ? `\n${fouten} controle(s) mislukt` : "\nAlles in orde");
 process.exit(fouten ? 1 : 0);

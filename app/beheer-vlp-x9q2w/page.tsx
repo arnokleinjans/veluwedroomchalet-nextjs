@@ -174,6 +174,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
     const [voyando, setVoyando] = useState<{ actief: boolean; stand: VoyandoStand } | null>(null);
     const [voyandoBezig, setVoyandoBezig] = useState(false);
+    const [voyandoUitleg, setVoyandoUitleg] = useState(false);
     const eerder = useMemo(() => eerdereVerblijven(bookings), [bookings]);
     // De timer hieronder leeft langer dan één render en ziet anders een oude waarde.
     const magBoekingenVerversen = useRef(true);
@@ -590,6 +591,18 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         });
     };
 
+    const handleTaal = async (booking: any, taal: string) => {
+        setIsSaving(true);
+        const res = await updateBooking(booking.id, booking.checkIn, booking.checkOut, taal);
+        setIsSaving(false);
+        if (res.success) {
+            await refreshBookings();
+            toonMelding(`✅ Taal van ${booking.guestName}: ${naamVan(taal)}`);
+        } else {
+            toonMelding("❌ " + res.error);
+        }
+    };
+
     const handleNeemOver = (booking: any) => {
         const v = booking.voyando;
         setDialog({
@@ -742,29 +755,27 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>✨ Gepersonaliseerde Gasten Links</summary>
                             <div style={{ marginTop: "15px" }}>
                                 {voyando?.actief ? (
-                                    <div style={{ marginBottom: "16px", backgroundColor: voyando.stand.gelukt === false ? "#fff4f2" : "#f3f8ec", padding: "12px 15px", borderRadius: "8px", border: `1px solid ${voyando.stand.gelukt === false ? "#e5b4ac" : "#cfdcb8"}`, display: "flex", gap: "12px", alignItems: "flex-start", flexWrap: "wrap" }}>
-                                        <div style={{ flex: "1 1 260px", fontSize: "0.85rem", color: "#444" }}>
+                                    <div style={{ marginBottom: "16px", backgroundColor: voyando.stand.gelukt === false ? "#fff4f2" : "#f3f8ec", padding: "10px 15px", borderRadius: "8px", border: `1px solid ${voyando.stand.gelukt === false ? "#e5b4ac" : "#cfdcb8"}`, fontSize: "0.85rem", color: "#444" }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                             <strong style={{ color: "#333" }}>🔄 Boekingen komen uit Voyando</strong>
-                                            <div style={{ marginTop: "3px", color: voyando.stand.gelukt === false ? "#a3352a" : "#666" }}>
-                                                {voyando.stand.gelukt === false
-                                                    ? `Ophalen mislukt: ${voyando.stand.fout}`
-                                                    : voyando.stand.laatst
-                                                        ? `Laatst opgehaald ${new Date(voyando.stand.laatst).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${voyando.stand.aantal ?? 0} boekingen in Voyando`
-                                                        : "Nog niet opgehaald"}
-                                            </div>
-                                            <div style={{ marginTop: "3px", color: "#777" }}>Nieuwe boekingen, andere datums en annuleringen komen vanzelf binnen. Het nummer en de datums wijzig je in Voyando.</div>
-                                            {voyando.stand.laatsteWijzigingen && (
-                                                <details style={{ marginTop: "6px" }}>
-                                                    <summary style={{ cursor: "pointer", color: "#4A5D23" }}>Laatste wijzigingen ({new Date(voyando.stand.laatsteWijzigingen.op).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })})</summary>
-                                                    <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
-                                                        {voyando.stand.laatsteWijzigingen.regels.map((r, i) => (
-                                                            <li key={i}><strong>{r.soort}</strong> · {r.naam || r.id} ({r.id}) · {r.tekst}</li>
-                                                        ))}
-                                                    </ul>
-                                                </details>
-                                            )}
+                                            <button onClick={() => setVoyandoUitleg(u => !u)} title="Nieuwe boekingen, andere datums en annuleringen komen vanzelf binnen. Het nummer en de datums wijzig je in Voyando." aria-label="Uitleg" style={{ width: "20px", height: "20px", borderRadius: "50%", border: "1px solid #8a9a6c", backgroundColor: voyandoUitleg ? "#4A5D23" : "white", color: voyandoUitleg ? "white" : "#4A5D23", fontSize: "0.75rem", fontWeight: "bold", fontStyle: "italic", fontFamily: "Georgia, serif", cursor: "pointer", padding: 0, lineHeight: 1 }}>i</button>
                                         </div>
-                                        <button onClick={() => haalVoyando(true)} disabled={voyandoBezig} style={{ ...rijKnop, backgroundColor: "#4A5D23", color: "white", fontWeight: "bold", padding: "7px 14px", opacity: voyandoBezig ? 0.6 : 1 }}>{voyandoBezig ? "Bezig…" : "Nu ophalen"}</button>
+                                        {voyandoUitleg && <div style={{ marginTop: "6px", color: "#666" }}>Nieuwe boekingen, andere datums en annuleringen komen vanzelf binnen. Het nummer en de datums wijzig je in Voyando.</div>}
+                                        {voyando.stand.gelukt === false && <div style={{ marginTop: "6px", color: "#a3352a" }}>Ophalen mislukt: {voyando.stand.fout}</div>}
+                                        <details style={{ marginTop: "6px" }}>
+                                            <summary style={{ cursor: "pointer", color: "#4A5D23" }}>Laatste wijzigingen{voyando.stand.laatsteWijzigingen ? ` (${new Date(voyando.stand.laatsteWijzigingen.op).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })})` : ""}</summary>
+                                            <div style={{ marginTop: "6px", color: "#666", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                                                <span>{voyando.stand.laatst ? `Laatst opgehaald ${new Date(voyando.stand.laatst).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${voyando.stand.aantal ?? 0} boekingen in Voyando` : "Nog niet opgehaald"}</span>
+                                                <button onClick={() => haalVoyando(true)} disabled={voyandoBezig} title="Niet nodig: ophalen gaat vanzelf. Handig als je net iets in Voyando hebt gewijzigd en niet wilt wachten." style={{ background: "none", border: "none", padding: 0, color: "#4A5D23", textDecoration: "underline", cursor: voyandoBezig ? "default" : "pointer", fontSize: "0.85rem", opacity: voyandoBezig ? 0.6 : 1 }}>{voyandoBezig ? "Bezig…" : "Nu ophalen"}</button>
+                                            </div>
+                                            {voyando.stand.laatsteWijzigingen ? (
+                                                <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
+                                                    {voyando.stand.laatsteWijzigingen.regels.map((r, i) => (
+                                                        <li key={i}><strong>{r.soort}</strong> · {r.naam || r.id} ({r.id}) · {r.tekst}</li>
+                                                    ))}
+                                                </ul>
+                                            ) : <div style={{ marginTop: "4px", color: "#888" }}>Nog geen wijzigingen sinds de koppeling.</div>}
+                                        </details>
                                     </div>
                                 ) : (
                                     <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
@@ -856,7 +867,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         {!isEditing && (
                                                             <span style={{ fontSize: "0.82rem", color: isExpired ? "#aaa" : "#777", whiteSpace: "nowrap" }}>
                                                                 {periodeKort(booking.checkIn, booking.checkOut)}
-                                                                {booking.language && booking.language !== "nl" && <span style={{ marginLeft: "6px" }}>{vlagVan(booking.language)}</span>}
+                                                                {!voy && booking.language && booking.language !== "nl" && <span style={{ marginLeft: "6px" }}>{vlagVan(booking.language)}</span>}
                                                             </span>
                                                         )}
                                                     </div>
@@ -868,7 +879,13 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={rijKnop}>Bewerk</button>
+                                                                {voy ? (
+                                                                    <select value={booking.language || "nl"} onChange={e => handleTaal(booking, e.target.value)} disabled={isSaving} title="Weergavetaal van de gastpagina" style={{ ...rijKnop, backgroundColor: "white", border: "1px solid #ccc", padding: "4px 6px" }}>
+                                                                        {TALEN.map(t => <option key={t.code} value={t.code}>{t.vlag} {t.naam}</option>)}
+                                                                    </select>
+                                                                ) : (
+                                                                    <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={rijKnop}>Bewerk</button>
+                                                                )}
                                                                 <button onClick={() => !isExpired && copyToClipboard(shareUrl, booking.id)} disabled={isExpired} title={isExpired ? "Verlopen boeking" : shareUrl} style={{ ...rijKnop, backgroundColor: isExpired ? "#f0f0f0" : copiedId === booking.id ? "#4A5D23" : "#e0e0e0", color: isExpired ? "#bbb" : copiedId === booking.id ? "white" : "#333", cursor: isExpired ? "not-allowed" : "pointer", fontWeight: "bold", transition: "all 0.2s" }}>{copiedId === booking.id ? "✓ Gekopieerd" : "Kopieer link"}</button>
                                                                 {magWeg && <button onClick={() => handleRemoveBooking(booking.id)} style={{ ...rijKnop, backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc" }}>Verwijder</button>}
                                                             </>
@@ -895,12 +912,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                                                 {isEditing ? (
                                                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                                                        {voy ? (
-                                                            <div style={{ flex: "2 1 260px", alignSelf: "center", fontSize: "0.8rem", color: "#777", backgroundColor: "#f3f3f3", border: "1px solid #e2e2e2", borderRadius: "6px", padding: "8px 10px" }}>
-                                                                Boekingsnummer {booking.id} · {periodeKort(booking.checkIn, booking.checkOut)}<br />Nummer en datums komen uit Voyando en wijzig je daar.
-                                                            </div>
-                                                        ) : (
-                                                            <>
                                                         <div style={{ flex: "1 1 130px" }}>
                                                             <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Boekingsnummer</label>
                                                             <input type="text" value={editValues.bookingNumber} onChange={e => setEditValues(v => ({ ...v, bookingNumber: e.target.value }))} placeholder="Bijv: 12345 (Voyando)" style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
@@ -913,8 +924,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             veldStyle={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }}
                                                             flex="1 1 130px"
                                                         />
-                                                            </>
-                                                        )}
                                                         <div style={{ flex: "1 1 130px" }}>
                                                             <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Taal</label>
                                                             <select value={editValues.language} onChange={e => setEditValues(v => ({ ...v, language: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white", fontSize: "0.85rem" }}>
