@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
-    updateChatbotContext, updateTranslationsVoorTaal, updateExpiredPageContent, updateGames,
+    updateChatbotContext, updateTranslationsVoorTaal, updateExpiredPageContent,
     verifyAdminPin, checkBeheerSessie, logoutBeheer
 } from "../actions/adminActions";
 import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
@@ -136,7 +136,6 @@ export default function AdminPage() {
     const [keyCode, setKeyCode] = useState("");
 
     // Dynamic Arrays
-    const [games, setGames] = useState<{ id: string, title: string, src: string }[]>([]);
     const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, fases?: string[], uitgelicht?: boolean, alleenLegeNachtregistratie?: boolean, toonMobiel?: boolean, toonDesktop?: boolean, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[] }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
@@ -258,7 +257,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setSubtitle(data.property.subtitle || "Welkom terug");
             setKeyCode((data.property as any).keyCode || "");
 
-            setGames((data as any).games || []);
             setInsights((data.insights || []).map((item: any) => ({ ...item, detailContent: item.detailContent || "", widgetCode: item.widgetCode || "" })));
 
             setVideos(data.videos || []);
@@ -375,7 +373,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         "Algemene info succesvol opgeslagen!"
     );
 
-    const handleSaveGames = () => runSaveAction(() => updateGames(games), "Gameroom succesvol opgeslagen!");
     const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!");
     const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!");
     const handleSaveOmgeving = () => runSaveAction(
@@ -478,7 +475,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         setSaveMessage("⏳ Alles aan het opslaan...");
         const results = await Promise.all([
             updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
-            updateGames(games),
             updateInsights(insights),
             updateVideos(videos),
             updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
@@ -674,10 +670,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     return (
         <div style={{ backgroundColor: "#f9f9f9", minHeight: "100vh", padding: "40px 20px" }}>
             <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "white", borderRadius: "16px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", overflow: "hidden" }}>
-                <div style={{ backgroundColor: "#4A5D23", padding: "30px", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
+                <div style={{ backgroundColor: "#4A5D23", padding: "12px 24px", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
                     <div>
-                        <h1 style={{ margin: 0, fontSize: "2rem", fontFamily: "'Lora', serif" }}>Geheim Beheer</h1>
-                        <p style={{ margin: "5px 0 0", opacity: 0.9 }}>Pas direct app-teksten aan. (Opgeslagen via Vercel KV)</p>
+                        <h1 style={{ margin: 0, fontSize: "1.35rem", fontFamily: "'Lora', serif", color: "white" }}>Geheim Beheer</h1>
                     </div>
                     <div style={{ display: "flex", gap: "10px" }}>
                         <div style={{ position: "relative" }}>
@@ -1573,43 +1568,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             onCancel={() => setConfirmDelete(null)}
                         />
 
-
-                        {/* Sectie: Gameroom */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
-                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎮 Gameroom</summary>
-                            <div style={{ marginTop: "15px" }}>
-                                <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Beheer de spellen in de gameroom. De ID wordt gebruikt in de URL (bijv. <code>tetris</code> → <code>/gameroom/tetris</code>). Het pad verwijst naar het HTML-bestand in <code>/public</code>.</p>
-                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(games, setGames)}>
-                                        <SortableContext items={games.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
-                                            {games.map((game, idx) => (
-                                                <SortableItem key={`game-${idx}`} id={`item-${idx}`}>
-                                                    <button onClick={() => setGames(games.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
-                                                    <div style={{ display: "flex", gap: "10px", marginTop: "5px", flexWrap: "wrap" }}>
-                                                        <div style={{ flex: "1 1 120px" }}>
-                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>ID (URL-slug)</label>
-                                                            <input type="text" value={game.id} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], id: e.target.value.toLowerCase().replace(/\s+/g, '-') }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "monospace" }} placeholder="bijv: tetris" />
-                                                        </div>
-                                                        <div style={{ flex: "1 1 150px" }}>
-                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam</label>
-                                                            <input type="text" value={game.title} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], title: e.target.value }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="bijv: Tetris" />
-                                                        </div>
-                                                        <div style={{ flex: "2 1 250px" }}>
-                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Pad naar HTML-bestand</label>
-                                                            <input type="text" value={game.src} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], src: e.target.value }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "monospace" }} placeholder="/Gameroom/tetris/index.html" />
-                                                        </div>
-                                                    </div>
-                                                </SortableItem>
-                                            ))}
-                                        </SortableContext>
-                                    </DndContext>
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <button onClick={() => setGames([...games, { id: "", title: "Nieuw Spel", src: "/Gameroom//index.html" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Spel Toevoegen</button>
-                                        <button onClick={handleSaveGames} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </details>
 
                         <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>
