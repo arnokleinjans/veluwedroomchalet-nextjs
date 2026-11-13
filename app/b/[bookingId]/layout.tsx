@@ -9,6 +9,7 @@ import TestBalk, { TEST_BALK_HOOGTE } from "../../components/TestBalk";
 import { cookies } from "next/headers";
 import { TEST_COOKIE, leesTestKeuze, pasTestKeuzeToe, TestKeuze } from "../../utils/testModus";
 import { importeerOpVerzoek } from "../../utils/voyando";
+import { voorinvulling } from "../../utils/voyandoKern";
 import { checkRateLimit } from "../../utils/rateLimit";
 
 export const revalidate = 60; // Cache guest pages for 60 seconds (ISR)
@@ -130,6 +131,7 @@ export default async function BookingLayout({
         language: language,
         keyCode: (translatedAppData?.property as any)?.keyCode || '',
         nachtregistratie: (testBooking as any).nachtregistratie || undefined,
+        voorinvulling: voorinvulling(testBooking) || undefined,
     };
 
     const finalAppData = toClientAppData(translatedAppData);
@@ -157,6 +159,7 @@ export default async function BookingLayout({
                         checkOut={bookingInfo.checkOut}
                         lang={language}
                         registratie={bookingInfo.nachtregistratie || null}
+                        voorinvulling={bookingInfo.voorinvulling}
                     />
                 </div>
             </div>

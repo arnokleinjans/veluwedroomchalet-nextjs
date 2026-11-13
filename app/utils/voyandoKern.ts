@@ -31,8 +31,12 @@ export type VoyandoMoment = {
     babys: number;
     huisdieren: number;
     naam?: string;
+    telefoon?: string;
+    email?: string;
     updatedAt: string;
 };
+
+export type Gast = { naam: string; telefoon: string; email: string };
 
 export type RapportRegel = {
     id: string;
@@ -85,7 +89,14 @@ export function naamVan(gast: any): string {
     return [gast?.first_name, gast?.last_name].map((s: any) => (s || "").trim()).filter(Boolean).join(" ");
 }
 
-export function momentVan(v: VoyandoBoeking, naam?: string): VoyandoMoment {
+// Booking.com geeft een doorstuuradres en Airbnb een plaatshouder; alleen een echt adres is bruikbaar.
+export function gastVan(gast: any): Gast {
+    const email = String(gast?.email || "").trim();
+    const echt = email && !/@(guest\.booking\.com|no-email\.voyando\.com)$/i.test(email);
+    return { naam: naamVan(gast), telefoon: String(gast?.telefoon ?? gast?.telephone ?? "").trim(), email: echt ? email : "" };
+}
+
+export function momentVan(v: VoyandoBoeking, gast?: Partial<Gast>): VoyandoMoment {
     return {
         id: v.id,
         status: v.status,
@@ -96,7 +107,9 @@ export function momentVan(v: VoyandoBoeking, naam?: string): VoyandoMoment {
         kinderen: v.kids || 0,
         babys: v.babies || 0,
         huisdieren: v.pets || 0,
-        ...(naam !== undefined ? { naam } : {}),
+        ...(gast?.naam !== undefined ? { naam: gast.naam } : {}),
+        ...(gast?.telefoon !== undefined ? { telefoon: gast.telefoon } : {}),
+        ...(gast?.email !== undefined ? { email: gast.email } : {}),
         updatedAt: v.updated_at,
     };
 }
@@ -153,14 +166,14 @@ export function detailNodig(bookings: any[], voyando: VoyandoBoeking[]): number[
         .filter(v => {
             const b = perId.get(String(v.id));
             if (!b) return TELT_MEE(v.status);
-            return !b.voyando || b.voyando.updatedAt !== v.updated_at || b.voyando.naam === undefined;
+            return !b.voyando || b.voyando.updatedAt !== v.updated_at || b.voyando.telefoon === undefined;
         })
         .map(v => v.id);
 }
 
 // Voegt de stand van Voyando samen met de boekingen in beheer. Zuiver: schrijft niets weg.
-// namen: gastnaam per Voyando-id, voor zover opgehaald. Een nieuwe boeking zonder naam wacht tot de volgende ronde.
-export function voegSamen(bestaand: any[], voyando: VoyandoBoeking[], namen: Map<number, string>, opties: { koppelOpDatum?: boolean } = {}): SamenvoegResultaat {
+// gasten: gastgegevens per Voyando-id, voor zover opgehaald. Een nieuwe boeking zonder gastgegevens wacht tot de volgende ronde.
+export function voegSamen(bestaand: any[], voyando: VoyandoBoeking[], gasten: Map<number, Gast>, opties: { koppelOpDatum?: boolean } = {}): SamenvoegResultaat {
     const bookings = (bestaand || []).map(b => ({ ...b }));
     const perId = new Map(bookings.map(b => [voyandoSleutel(b), b]));
     if (opties.koppelOpDatum) {
@@ -178,7 +191,8 @@ export function voegSamen(bestaand: any[], voyando: VoyandoBoeking[], namen: Map
     for (const v of voyando) {
         const id = String(v.id);
         gezien.add(id);
-        const naam = namen.get(v.id);
+        const gast = gasten.get(v.id);
+        const naam = gast?.naam;
         const b = perId.get(id);
 
         if (!b) {
@@ -191,7 +205,7 @@ export function voegSamen(bestaand: any[], voyando: VoyandoBoeking[], namen: Map
                 rapport.push({ id, soort: "overgeslagen", tekst: "gastnaam nog niet opgehaald, volgt bij de volgende ronde" });
                 continue;
             }
-            bookings.push({ id, guestName: naam || "Gast", checkIn: v.check_in, checkOut: v.check_out, language: "nl", voyando: momentVan(v, naam) });
+            bookings.push({ id, guestName: naam || "Gast", checkIn: v.check_in, checkOut: v.check_out, language: "nl", voyando: momentVan(v, gast) });
             rapport.push({ id, soort: "nieuw", naam, tekst: `${v.check_in} t/m ${v.check_out} · ${kanaalNaam(v.channel)}` });
             gewijzigd = true;
             continue;
@@ -199,7 +213,7 @@ export function voegSamen(bestaand: any[], voyando: VoyandoBoeking[], namen: Map
 
         const oud: VoyandoMoment | undefined = b.voyando;
         if (!oud) {
-            b.voyando = momentVan(v, naam);
+            b.voyando = momentVan(v, gast);
             gewijzigd = true;
             const verschillen: string[] = [];
             if (v.check_in && v.check_in !== b.checkIn) verschillen.push(`aankomst beheer ${b.checkIn}, Voyando ${v.check_in}`);
@@ -211,7 +225,7 @@ export function voegSamen(bestaand: any[], voyando: VoyandoBoeking[], namen: Map
             continue;
         }
 
-        if (oud.updatedAt === v.updated_at && (oud.naam !== undefined || naam === undefined)) continue;
+        if (oud.updatedAt === v.updated_at && (oud.telefoon !== undefined || gast === undefined)) continue;
         // Gewijzigd in Voyando maar de naam is deze ronde niet opgehaald: wachten, anders raakt een naamswijziging zoek.
         if (oud.updatedAt !== v.updated_at && naam === undefined) continue;
 
@@ -238,7 +252,7 @@ export function voegSamen(bestaand: any[], voyando: VoyandoBoeking[], namen: Map
             delete b.geannuleerd;
             rapport.push({ id, soort: "hersteld", naam: b.guestName, tekst: "in Voyando weer geaccepteerd" });
         }
-        b.voyando = momentVan(v, naam ?? oud.naam);
+        b.voyando = momentVan(v, gast ?? { naam: oud.naam, telefoon: oud.telefoon, email: oud.email });
         gewijzigd = true;
         if (wijzigingen.length) rapport.push({ id, soort: "bijgewerkt", naam: b.guestName, tekst: wijzigingen.join(" · ") });
     }
@@ -249,4 +263,42 @@ export function voegSamen(bestaand: any[], voyando: VoyandoBoeking[], namen: Map
     }
 
     return { bookings, gewijzigd, rapport, geannuleerd };
+}
+
+// Voorinvulling van een nog lege nachtregistratie met wat Voyando al weet. Een ingevuld formulier blijft zoals het is.
+export function voorinvulling(b: any): { aantalPersonen: number; telefoon: string; email: string } | null {
+    const m: VoyandoMoment | undefined = b?.voyando;
+    if (!m || b.nachtregistratie) return null;
+    return { aantalPersonen: (m.volwassenen || 0) + (m.kinderen || 0) + (m.babys || 0), telefoon: m.telefoon || "", email: m.email || "" };
+}
+
+const telKern = (t: any) => String(t || "").replace(/\D/g, "").slice(-9);
+const naamKern = (n: any) => String(n || "").toLowerCase().replace(/[^a-zà-ÿ ]/g, " ").replace(/\s+/g, " ").trim();
+
+function kenmerken(b: any) {
+    const tel = [b.voyando?.telefoon, b.nachtregistratie?.telefoon].map(telKern).filter(t => t.length === 9);
+    const mail = [b.voyando?.email, b.nachtregistratie?.email].map(e => String(e || "").trim().toLowerCase()).filter(Boolean);
+    const naam = [b.voyando?.naam, b.nachtregistratie?.huurderNaam, b.guestName].map(naamKern).filter(n => n.split(" ").length >= 2);
+    return { tel, mail, naam };
+}
+
+// Eerdere verblijven van dezelfde gast: zelfde telefoonnummer, e-mailadres of volledige naam.
+// Een nummer dat bij drie of meer verschillende namen staat (dat van de verhuurder zelf) zegt niets en telt niet mee.
+export function eerdereVerblijven(bookings: any[]): Map<string, any[]> {
+    const echte = (bookings || []).filter(b => !b.isTest && !b.geannuleerd && b.checkIn && b.checkOut);
+    const metKenmerken = echte.map(b => ({ b, k: kenmerken(b) }));
+    const namenPerTel = new Map<string, Set<string>>();
+    for (const { b, k } of metKenmerken) for (const t of k.tel) {
+        if (!namenPerTel.has(t)) namenPerTel.set(t, new Set());
+        namenPerTel.get(t)!.add(naamKern(b.voyando?.naam || b.guestName));
+    }
+    const bruikbaar = (t: string) => (namenPerTel.get(t)?.size || 0) < 3;
+    const uit = new Map<string, any[]>();
+    for (const { b, k } of metKenmerken) {
+        const eerder = metKenmerken.filter(({ b: a, k: ka }) => a !== b && a.checkOut <= b.checkIn && (
+            k.tel.some(t => bruikbaar(t) && ka.tel.includes(t)) || k.mail.some(m => ka.mail.includes(m)) || k.naam.some(n => ka.naam.includes(n))
+        )).map(x => x.b).sort((x, y) => y.checkIn.localeCompare(x.checkIn));
+        if (eerder.length) uit.set(b.id, eerder);
+    }
+    return uit;
 }

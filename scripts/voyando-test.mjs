@@ -59,6 +59,9 @@ try {
     check((await tekst()).includes("Losse link aanmaken"), "losse link staat ingeklapt");
 
     // Situaties klaarzetten
+    for (const id of await db.smembers("schoonmaak:index")) {
+        if ((await db.get(`schoonmaak:${id}`))?.bookingId === String(GEANNULEERD.id)) { await db.del(`schoonmaak:${id}`); await db.srem("schoonmaak:index", id); }
+    }
     await pasAan(bs => bs.filter(b => b.id !== idNieuw).map(b => {
         if (b.id === idA) return { ...b, checkOut: plus(A.check_out, 1), voyando: { ...b.voyando, checkOut: plus(A.check_out, 1), updatedAt: "oud" } };
         if (b.id === idB) return { ...b, checkIn: plus(B.check_in, -1) };
@@ -73,7 +76,8 @@ try {
 
     await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
     await page.locator("::-p-text(Nu ophalen)").click();
-    await page.waitForSelector("::-p-text(Laatste wijzigingen)", { timeout: 60000 }).catch(() => null);
+    await wacht(300);
+    await page.waitForFunction(() => ![...document.querySelectorAll("button")].some(b => b.textContent.trim() === "Bezig…"), { timeout: 90000 });
     await wacht(1500);
 
     const a = await boeking(idA);
@@ -115,6 +119,26 @@ try {
     if (SCHERM) { await page.evaluate(() => window.scrollTo(0, 0)); await page.screenshot({ path: SCHERM }); }
     check(jsFouten.length === 0, "geen JavaScript-fouten", jsFouten.join(" | "));
 
+    // Voorinvulling van een lege nachtregistratie
+    const leeg = (await boekingen()).find(x => x.checkIn > plus(vandaag, 3) && !x.nachtregistratie && x.voyando?.telefoon && x.voyando.status === "accepted");
+    const gevuld = (await boekingen()).find(x => x.checkOut > vandaag && x.nachtregistratie?.aantalPersonen && x.voyando);
+    const waarden = async (id) => { const p2 = await browser.newPage(); await p2.goto(`${BASIS}/b/${id}/nachtregistratie`, { waitUntil: "networkidle2" }); const w = await p2.$$eval("input", els => els.map(e => e.value)); await p2.close(); return w; };
+    const wl = await waarden(leeg.id);
+    const totaal = String(leeg.voyando.volwassenen + leeg.voyando.kinderen + leeg.voyando.babys);
+    check(wl.includes(leeg.voyando.telefoon) && wl.includes(totaal), "leeg gastformulier voorgevuld met telefoon en aantal personen", `${leeg.id}: ${totaal} pers.`);
+    check(!(await boeking(leeg.id)).nachtregistratie, "voorinvulling slaat niets op: formulier blijft 'leeg' tot de gast opslaat");
+    if (gevuld) check((await waarden(gevuld.id)).includes(String(gevuld.nachtregistratie.aantalPersonen)), "ingevuld formulier toont de eigen gegevens", gevuld.id);
+
+    await page.reload({ waitUntil: "networkidle2" });
+    await page.locator("::-p-text(Gepersonaliseerde Gasten Links)").click();
+    await page.type("input[placeholder*='Zoek op naam']", leeg.id);
+    await wacht(800);
+    await (await rij(leeg.id)).evaluate(el => [...el.querySelectorAll("button")].find(b => b.textContent.includes("Formulier leeg")).click());
+    await wacht(800);
+    const wp = await (await rij(leeg.id)).evaluate(el => [...el.querySelectorAll("input")].map(i => i.value));
+    check(wp.includes(leeg.voyando.telefoon) && wp.includes(totaal), "leeg formulier in beheer voorgevuld");
+    if (SCHERM) await page.screenshot({ path: SCHERM.replace(".png", "-formulier.png") });
+
     // Gast opent de link vóór de boeking in beheer staat
     await pasAan(bs => bs.filter(x => x.id !== idNieuw));
     await wacht(2500);
@@ -123,7 +147,7 @@ try {
     check((await fetch(`${BASIS}/b/${GEANNULEERD.id + 900000}`)).status === 404, "onbekend nummer blijft 404");
 } finally {
     await browser.close();
-    await pasAan(bs => bs.filter(b => b.guestName !== "Test Annulering"));
+    await pasAan(bs => bs.filter(b => b.id !== String(GEANNULEERD.id)));
 }
 console.log(fouten ? `\n${fouten} controle(s) mislukt` : "\nAlles in orde");
 process.exit(fouten ? 1 : 0);

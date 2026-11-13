@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
@@ -12,7 +12,7 @@ import SchoonmaakSectie, { type SchoonmaakData } from "../components/schoonmaak/
 import BeurtPaneel, { beurtPaneelOpen } from "../components/schoonmaak/BeurtPaneel";
 import { haalSchoonmaakData } from "../actions/schoonmaakActions";
 import { voyandoOphalen, neemDatumsOverVanVoyando } from "../actions/voyandoActions";
-import { kanaalNaam, wijktAf } from "../utils/voyandoKern";
+import { kanaalNaam, wijktAf, eerdereVerblijven } from "../utils/voyandoKern";
 import type { VoyandoStand } from "../utils/voyando";
 import { STATUS_LABEL } from "../utils/schoonmaakTypes";
 import { formatDatumNL } from "../utils/toeristenbelasting";
@@ -174,6 +174,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
     const [voyando, setVoyando] = useState<{ actief: boolean; stand: VoyandoStand } | null>(null);
     const [voyandoBezig, setVoyandoBezig] = useState(false);
+    const eerder = useMemo(() => eerdereVerblijven(bookings), [bookings]);
     // De timer hieronder leeft langer dan één render en ziet anders een oude waarde.
     const magBoekingenVerversen = useRef(true);
     magBoekingenVerversen.current = !editingId && !expandedRegId;
@@ -886,6 +887,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                     {isExpired && !isEditing && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#f0f0f0", color: "#999", border: "1px solid transparent" }}>Verlopen</span>}
                                                     {isTestBooking && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#4A5D23", color: "white", border: "1px solid transparent" }}>🧪 Testboeking</span>}
                                                     {voy && <span title="Deze boeking komt uit Voyando" style={{ ...labelKnop, cursor: "default", backgroundColor: "#eef2f7", color: "#4a5a70", border: "1px solid transparent" }}>{kanaalNaam(voy.kanaal)}{personen ? ` · ${personen} pers.` : ""}{voy.babys ? ` + ${voy.babys} baby` : ""}{voy.huisdieren ? " · 🐾" : ""}</span>}
+                                                    {eerder.has(booking.id) && <span title={eerder.get(booking.id)!.map(e => `${e.guestName}: ${formatDatumNL(e.checkIn)} t/m ${formatDatumNL(e.checkOut)}`).join("\n")} style={{ ...labelKnop, cursor: "help", backgroundColor: "#ede9fe", color: "#5b21b6", border: "1px solid transparent" }}>🔁 Was hier eerder · {eerder.get(booking.id)!.length === 1 ? formatDatumNL(eerder.get(booking.id)![0].checkIn).slice(3) : `${eerder.get(booking.id)!.length}×`}</span>}
                                                     {isGeannuleerd && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#fde8e6", color: "#a3352a", border: "1px solid transparent" }}>Geannuleerd in Voyando</span>}
                                                     {afwijking && !isGeannuleerd && <button onClick={() => handleNeemOver(booking)} title="Klik om de datums uit Voyando over te nemen" style={{ ...labelKnop, backgroundColor: "#fef3c7", color: "#92400e", border: "1px solid #f0d58a" }}>⚠ Voyando: {formatDatumNL(voy.checkIn)} t/m {formatDatumNL(voy.checkOut)} · neem over</button>}
                                                     <a href={shareUrl} target="_blank" rel="noreferrer" title={shareUrl} style={{ marginLeft: "auto", fontSize: "0.78rem", color: isExpired ? "#bbb" : "#4A5D23", textDecoration: isExpired ? "line-through" : "none", whiteSpace: "nowrap" }}>/b/{booking.id} ↗</a>

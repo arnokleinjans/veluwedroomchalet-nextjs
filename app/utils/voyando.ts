@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { getKV, getAppDataFresh, invalidateCache } from "./db";
 import { synchroniseerNaBoekingen, vervalBeurtenVanBoeking } from "./schoonmaakMail";
-import { haalAlleBoekingen, haalBoeking, detailNodig, voegSamen, naamVan, momentVan, voyandoSleutel, RapportRegel } from "./voyandoKern";
+import { haalAlleBoekingen, haalBoeking, detailNodig, voegSamen, gastVan, momentVan, voyandoSleutel, Gast, RapportRegel } from "./voyandoKern";
 
 const STAND = "voyando:sync";
 const MIN_TUSSENTIJD_MS = 2 * 60_000;
@@ -48,16 +48,16 @@ export async function synchroniseerVoyando(opties: { forceer?: boolean } = {}): 
         const appData = await getAppDataFresh();
         const nodig = detailNodig((appData as any).bookings || [], voyando);
         // Nieuwste eerst: een nieuwe boeking is dringender dan een oude naam.
-        const namen = new Map<number, string>();
+        const gasten = new Map<number, Gast>();
         for (const id of nodig.sort((a, b) => b - a).slice(0, MAX_DETAILS)) {
             const detail = await haalBoeking(sleutel, id);
-            if (detail) namen.set(id, naamVan(detail.guest));
+            if (detail) gasten.set(id, gastVan(detail.guest));
         }
 
         let rapport: RapportRegel[] = [];
         let geannuleerd: string[] = [];
         const bookings = await schrijfBoekingen(huidig => {
-            const r = voegSamen(huidig, voyando, namen);
+            const r = voegSamen(huidig, voyando, gasten);
             rapport = r.rapport;
             geannuleerd = r.geannuleerd;
             return r;
@@ -96,12 +96,12 @@ export async function importeerOpVerzoek(rawId: string): Promise<boolean> {
     try {
         const detail = await haalBoeking(sleutel, id);
         if (!detail || detail.status !== "accepted" || !detail.check_in || !detail.check_out) return false;
-        const naam = naamVan(detail.guest);
+        const gast = gastVan(detail.guest);
         const bookings = await schrijfBoekingen(huidig => {
             if (huidig.some(b => String(b.id).toUpperCase() === id || voyandoSleutel(b) === id)) return { bookings: huidig, gewijzigd: false };
             return {
                 gewijzigd: true,
-                bookings: [...huidig, { id, guestName: naam || "Gast", checkIn: detail.check_in, checkOut: detail.check_out, language: "nl", voyando: momentVan(detail, naam) }],
+                bookings: [...huidig, { id, guestName: gast.naam || "Gast", checkIn: detail.check_in, checkOut: detail.check_out, language: "nl", voyando: momentVan(detail, gast) }],
             };
         });
         if (bookings) await synchroniseerNaBoekingen(bookings).catch(e => console.error("Schoonmaak bijwerken na Voyando mislukt:", e));

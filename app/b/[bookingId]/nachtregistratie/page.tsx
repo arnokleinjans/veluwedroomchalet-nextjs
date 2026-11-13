@@ -32,6 +32,7 @@ export default function NachtregistratiePage() {
                 checkOut={booking.checkOut}
                 lang={booking.language || "nl"}
                 registratie={booking.nachtregistratie || null}
+                voorinvulling={booking.voorinvulling}
             />
         </div>
     );

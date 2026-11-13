@@ -28,6 +28,7 @@ export type BookingInfo = {
     language: string;
     keyCode?: string;
     nachtregistratie?: NachtregistratieData;
+    voorinvulling?: { aantalPersonen: number; telefoon: string; email: string };
 };
 
 const BookingContext = createContext<{ booking: BookingInfo, appData: any } | null>(null);

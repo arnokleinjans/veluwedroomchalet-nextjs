@@ -11,7 +11,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { Redis } from "@upstash/redis";
-import { haalAlleBoekingen, haalBoeking, detailNodig, voegSamen, naamVan } from "../app/utils/voyandoKern.ts";
+import { haalAlleBoekingen, haalBoeking, detailNodig, voegSamen, gastVan } from "../app/utils/voyandoKern.ts";
 
 const productie = process.argv.includes("--productie");
 const schrijf = process.argv.includes("--schrijf");
@@ -46,11 +46,11 @@ let app = await db.get("veluwe_app_data");
 if (!app?.bookings) { console.error("Geen boekingen gevonden in veluwe_app_data"); process.exit(1); }
 
 const nodig = detailNodig(app.bookings, voyando);
-console.log(`Voyando: ${voyando.length} boekingen · beheer: ${app.bookings.length} · gastnamen ophalen: ${nodig.length}`);
+console.log(`Voyando: ${voyando.length} boekingen · beheer: ${app.bookings.length} · gastgegevens ophalen: ${nodig.length}`);
 const namen = new Map();
 for (const [i, id] of nodig.entries()) {
     const detail = await haalBoeking(sleutel, id);
-    if (detail) namen.set(id, naamVan(detail.guest));
+    if (detail) namen.set(id, gastVan(detail.guest));
     if (i % 10 === 9) process.stdout.write(`  ${i + 1}/${nodig.length}\n`);
     await new Promise(r => setTimeout(r, 1100));
 }
@@ -74,14 +74,15 @@ for (const [soort, kop] of Object.entries(KOPPEN)) {
     for (const r of soort === "gekoppeld" ? regels.filter(r => r.tekst.includes("link blijft")) : regels) console.log(`  ${r.id.padEnd(14)} ${(r.naam || "").padEnd(28)} ${r.tekst}`);
 }
 
-// Controle: van een bestaande boeking mag alleen het veld voyando erbij zijn gekomen.
+// Controle: van een bestaande boeking mag alleen het veld voyando zijn toegevoegd of bijgewerkt.
 const oud = new Map(JSON.parse(voor).map(b => [b.id, b]));
 let aangetast = 0;
 for (const b of uit.bookings) {
     const o = oud.get(b.id);
     if (!o) continue;
     const { voyando: _v, ...rest } = b;
-    if (JSON.stringify(rest) !== JSON.stringify(o)) { aangetast++; console.error(`  ONVERWACHT gewijzigd: ${b.id}`); }
+    const { voyando: _w, ...oudRest } = o;
+    if (JSON.stringify(rest) !== JSON.stringify(oudRest)) { aangetast++; console.error(`  ONVERWACHT gewijzigd: ${b.id}`); }
 }
 const verdwenen = [...oud.keys()].filter(id => !uit.bookings.some(b => b.id === id));
 console.log(`\nControle: ${oud.size} bestaande boekingen, ${aangetast} inhoudelijk gewijzigd, ${verdwenen.length} verdwenen. Na de lading: ${uit.bookings.length} boekingen.`);
