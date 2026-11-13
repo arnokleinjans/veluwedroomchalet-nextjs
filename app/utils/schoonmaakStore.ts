@@ -112,6 +112,8 @@ export async function alleBeurten(): Promise<Beurt[]> {
 // Een beurt waarvan de datum niet met de hand is aangepast, schuift mee met de vertrekdatum.
 // Geeft de beurten terug waarvan de datum is verschoven terwijl er al iemand op stond.
 export async function synchroniseerBeurten(bookings: any[]): Promise<Beurt[]> {
+    // Een in Voyando geannuleerde boeking telt voor de schoonmaak als niet-bestaand.
+    bookings = (bookings || []).filter(b => !b?.geannuleerd);
     const beurten = await alleBeurten();
     const perBoeking = new Map(beurten.filter(b => b.automatisch && b.bookingId).map(b => [b.bookingId!, b]));
     const grens = vandaag();
@@ -170,7 +172,7 @@ export function verrijk(beurt: Beurt, bookings: any[]): BeurtMetContext {
     const boeking = beurt.bookingId ? bookings.find(b => b.id === beurt.bookingId) : undefined;
     // De eerstvolgende gast die op of na de schoonmaakdatum aankomt. Voor die gast wordt het chalet klaargemaakt.
     const volgende = bookings
-        .filter(b => !b.isTest && b.id !== beurt.bookingId && b.checkIn && b.checkIn >= beurt.datum)
+        .filter(b => !b.isTest && !b.geannuleerd && b.id !== beurt.bookingId && b.checkIn && b.checkIn >= beurt.datum)
         .sort((a, b) => a.checkIn.localeCompare(b.checkIn))[0];
     return {
         ...beurt,

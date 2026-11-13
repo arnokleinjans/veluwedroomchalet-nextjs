@@ -248,9 +248,13 @@ export async function updateBooking(id: string, checkIn: string, checkOut: strin
         if (bezet) return idTakenError(newId, bezet);
     }
 
+    // Bij een Voyando-boeking komen nummer en datums uit Voyando; in beheer is alleen de taal te wijzigen.
+    const gekoppeld = !!updatedData.bookings.find((b: any) => b.id === id)?.voyando;
+    if (gekoppeld) newId = null;
+
     updatedData.bookings = updatedData.bookings.map((b: any) => {
         if (b.id !== id) return b;
-        const updated = { ...b, checkIn, checkOut, language };
+        const updated = gekoppeld ? { ...b, language } : { ...b, checkIn, checkOut, language };
         if (newId) updated.id = newId;
         delete updated.aliases;
         return updated;
@@ -274,6 +278,11 @@ export async function removeBooking(id: string) {
 
     if (updatedData.bookings.some((b: any) => b.id === id && b.isTest)) {
         return { success: false, error: "De testboeking kan niet worden verwijderd." };
+    }
+
+    const teVerwijderen = updatedData.bookings.find((b: any) => b.id === id) as any;
+    if (teVerwijderen?.voyando && teVerwijderen.voyando.status === "accepted") {
+        return { success: false, error: "Deze boeking komt uit Voyando. Annuleer hem daar; hij verdwijnt dan hier vanzelf uit de planning." };
     }
 
     updatedData.bookings = updatedData.bookings.filter((b: any) => b.id !== id);

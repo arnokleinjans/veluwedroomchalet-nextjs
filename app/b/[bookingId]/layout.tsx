@@ -8,6 +8,8 @@ import NachtregistratieForm from "../../components/NachtregistratieForm";
 import TestBalk, { TEST_BALK_HOOGTE } from "../../components/TestBalk";
 import { cookies } from "next/headers";
 import { TEST_COOKIE, leesTestKeuze, pasTestKeuzeToe, TestKeuze } from "../../utils/testModus";
+import { importeerOpVerzoek } from "../../utils/voyando";
+import { checkRateLimit } from "../../utils/rateLimit";
 
 export const revalidate = 60; // Cache guest pages for 60 seconds (ISR)
 
@@ -19,13 +21,19 @@ export default async function BookingLayout({
     params: Promise<{ bookingId: string }>;
 }) {
     const { bookingId: rawId } = await params;
-    const appData = await getAppData();
+    let appData = await getAppData();
 
     // Find the current booking
-    const booking = findBooking(appData.bookings, rawId);
+    let booking = findBooking(appData.bookings, rawId);
+
+    // Nog niet in beheer: misschien een boeking die Voyando net heeft gemaild.
+    if (!booking && checkRateLimit("voyando-op-verzoek").allowed && await importeerOpVerzoek(rawId)) {
+        appData = await getAppData();
+        booking = findBooking(appData.bookings, rawId);
+    }
 
     // Fallback if URL is invalid
-    if (!booking) {
+    if (!booking || (booking as any).geannuleerd) {
         notFound();
     }
 

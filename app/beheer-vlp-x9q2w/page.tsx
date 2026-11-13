@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
@@ -11,6 +11,9 @@ import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel
 import SchoonmaakSectie, { type SchoonmaakData } from "../components/schoonmaak/SchoonmaakSectie";
 import BeurtPaneel, { beurtPaneelOpen } from "../components/schoonmaak/BeurtPaneel";
 import { haalSchoonmaakData } from "../actions/schoonmaakActions";
+import { voyandoOphalen, neemDatumsOverVanVoyando } from "../actions/voyandoActions";
+import { kanaalNaam, wijktAf } from "../utils/voyandoKern";
+import type { VoyandoStand } from "../utils/voyando";
 import { STATUS_LABEL } from "../utils/schoonmaakTypes";
 import { formatDatumNL } from "../utils/toeristenbelasting";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
@@ -169,9 +172,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [staanplaats, setStaanplaats] = useState("");
     const [campingEmail, setCampingEmail] = useState("");
 
-    // CSV import
-    const [csvRows, setCsvRows] = useState<{ name: string, checkIn: string, checkOut: string, language: string, isDuplicate?: boolean, overrideDuplicate?: boolean }[]>([]);
-    const [importProgress, setImportProgress] = useState<{ done: number, total: number } | null>(null);
+    const [voyando, setVoyando] = useState<{ actief: boolean; stand: VoyandoStand } | null>(null);
+    const [voyandoBezig, setVoyandoBezig] = useState(false);
+    // De timer hieronder leeft langer dan één render en ziet anders een oude waarde.
+    const magBoekingenVerversen = useRef(true);
+    magBoekingenVerversen.current = !editingId && !expandedRegId;
 
     const [isSaving, setIsSaving] = useState(false);
     const [isTranslating, setIsTranslating] = useState<string | null>(null);
@@ -197,10 +202,29 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         }
     };
 
+    const haalVoyando = async (forceer = false) => {
+        try {
+            if (forceer) setVoyandoBezig(true);
+            const res = await voyandoOphalen(forceer);
+            setVoyando(res);
+            if (res.actief) {
+                const data = await fetchAdminData();
+                setBookings(data.bookings || []);
+            }
+        } catch (e) {
+            console.error("Voyando ophalen mislukt:", e);
+        } finally {
+            setVoyandoBezig(false);
+        }
+        await herlaadSchoonmaak();
+    };
+
     useEffect(() => {
         if (!isAuthenticated) return;
         const vernieuw = () => {
-            if (document.visibilityState === "visible" && !beurtPaneelOpen()) herlaadSchoonmaak();
+            if (document.visibilityState !== "visible" || beurtPaneelOpen()) return;
+            if (magBoekingenVerversen.current) haalVoyando();
+            else herlaadSchoonmaak();
         };
         const timer = setInterval(vernieuw, 60_000);
         document.addEventListener("visibilitychange", vernieuw);
@@ -244,6 +268,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setExpiredPageContent((data as any).expiredPageContent || "");
             if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
             if ((data as any).aiMaxChars) setAiMaxChars((data as any).aiMaxChars);
+            haalVoyando();
         });
     };
 
@@ -508,79 +533,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         };
     }
 
-    const parseDutchDate = (raw: string): string => {
-        const s = raw.trim().replace(/\//g, '-');
-        const parts = s.split('-');
-        if (parts.length !== 3) return '';
-        const [a, b, c] = parts;
-        // If first part is 4 digits: yyyy-mm-dd already
-        if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
-        // Otherwise: d-m-yyyy
-        return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
-    };
-
-    const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const text = ev.target?.result as string;
-            const lines = text.split(/\r?\n/).filter(l => l.trim());
-            const parsed: typeof csvRows = [];
-            for (const line of lines) {
-                const cols = line.split(';').map(c => c.trim().replace(/^"|"$/g, ''));
-                const name = cols[0];
-                if (!name) continue;
-
-                let checkIn = '', checkOut = '';
-                const dateCol = cols[1] || '';
-
-                if (dateCol.includes(' - ')) {
-                    // Format: "8-5-2026 - 10-5-2026"
-                    const [from, to] = dateCol.split(' - ');
-                    checkIn = parseDutchDate(from);
-                    checkOut = parseDutchDate(to);
-                } else {
-                    // Separate columns: cols[1] = checkIn, cols[2] = checkOut
-                    checkIn = parseDutchDate(dateCol);
-                    checkOut = parseDutchDate(cols[2] || '');
-                }
-
-                if (!checkIn || !checkOut) continue;
-                // Voorkom dubbele boekingen op basis van gastnaam + aankomstdatum (ongeacht hoofdletters/spaties)
-                const isDuplicate = bookings.some(b => b.guestName.trim().toLowerCase() === name.trim().toLowerCase() && b.checkIn === checkIn);
-
-                parsed.push({
-                    name,
-                    checkIn,
-                    checkOut,
-                    language: cols[3]?.trim() || 'nl',
-                    isDuplicate
-                });
-            }
-            setCsvRows(parsed);
-        };
-        reader.readAsText(file, 'UTF-8');
-        e.target.value = '';
-    };
-
-    const handleImportAll = async () => {
-        const validRows = csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate);
-        if (!validRows.length) return;
-        setImportProgress({ done: 0, total: validRows.length });
-        for (let i = 0; i < validRows.length; i++) {
-            const row = validRows[i];
-            await addBooking(row.name, row.checkIn, row.checkOut, row.language);
-            setImportProgress({ done: i + 1, total: validRows.length });
-        }
-        setCsvRows([]);
-        setImportProgress(null);
-        await refreshBookings();
-        const validRowsCount = csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate).length;
-        setSaveMessage(`✅ ${validRowsCount} boekingen geïmporteerd!`);
-        setTimeout(() => setSaveMessage(""), 4000);
-    };
-
     const refreshBookings = async () => {
         const data = await fetchAdminData();
         setBookings(data.bookings || []);
@@ -634,6 +586,26 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             confirmLabel: "Ja, verwijderen",
             variant: "danger",
             onConfirm: () => { setDialog(null); doRemoveBooking(id); },
+        });
+    };
+
+    const handleNeemOver = (booking: any) => {
+        const v = booking.voyando;
+        setDialog({
+            title: "Datums overnemen van Voyando?",
+            message: `"${booking.guestName}" staat in beheer op ${formatDatumNL(booking.checkIn)} t/m ${formatDatumNL(booking.checkOut)}. In Voyando is het ${formatDatumNL(v.checkIn)} t/m ${formatDatumNL(v.checkOut)}. De schoonmaakbeurt schuift mee.`,
+            confirmLabel: "Ja, overnemen",
+            variant: "primary",
+            onConfirm: async () => {
+                setDialog(null);
+                const res = await neemDatumsOverVanVoyando(booking.id);
+                if (res.success) {
+                    await refreshBookings();
+                    toonMelding("✅ Datums overgenomen uit Voyando.");
+                } else {
+                    toonMelding("❌ " + res.error);
+                }
+            },
         });
     };
 
@@ -768,19 +740,50 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         <details className="sectie" style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "14px 18px", backgroundColor: "#fcfefc" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>✨ Gepersonaliseerde Gasten Links</summary>
                             <div style={{ marginTop: "15px" }}>
-                                <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
+                                {voyando?.actief ? (
+                                    <div style={{ marginBottom: "16px", backgroundColor: voyando.stand.gelukt === false ? "#fff4f2" : "#f3f8ec", padding: "12px 15px", borderRadius: "8px", border: `1px solid ${voyando.stand.gelukt === false ? "#e5b4ac" : "#cfdcb8"}`, display: "flex", gap: "12px", alignItems: "flex-start", flexWrap: "wrap" }}>
+                                        <div style={{ flex: "1 1 260px", fontSize: "0.85rem", color: "#444" }}>
+                                            <strong style={{ color: "#333" }}>🔄 Boekingen komen uit Voyando</strong>
+                                            <div style={{ marginTop: "3px", color: voyando.stand.gelukt === false ? "#a3352a" : "#666" }}>
+                                                {voyando.stand.gelukt === false
+                                                    ? `Ophalen mislukt: ${voyando.stand.fout}`
+                                                    : voyando.stand.laatst
+                                                        ? `Laatst opgehaald ${new Date(voyando.stand.laatst).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${voyando.stand.aantal ?? 0} boekingen in Voyando`
+                                                        : "Nog niet opgehaald"}
+                                            </div>
+                                            <div style={{ marginTop: "3px", color: "#777" }}>Nieuwe boekingen, andere datums en annuleringen komen vanzelf binnen. Het nummer en de datums wijzig je in Voyando.</div>
+                                            {voyando.stand.laatsteWijzigingen && (
+                                                <details style={{ marginTop: "6px" }}>
+                                                    <summary style={{ cursor: "pointer", color: "#4A5D23" }}>Laatste wijzigingen ({new Date(voyando.stand.laatsteWijzigingen.op).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })})</summary>
+                                                    <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
+                                                        {voyando.stand.laatsteWijzigingen.regels.map((r, i) => (
+                                                            <li key={i}><strong>{r.soort}</strong> · {r.naam || r.id} ({r.id}) · {r.tekst}</li>
+                                                        ))}
+                                                    </ul>
+                                                </details>
+                                            )}
+                                        </div>
+                                        <button onClick={() => haalVoyando(true)} disabled={voyandoBezig} style={{ ...rijKnop, backgroundColor: "#4A5D23", color: "white", fontWeight: "bold", padding: "7px 14px", opacity: voyandoBezig ? 0.6 : 1 }}>{voyandoBezig ? "Bezig…" : "Nu ophalen"}</button>
+                                    </div>
+                                ) : (
+                                    <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
+                                )}
 
-                                <div style={{ marginBottom: "20px", backgroundColor: "white", padding: "15px", borderRadius: "8px", border: "1px solid #ccc" }}>
-                                    <h3 style={{ fontSize: "1rem", marginBottom: "10px", color: "#333" }}>Nieuwe Link Aanmaken</h3>
+                                <details open={voyando ? !voyando.actief : false} style={{ marginBottom: "20px", backgroundColor: "white", padding: "12px 15px", borderRadius: "8px", border: "1px solid #ccc" }}>
+                                    <summary style={{ fontSize: "0.95rem", color: "#333", cursor: "pointer", fontWeight: "bold" }}>{voyando?.actief ? "Losse link aanmaken (zonder Voyando-boeking)" : "Nieuwe Link Aanmaken"}</summary>
+                                    {voyando?.actief && <p style={{ fontSize: "0.8rem", color: "#777", margin: "8px 0 0" }}>Voor familie, een schoonmaakster of een proeflink. Een gewone boeking hoef je hier niet in te voeren.</p>}
+                                    <div style={{ height: "10px" }} />
                                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                                         <div style={{ flex: "1 1 200px" }}>
                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
                                             <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
                                         </div>
+                                        {!voyando?.actief && (
                                         <div style={{ flex: "1 1 140px" }}>
                                             <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Boekingsnummer</label>
                                             <input type="text" value={newBookingNumber} onChange={e => setNewBookingNumber(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Voyando-nr" />
                                         </div>
+                                        )}
                                         <DatumBereik
                                             aankomst={newCheckIn}
                                             vertrek={newCheckOut}
@@ -796,74 +799,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         </div>
                                     </div>
                                     <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
-                                </div>
-
-                                {/* CSV Import */}
-                                <div style={{ marginBottom: "20px", backgroundColor: "white", padding: "15px", borderRadius: "8px", border: "1px dashed #bbb" }}>
-                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-                                        <div>
-                                            <strong style={{ fontSize: "0.95rem", color: "#333" }}>📂 Importeer uit CSV</strong>
-                                            <p style={{ fontSize: "0.78rem", color: "#888", marginTop: "2px" }}>Kolommen (puntkomma): <strong>Naam;d-m-jjjj - d-m-jjjj</strong> · ook los per kolom ondersteund · optioneel: taal</p>
-                                        </div>
-                                        <label style={{ backgroundColor: "#f0f0f0", color: "#333", padding: "8px 16px", borderRadius: "6px", border: "1px solid #ccc", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                            Kies CSV-bestand
-                                            <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} style={{ display: "none" }} />
-                                        </label>
-                                    </div>
-
-                                    {csvRows.length > 0 && (
-                                        <div style={{ marginTop: "12px" }}>
-                                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
-                                                <thead>
-                                                    <tr style={{ backgroundColor: "#f5f5f5" }}>
-                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Naam</th>
-                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Aankomst</th>
-                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Vertrek</th>
-                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Taal</th>
-                                                        <th style={{ padding: "6px 8px", borderBottom: "1px solid #ddd" }}></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {csvRows.map((row, i) => {
-                                                        const isIgnored = row.isDuplicate && !row.overrideDuplicate;
-                                                        return (
-                                                            <tr key={i} style={{ borderBottom: "1px solid #eee", backgroundColor: isIgnored ? "#fafafa" : "transparent" }}>
-                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#333", textDecoration: isIgnored ? "line-through" : "none" }}>
-                                                                    {row.name} 
-                                                                    {row.isDuplicate && (
-                                                                        <button 
-                                                                            onClick={() => { const n = [...csvRows]; n[i].overrideDuplicate = !n[i].overrideDuplicate; setCsvRows(n); }}
-                                                                            style={{ fontSize: "0.7rem", backgroundColor: row.overrideDuplicate ? "#e8f5e9" : "#f0f0f0", color: row.overrideDuplicate ? "#2e7d32" : "#999", padding: "2px 6px", borderRadius: "8px", marginLeft: "4px", border: `1px solid ${row.overrideDuplicate ? "#c8e6c9" : "#e0e0e0"}`, cursor: "pointer", outline: "none" }}
-                                                                        >
-                                                                            {row.overrideDuplicate ? "Dubbel, toch toevoegen" : "Dubbel"}
-                                                                        </button>
-                                                                    )}
-                                                                </td>
-                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{formatDatumNL(row.checkIn)} - {formatDatumNL(row.checkOut)}</td>
-                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{row.language.toUpperCase()}</td>
-                                                                <td style={{ padding: "8px", textAlign: "right" }}>
-                                                                    <button onClick={() => setCsvRows(r => r.filter((_, j) => j !== i))} style={{ background: "none", border: "none", color: "#c00", cursor: "pointer", fontSize: "0.85rem", opacity: isIgnored ? 0.5 : 1 }}>✕</button>
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                            <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "12px" }}>
-                                                {importProgress ? (
-                                                    <span style={{ fontSize: "0.85rem", color: "#4A5D23" }}>⏳ {importProgress.done} / {importProgress.total} aangemaakt…</span>
-                                                ) : (
-                                                    <>
-                                                        <button onClick={handleImportAll} style={{ backgroundColor: "#4A5D23", color: "white", padding: "8px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem" }}>
-                                                            + Genereer {csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate).length} links
-                                                        </button>
-                                                        <button onClick={() => setCsvRows([])} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: "0.85rem" }}>Annuleer</button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                </details>
 
                                 {/* Filter: nieuw / verlopen / alle */}
                                 <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
@@ -896,6 +832,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         const beurt = schoonmaak?.beurten.find(b => b.automatisch && b.bookingId === booking.id);
                                         const isSchoonmaakOpen = !!beurt && expandedSchoonmaakId === booking.id;
                                         const schoonmakerNaam = beurt?.schoonmakerId ? schoonmaak?.schoonmakers.find(s => s.id === beurt.schoonmakerId)?.naam : undefined;
+                                        const voy = (booking as any).voyando;
+                                        const isGeannuleerd = !!(booking as any).geannuleerd || (!!voy && voy.status !== "accepted");
+                                        const afwijking = wijktAf(booking);
+                                        const magWeg = !isTestBooking && (!voy || voy.status !== "accepted");
+                                        const personen = voy ? (voy.volwassenen || 0) + (voy.kinderen || 0) : 0;
                                         return (
                                             <div key={booking.id} style={{ padding: "12px", backgroundColor: isExpired && !isEditing ? "#fafafa" : "white", borderRadius: "8px", border: isEditing ? "1px solid #4A5D23" : isExpired ? "1px solid #e0e0e0" : "1px solid #eee", opacity: isExpired && !isEditing ? 0.75 : 1, transition: "opacity 0.2s" }}>
                                                 {/* Rij 1: naam, periode en acties */}
@@ -928,7 +869,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             <>
                                                                 <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={rijKnop}>Bewerk</button>
                                                                 <button onClick={() => !isExpired && copyToClipboard(shareUrl, booking.id)} disabled={isExpired} title={isExpired ? "Verlopen boeking" : shareUrl} style={{ ...rijKnop, backgroundColor: isExpired ? "#f0f0f0" : copiedId === booking.id ? "#4A5D23" : "#e0e0e0", color: isExpired ? "#bbb" : copiedId === booking.id ? "white" : "#333", cursor: isExpired ? "not-allowed" : "pointer", fontWeight: "bold", transition: "all 0.2s" }}>{copiedId === booking.id ? "✓ Gekopieerd" : "Kopieer link"}</button>
-                                                                {!isTestBooking && <button onClick={() => handleRemoveBooking(booking.id)} style={{ ...rijKnop, backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc" }}>Verwijder</button>}
+                                                                {magWeg && <button onClick={() => handleRemoveBooking(booking.id)} style={{ ...rijKnop, backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc" }}>Verwijder</button>}
                                                             </>
                                                         )}
                                                     </div>
@@ -944,11 +885,20 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                     )}
                                                     {isExpired && !isEditing && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#f0f0f0", color: "#999", border: "1px solid transparent" }}>Verlopen</span>}
                                                     {isTestBooking && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#4A5D23", color: "white", border: "1px solid transparent" }}>🧪 Testboeking</span>}
+                                                    {voy && <span title="Deze boeking komt uit Voyando" style={{ ...labelKnop, cursor: "default", backgroundColor: "#eef2f7", color: "#4a5a70", border: "1px solid transparent" }}>{kanaalNaam(voy.kanaal)}{personen ? ` · ${personen} pers.` : ""}{voy.babys ? ` + ${voy.babys} baby` : ""}{voy.huisdieren ? " · 🐾" : ""}</span>}
+                                                    {isGeannuleerd && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#fde8e6", color: "#a3352a", border: "1px solid transparent" }}>Geannuleerd in Voyando</span>}
+                                                    {afwijking && !isGeannuleerd && <button onClick={() => handleNeemOver(booking)} title="Klik om de datums uit Voyando over te nemen" style={{ ...labelKnop, backgroundColor: "#fef3c7", color: "#92400e", border: "1px solid #f0d58a" }}>⚠ Voyando: {formatDatumNL(voy.checkIn)} t/m {formatDatumNL(voy.checkOut)} · neem over</button>}
                                                     <a href={shareUrl} target="_blank" rel="noreferrer" title={shareUrl} style={{ marginLeft: "auto", fontSize: "0.78rem", color: isExpired ? "#bbb" : "#4A5D23", textDecoration: isExpired ? "line-through" : "none", whiteSpace: "nowrap" }}>/b/{booking.id} ↗</a>
                                                 </div>
 
                                                 {isEditing ? (
                                                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                                        {voy ? (
+                                                            <div style={{ flex: "2 1 260px", alignSelf: "center", fontSize: "0.8rem", color: "#777", backgroundColor: "#f3f3f3", border: "1px solid #e2e2e2", borderRadius: "6px", padding: "8px 10px" }}>
+                                                                Boekingsnummer {booking.id} · {periodeKort(booking.checkIn, booking.checkOut)}<br />Nummer en datums komen uit Voyando en wijzig je daar.
+                                                            </div>
+                                                        ) : (
+                                                            <>
                                                         <div style={{ flex: "1 1 130px" }}>
                                                             <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Boekingsnummer</label>
                                                             <input type="text" value={editValues.bookingNumber} onChange={e => setEditValues(v => ({ ...v, bookingNumber: e.target.value }))} placeholder="Bijv: 12345 (Voyando)" style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }} />
@@ -961,6 +911,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             veldStyle={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }}
                                                             flex="1 1 130px"
                                                         />
+                                                            </>
+                                                        )}
                                                         <div style={{ flex: "1 1 130px" }}>
                                                             <label style={{ display: "block", fontSize: "0.78rem", color: "#555", marginBottom: "4px" }}>Taal</label>
                                                             <select value={editValues.language} onChange={e => setEditValues(v => ({ ...v, language: e.target.value }))} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white", fontSize: "0.85rem" }}>
