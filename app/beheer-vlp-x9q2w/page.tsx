@@ -58,8 +58,11 @@ function samenvattingZichtbaarheid(item: any): string {
     return delen.join(" · ");
 }
 
-function SortableItem({ id, children, accent, titel, kop }: { id: string, children: React.ReactNode, accent?: string, titel?: string, kop?: React.ReactNode }) {
-    const [open, setOpen] = useState(titel === undefined);
+function SortableItem({ id, children, accent, titel, oog }: { id: string, children: React.ReactNode, accent?: string, titel?: string, oog?: { tekst: string, inhoud: React.ReactNode } }) {
+    // Met een titel is de tegel een smalle balk die openklapt; zonder titel staat alles altijd open.
+    const smal = titel !== undefined;
+    const [open, setOpen] = useState(!smal);
+    const [oogOpen, setOogOpen] = useState(false);
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -67,33 +70,43 @@ function SortableItem({ id, children, accent, titel, kop }: { id: string, childr
         opacity: isDragging ? 0.5 : 1,
     };
     const accentStyle = accent && VISIBILITY_ACCENT[accent];
+    const metLabel = !!accentStyle && !smal;
     return (
         <div ref={setNodeRef} style={style}>
             <div style={{
-                padding: "15px",
+                padding: smal ? "9px 15px" : "15px",
                 backgroundColor: accentStyle ? accentStyle.bg : "#f4f4f4",
                 borderRadius: "8px",
                 position: "relative" as const,
                 borderLeft: accentStyle ? `4px solid ${accentStyle.border}` : "4px solid transparent",
                 boxShadow: accentStyle ? `0 2px 8px ${accentStyle.border}22` : undefined,
             }}>
-                {accentStyle && (
+                {accentStyle && metLabel && (
                     <span style={{ position: "absolute", top: "10px", left: "22px", fontSize: "0.68rem", fontWeight: "bold", color: accentStyle.border, letterSpacing: "0.3px", pointerEvents: "none" }}>
                         {accentStyle.label}
                     </span>
                 )}
-                <div {...attributes} {...listeners} style={{ position: "absolute" as const, top: accentStyle ? "28px" : "12px", left: "10px", cursor: "grab", fontSize: "1.2rem", color: "#999", touchAction: "none", userSelect: "none" }} title="Sleep om te herordenen">
+                <div {...attributes} {...listeners} style={{ position: "absolute" as const, top: metLabel ? "28px" : smal ? "9px" : "12px", left: "10px", cursor: "grab", fontSize: "1.2rem", color: "#999", touchAction: "none", userSelect: "none" as const }}>
                     ☰
                 </div>
-                <div style={{ marginLeft: "30px", marginTop: accentStyle ? "18px" : "0" }}>
-                    {titel !== undefined && (
-                        <button onClick={() => setOpen(o => !o)} title={open ? "Inklappen" : "Openen om te bewerken"} style={{ display: "block", width: open ? "calc(100% - 110px)" : "100%", textAlign: "left", background: "none", border: "none", padding: "2px 0", cursor: "pointer", fontSize: "0.95rem", fontWeight: "bold", color: "#333", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            <span style={{ display: "inline-block", width: "16px", color: "#4A5D23", fontSize: "0.8rem", transform: open ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>▶</span>
-                            {titel || "(zonder titel)"}
-                        </button>
+                <div style={{ marginLeft: "30px", marginTop: metLabel ? "18px" : "0" }}>
+                    {smal && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginRight: open ? "105px" : 0, minHeight: "28px" }}>
+                            <button onClick={() => setOpen(o => !o)} title={open ? "Inklappen" : "Openen om te bewerken"} style={{ flex: "1 1 auto", minWidth: 0, textAlign: "left", background: "none", border: "none", padding: "2px 0", cursor: "pointer", fontSize: "0.95rem", fontWeight: "bold", color: "#333", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <span style={{ display: "inline-block", width: "16px", color: "#4A5D23", fontSize: "0.8rem", transform: open ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>▶</span>
+                                {titel || "(zonder titel)"}
+                            </button>
+                            {oog && (
+                                <button onClick={() => setOogOpen(o => !o)} aria-label="Zichtbaarheid" aria-expanded={oogOpen} title="Zichtbaarheid: klik om te wijzigen" style={{ flex: "0 1 auto", minWidth: 0, maxWidth: "62%", background: oogOpen ? "rgba(74,93,35,0.1)" : "none", border: "none", borderRadius: "6px", padding: "3px 8px", cursor: "pointer", fontSize: "0.8rem", color: "#777", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    👁 {oog.tekst}
+                                </button>
+                            )}
+                        </div>
                     )}
-                    {kop}
-                    {open && children}
+                    {oog && oogOpen && (
+                        <div style={{ marginTop: "8px", marginBottom: "6px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>{oog.inhoud}</div>
+                    )}
+                    {open && (smal ? <div style={{ marginTop: "10px" }}>{children}</div> : children)}
                 </div>
             </div>
         </div>
@@ -1057,12 +1070,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
                                         <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                             {insights.map((item, idx) => (
-                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)} titel={item.title} kop={(
-                                                    <details style={{ marginTop: "6px", marginBottom: "6px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>
-                                                        <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>
-                                                            👁 Zichtbaarheid <span style={{ fontWeight: "normal", color: "#888" }}>({samenvattingZichtbaarheid(item)})</span>
-                                                        </summary>
-                                                        <div style={{ marginTop: "10px" }}>
+                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)} titel={item.title} oog={{ tekst: samenvattingZichtbaarheid(item), inhoud: (
+                                                        <div>
                                                         <div style={{ fontSize: "0.75rem", color: "#777", marginBottom: "6px" }}>Zichtbaar in fase</div>
                                                         <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "8px" }}>
                                                             {FASES_VOOR_TEGELS.map(f => {
@@ -1117,8 +1126,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             📋 Alleen zolang de nachtregistratie nog niet is ingevuld (rode tegel)
                                                         </label>
                                                     </div>
-                                                    </details>
-                                                )}>
+                                                ) }}>
                                                     <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
 
@@ -1234,7 +1242,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(videos, setVideos)}>
                                     <SortableContext items={videos.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                         {videos.map((vid, idx) => (
-                                            <SortableItem key={`vid-${idx}`} id={`item-${idx}`}>
+                                            <SortableItem key={`vid-${idx}`} id={`item-${idx}`} titel={vid.title}>
                                                 <button onClick={() => setVideos(videos.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
                                                 <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
@@ -1352,7 +1360,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(omgeving, setOmgeving)}>
                                         <SortableContext items={omgeving.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                             {omgeving.map((tip, idx) => (
-                                                <SortableItem key={`omg-${idx}`} id={`item-${idx}`}>
+                                                <SortableItem key={`omg-${idx}`} id={`item-${idx}`} titel={tip.name}>
                                                     <button onClick={() => setOmgeving(omgeving.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
                                                     <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
