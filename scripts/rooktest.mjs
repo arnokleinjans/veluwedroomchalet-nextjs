@@ -77,7 +77,7 @@ try {
     }
     check(metData > 0 && lek === 0, `server-acties: ${metData} geven data met inlog, ${lek} zonder inlog`);
 
-    check(!!(await page.waitForSelector("::-p-text(Kirsten Dekker)", { timeout: 10000 }).catch(() => null)), "boekingenlijst laadt");
+    check(!!(await page.waitForSelector("::-p-text(/b/TEST)", { timeout: 10000 }).catch(() => null)), "boekingenlijst laadt");
     await page.locator("::-p-text(Losse link aanmaken)").click();
     const velden = await page.$$("::-p-xpath(//label[normalize-space()='Aankomst']/following-sibling::div[1]/input)");
     await velden[0].click();
