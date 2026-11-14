@@ -180,7 +180,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
     const [voyando, setVoyando] = useState<{ actief: boolean; stand: VoyandoStand } | null>(null);
     const [voyandoBezig, setVoyandoBezig] = useState(false);
-    const [voyandoUitleg, setVoyandoUitleg] = useState(false);
+    const [voyandoPopup, setVoyandoPopup] = useState(false);
     const [inrichtenOpen, setInrichtenOpen] = useState(false);
     const telInrichten = () => setInrichtenOpen(document.querySelectorAll("details.inrichten[open]").length > 0);
     const eerder = useMemo(() => eerdereVerblijven(bookings), [bookings]);
@@ -767,34 +767,18 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         <div className="groepskop">Dagelijks</div>
                         {/* Sectie: Boekingen */}
                         <details open className="sectie" style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "14px 18px", backgroundColor: "#fcfefc" }}>
-                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📅 Boekingen</summary>
-                            <div style={{ marginTop: "15px" }}>
-                                {voyando?.actief ? (
-                                    <div style={{ marginBottom: "16px", backgroundColor: voyando.stand.gelukt === false ? "#fff4f2" : "#f3f8ec", padding: "10px 15px", borderRadius: "8px", border: `1px solid ${voyando.stand.gelukt === false ? "#e5b4ac" : "#cfdcb8"}`, fontSize: "0.85rem", color: "#444" }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                            <strong style={{ color: "#333" }}>🔄 Boekingen komen uit Voyando</strong>
-                                            <button onClick={() => setVoyandoUitleg(u => !u)} title="Nieuwe boekingen, andere datums en annuleringen komen vanzelf binnen. Het nummer en de datums wijzig je in Voyando." aria-label="Uitleg" style={{ width: "20px", height: "20px", borderRadius: "50%", border: "1px solid #8a9a6c", backgroundColor: voyandoUitleg ? "#4A5D23" : "white", color: voyandoUitleg ? "white" : "#4A5D23", fontSize: "0.75rem", fontWeight: "bold", fontStyle: "italic", fontFamily: "Georgia, serif", cursor: "pointer", padding: 0, lineHeight: 1 }}>i</button>
-                                        </div>
-                                        {voyandoUitleg && <div style={{ marginTop: "6px", color: "#666" }}>Nieuwe boekingen, andere datums en annuleringen komen vanzelf binnen. Het nummer en de datums wijzig je in Voyando.</div>}
-                                        {voyando.stand.gelukt === false && <div style={{ marginTop: "6px", color: "#a3352a" }}>Ophalen mislukt: {voyando.stand.fout}</div>}
-                                        <details style={{ marginTop: "6px" }}>
-                                            <summary style={{ cursor: "pointer", color: "#4A5D23" }}>Laatste wijzigingen{voyando.stand.laatsteWijzigingen ? ` (${new Date(voyando.stand.laatsteWijzigingen.op).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })})` : ""}</summary>
-                                            <div style={{ marginTop: "6px", color: "#666", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-                                                <span>{voyando.stand.laatst ? `Laatst opgehaald ${new Date(voyando.stand.laatst).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${voyando.stand.aantal ?? 0} boekingen in Voyando` : "Nog niet opgehaald"}</span>
-                                                <button onClick={() => haalVoyando(true)} disabled={voyandoBezig} title="Niet nodig: ophalen gaat vanzelf. Handig als je net iets in Voyando hebt gewijzigd en niet wilt wachten." style={{ background: "none", border: "none", padding: 0, color: "#4A5D23", textDecoration: "underline", cursor: voyandoBezig ? "default" : "pointer", fontSize: "0.85rem", opacity: voyandoBezig ? 0.6 : 1 }}>{voyandoBezig ? "Bezig…" : "Nu ophalen"}</button>
-                                            </div>
-                                            {voyando.stand.laatsteWijzigingen ? (
-                                                <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
-                                                    {voyando.stand.laatsteWijzigingen.regels.map((r, i) => (
-                                                        <li key={i}><strong>{r.soort}</strong> · {r.naam || r.id} ({r.id}) · {r.tekst}</li>
-                                                    ))}
-                                                </ul>
-                                            ) : <div style={{ marginTop: "4px", color: "#888" }}>Nog geen wijzigingen sinds de koppeling.</div>}
-                                        </details>
-                                    </div>
-                                ) : (
-                                    <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📅 Boekingen
+                                {voyando?.actief && (
+                                    <button
+                                        aria-label="Laatste wijzigingen"
+                                        title={voyando.stand.gelukt === false ? "Ophalen uit Voyando is mislukt" : "Laatste wijzigingen uit Voyando"}
+                                        onClick={e => { e.preventDefault(); e.stopPropagation(); setVoyandoPopup(true); }}
+                                        style={{ marginLeft: "10px", verticalAlign: "middle", width: "26px", height: "26px", borderRadius: "50%", border: `1px solid ${voyando.stand.gelukt === false ? "#d9534f" : "#cfdcb8"}`, backgroundColor: voyando.stand.gelukt === false ? "#fde8e6" : "white", cursor: "pointer", padding: 0, fontSize: "0.85rem", lineHeight: 1 }}
+                                    >{voyando.stand.gelukt === false ? "⚠️" : "🕘"}</button>
                                 )}
+                            </summary>
+                            <div style={{ marginTop: "15px" }}>
+                                {voyando && !voyando.actief && <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>}
 
                                 {/* Filter: nieuw / verlopen / alle */}
                                 <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
@@ -1609,6 +1593,37 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                     </div>
                 </div>
             </div>
+
+            {voyandoPopup && voyando?.actief && (
+                <div onClick={() => setVoyandoPopup(false)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.35)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+                    <div role="dialog" aria-label="Laatste wijzigingen uit Voyando" onClick={e => e.stopPropagation()} style={{ backgroundColor: "white", borderRadius: "12px", padding: "20px 22px", width: "100%", maxWidth: "520px", maxHeight: "80vh", overflowY: "auto", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", fontSize: "0.9rem", color: "#444" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px" }}>
+                            <strong style={{ fontSize: "1.05rem", color: "#333" }}>🕘 Laatste wijzigingen uit Voyando</strong>
+                            <button onClick={() => setVoyandoPopup(false)} aria-label="Sluiten" style={{ background: "none", border: "none", fontSize: "1.3rem", cursor: "pointer", color: "#888", lineHeight: 1 }}>×</button>
+                        </div>
+                        {voyando.stand.gelukt === false && <div style={{ marginTop: "10px", color: "#a3352a", backgroundColor: "#fff4f2", border: "1px solid #e5b4ac", borderRadius: "6px", padding: "8px 10px" }}>Ophalen mislukt: {voyando.stand.fout}</div>}
+                        {voyando.stand.laatsteWijzigingen ? (
+                            <>
+                                <div style={{ marginTop: "12px", color: "#777", fontSize: "0.8rem" }}>{new Date(voyando.stand.laatsteWijzigingen.op).toLocaleString("nl-NL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</div>
+                                <ul style={{ margin: "6px 0 0", padding: 0, listStyle: "none" }}>
+                                    {voyando.stand.laatsteWijzigingen.regels.map((r, i) => (
+                                        <li key={i} style={{ padding: "7px 0", borderBottom: "1px solid #f0f0f0" }}>
+                                            <span style={{ ...labelKnop, cursor: "default", marginRight: "8px", backgroundColor: r.soort === "geannuleerd" ? "#fde8e6" : r.soort === "nieuw" ? "#dcfce7" : "#fef3c7", color: r.soort === "geannuleerd" ? "#a3352a" : r.soort === "nieuw" ? "#166534" : "#92400e" }}>{r.soort}</span>
+                                            <strong>{r.naam || r.id}</strong> <span style={{ color: "#999" }}>({r.id})</span>
+                                            <div style={{ color: "#666", fontSize: "0.82rem", marginTop: "2px" }}>{r.tekst}</div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        ) : <div style={{ marginTop: "12px", color: "#888" }}>Nog geen wijzigingen sinds de koppeling.</div>}
+                        <div style={{ marginTop: "14px", color: "#888", fontSize: "0.8rem", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                            <span>{voyando.stand.laatst ? `Laatst opgehaald ${new Date(voyando.stand.laatst).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${voyando.stand.aantal ?? 0} boekingen in Voyando` : "Nog niet opgehaald"}</span>
+                            <button onClick={() => haalVoyando(true)} disabled={voyandoBezig} title="Niet nodig: ophalen gaat vanzelf. Handig als je net iets in Voyando hebt gewijzigd en niet wilt wachten." style={{ background: "none", border: "none", padding: 0, color: "#4A5D23", textDecoration: "underline", cursor: voyandoBezig ? "default" : "pointer", fontSize: "0.8rem", opacity: voyandoBezig ? 0.6 : 1 }}>{voyandoBezig ? "Bezig…" : "Nu ophalen"}</button>
+                        </div>
+                        <div style={{ marginTop: "8px", color: "#999", fontSize: "0.78rem" }}>Nieuwe boekingen, andere datums en annuleringen komen vanzelf binnen. Het nummer en de datums wijzig je in Voyando.</div>
+                    </div>
+                </div>
+            )}
 
             {/* Zwevende Alle Wijzigingen Opslaan Knop: alleen als er een inrichtingssectie openstaat. Boekingen en schoonmaak slaan zelf op. */}
             {inrichtenOpen && <button
