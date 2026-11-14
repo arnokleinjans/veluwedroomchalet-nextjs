@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/voyando/sync", "schedule": "30 4 * * *" }
+  ]
+}

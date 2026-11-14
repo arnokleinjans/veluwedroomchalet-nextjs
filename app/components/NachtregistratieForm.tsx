@@ -12,6 +12,7 @@ type Props = {
     checkOut: string;
     lang: string;
     registratie?: NachtregistratieData | null;
+    voorinvulling?: { aantalPersonen: number; telefoon: string; email: string };
 };
 
 const inputStyle: React.CSSProperties = {
@@ -32,7 +33,7 @@ const labelStyle: React.CSSProperties = {
     marginBottom: "6px",
 };
 
-export default function NachtregistratieForm({ bookingId, guestName, checkIn, checkOut, lang, registratie }: Props) {
+export default function NachtregistratieForm({ bookingId, guestName, checkIn, checkOut, lang, registratie, voorinvulling }: Props) {
     const [reg, setReg] = useState<NachtregistratieData | null>(registratie || null);
     const [locked, setLocked] = useState(!!registratie);
     const [betaalwijze, setBetaalwijze] = useState<string>(registratie?.betaalwijze || "");
@@ -40,9 +41,9 @@ export default function NachtregistratieForm({ bookingId, guestName, checkIn, ch
     const [adres, setAdres] = useState(registratie?.adres || "");
     const [postcode, setPostcode] = useState(registratie?.postcode || "");
     const [woonplaats, setWoonplaats] = useState(registratie?.woonplaats || "");
-    const [telefoon, setTelefoon] = useState(registratie?.telefoon || "");
-    const [email, setEmail] = useState(registratie?.email || "");
-    const [aantalPersonen, setAantalPersonen] = useState(registratie?.aantalPersonen ? String(registratie.aantalPersonen) : "");
+    const [telefoon, setTelefoon] = useState(registratie?.telefoon || voorinvulling?.telefoon || "");
+    const [email, setEmail] = useState(registratie?.email || voorinvulling?.email || "");
+    const [aantalPersonen, setAantalPersonen] = useState(registratie?.aantalPersonen ? String(registratie.aantalPersonen) : voorinvulling?.aantalPersonen ? String(voorinvulling.aantalPersonen) : "");
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
     const [justSaved, setJustSaved] = useState(false);

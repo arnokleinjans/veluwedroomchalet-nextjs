@@ -5,6 +5,7 @@ import { adminUpdateNachtregistratie, verstuurNachtregistratie } from "../action
 import { berekenBedrag, formatBedrag, formatDatumNL } from "../utils/toeristenbelasting";
 import ConfirmDialog from "./ConfirmDialog";
 import DatumBereik from "./DatumBereik";
+import { voorinvulling } from "../utils/voyandoKern";
 
 const DEFAULT_OPMERKING: Record<string, string> = {
     receptie: "Huurder betaalt de toeristenbelasting bij aankomst zelf bij de receptie",
@@ -22,14 +23,15 @@ export default function NachtregistratieAdminPanel({ booking, onSaved, setToast 
     setToast: (msg: string) => void,
 }) {
     const reg = booking.nachtregistratie;
+    const voor = voorinvulling(booking);
     const [betaalwijze, setBetaalwijze] = useState<string>(reg?.betaalwijze || "receptie");
     const [huurderNaam, setHuurderNaam] = useState(reg?.huurderNaam || booking.guestName);
     const [adres, setAdres] = useState(reg?.adres || "");
     const [postcode, setPostcode] = useState(reg?.postcode || "");
     const [woonplaats, setWoonplaats] = useState(reg?.woonplaats || "");
-    const [telefoon, setTelefoon] = useState(reg?.telefoon || "");
-    const [email, setEmail] = useState(reg?.email || "");
-    const [aantalPersonen, setAantalPersonen] = useState(reg?.aantalPersonen ? String(reg.aantalPersonen) : "");
+    const [telefoon, setTelefoon] = useState(reg?.telefoon || voor?.telefoon || "");
+    const [email, setEmail] = useState(reg?.email || voor?.email || "");
+    const [aantalPersonen, setAantalPersonen] = useState(reg?.aantalPersonen ? String(reg.aantalPersonen) : voor?.aantalPersonen ? String(voor.aantalPersonen) : "");
     const [aankomst, setAankomst] = useState(reg?.aankomst || booking.checkIn);
     const [vertrek, setVertrek] = useState(reg?.vertrek || booking.checkOut);
     const [bedrag, setBedrag] = useState(String(reg?.bedrag ?? berekenBedrag(booking.checkIn, booking.checkOut)));

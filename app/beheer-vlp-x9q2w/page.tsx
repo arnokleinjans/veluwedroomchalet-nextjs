@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
     updateGeneralInfo, addBooking, updateBooking, removeBooking, fetchAdminData,
     updateInsights, updateVideos, updateOmgevingWithAi,
-    updateChatbotContext, updateTranslationsVoorTaal, updateExpiredPageContent, updateGames,
+    updateChatbotContext, updateTranslationsVoorTaal, updateExpiredPageContent,
     verifyAdminPin, checkBeheerSessie, logoutBeheer
 } from "../actions/adminActions";
 import NachtregistratieAdminPanel from "../components/NachtregistratieAdminPanel";
 import SchoonmaakSectie, { type SchoonmaakData } from "../components/schoonmaak/SchoonmaakSectie";
 import BeurtPaneel, { beurtPaneelOpen } from "../components/schoonmaak/BeurtPaneel";
 import { haalSchoonmaakData } from "../actions/schoonmaakActions";
+import { voyandoOphalen, neemDatumsOverVanVoyando } from "../actions/voyandoActions";
+import { kanaalNaam, wijktAf, eerdereVerblijven } from "../utils/voyandoKern";
+import type { VoyandoStand } from "../utils/voyando";
 import { STATUS_LABEL } from "../utils/schoonmaakTypes";
 import { formatDatumNL } from "../utils/toeristenbelasting";
 import { fetchAvailableHeaderImages, fetchAvailableIcons, fetchAvailableThumbnails } from "../actions/assetActions";
@@ -55,7 +58,11 @@ function samenvattingZichtbaarheid(item: any): string {
     return delen.join(" · ");
 }
 
-function SortableItem({ id, children, accent }: { id: string, children: React.ReactNode, accent?: string }) {
+function SortableItem({ id, children, accent, titel, oog }: { id: string, children: React.ReactNode, accent?: string, titel?: string, oog?: { tekst: string, inhoud: React.ReactNode } }) {
+    // Met een titel is de tegel een smalle balk die openklapt; zonder titel staat alles altijd open.
+    const smal = titel !== undefined;
+    const [open, setOpen] = useState(!smal);
+    const [oogOpen, setOogOpen] = useState(false);
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -63,26 +70,43 @@ function SortableItem({ id, children, accent }: { id: string, children: React.Re
         opacity: isDragging ? 0.5 : 1,
     };
     const accentStyle = accent && VISIBILITY_ACCENT[accent];
+    const metLabel = !!accentStyle && !smal;
     return (
         <div ref={setNodeRef} style={style}>
             <div style={{
-                padding: "15px",
+                padding: smal ? "9px 15px" : "15px",
                 backgroundColor: accentStyle ? accentStyle.bg : "#f4f4f4",
                 borderRadius: "8px",
                 position: "relative" as const,
                 borderLeft: accentStyle ? `4px solid ${accentStyle.border}` : "4px solid transparent",
                 boxShadow: accentStyle ? `0 2px 8px ${accentStyle.border}22` : undefined,
             }}>
-                {accentStyle && (
+                {accentStyle && metLabel && (
                     <span style={{ position: "absolute", top: "10px", left: "22px", fontSize: "0.68rem", fontWeight: "bold", color: accentStyle.border, letterSpacing: "0.3px", pointerEvents: "none" }}>
                         {accentStyle.label}
                     </span>
                 )}
-                <div {...attributes} {...listeners} style={{ position: "absolute" as const, top: accentStyle ? "28px" : "12px", left: "10px", cursor: "grab", fontSize: "1.2rem", color: "#999", touchAction: "none", userSelect: "none" }} title="Sleep om te herordenen">
+                <div {...attributes} {...listeners} style={{ position: "absolute" as const, top: metLabel ? "28px" : smal ? "9px" : "12px", left: "10px", cursor: "grab", fontSize: "1.2rem", color: "#999", touchAction: "none", userSelect: "none" as const }}>
                     ☰
                 </div>
-                <div style={{ marginLeft: "30px", marginTop: accentStyle ? "18px" : "0" }}>
-                    {children}
+                <div style={{ marginLeft: "30px", marginTop: metLabel ? "18px" : "0" }}>
+                    {smal && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginRight: open ? "105px" : 0, minHeight: "28px" }}>
+                            <button onClick={() => setOpen(o => !o)} title={open ? "Inklappen" : "Openen om te bewerken"} style={{ flex: "1 1 auto", minWidth: 0, textAlign: "left", background: "none", border: "none", padding: "2px 0", cursor: "pointer", fontSize: "0.95rem", fontWeight: "bold", color: "#333", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <span style={{ display: "inline-block", width: "16px", color: "#4A5D23", fontSize: "0.8rem", transform: open ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>▶</span>
+                                {titel || "(zonder titel)"}
+                            </button>
+                            {oog && (
+                                <button onClick={() => setOogOpen(o => !o)} aria-label="Zichtbaarheid" aria-expanded={oogOpen} title="Zichtbaarheid: klik om te wijzigen" style={{ flex: "0 1 auto", minWidth: 0, maxWidth: "62%", background: oogOpen ? "rgba(74,93,35,0.1)" : "none", border: "none", borderRadius: "6px", padding: "3px 8px", cursor: "pointer", fontSize: "0.8rem", color: "#777", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    👁 {oog.tekst}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                    {oog && oogOpen && (
+                        <div style={{ marginTop: "8px", marginBottom: "6px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>{oog.inhoud}</div>
+                    )}
+                    {open && (smal ? <div style={{ marginTop: "10px" }}>{children}</div> : children)}
                 </div>
             </div>
         </div>
@@ -133,7 +157,6 @@ export default function AdminPage() {
     const [keyCode, setKeyCode] = useState("");
 
     // Dynamic Arrays
-    const [games, setGames] = useState<{ id: string, title: string, src: string }[]>([]);
     const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, fases?: string[], uitgelicht?: boolean, alleenLegeNachtregistratie?: boolean, toonMobiel?: boolean, toonDesktop?: boolean, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[] }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
@@ -169,9 +192,29 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [staanplaats, setStaanplaats] = useState("");
     const [campingEmail, setCampingEmail] = useState("");
 
-    // CSV import
-    const [csvRows, setCsvRows] = useState<{ name: string, checkIn: string, checkOut: string, language: string, isDuplicate?: boolean, overrideDuplicate?: boolean }[]>([]);
-    const [importProgress, setImportProgress] = useState<{ done: number, total: number } | null>(null);
+    const [voyando, setVoyando] = useState<{ actief: boolean; stand: VoyandoStand } | null>(null);
+    const [voyandoBezig, setVoyandoBezig] = useState(false);
+    const [voyandoPopup, setVoyandoPopup] = useState(false);
+    // Wat er in de inrichting is ingevuld, per opslagactie. "Alles Opslaan" staat er alleen als dit afwijkt van wat is opgeslagen.
+    const huidig: Record<string, string> = useMemo(() => ({
+        algemeen: JSON.stringify([propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail]),
+        insights: JSON.stringify(insights),
+        videos: JSON.stringify(videos),
+        omgeving: JSON.stringify([omgeving, aiPrompt, aiMaxChars]),
+        chatbot: JSON.stringify(chatbotContext),
+        verlopen: JSON.stringify(expiredPageContent),
+    }), [propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail, insights, videos, omgeving, aiPrompt, aiMaxChars, chatbotContext, expiredPageContent]);
+    const [opgeslagen, setOpgeslagen] = useState<Record<string, string> | null>(null);
+    const [geladen, setGeladen] = useState(0);
+    const huidigRef = useRef(huidig);
+    huidigRef.current = huidig;
+    useEffect(() => { if (geladen) setOpgeslagen(huidigRef.current); }, [geladen]);
+    const markeerOpgeslagen = (...delen: string[]) => setOpgeslagen(o => o ? { ...o, ...Object.fromEntries(delen.map(d => [d, huidigRef.current[d]])) } : o);
+    const nietOpgeslagen = !!opgeslagen && Object.keys(huidig).some(k => huidig[k] !== opgeslagen[k]);
+    const eerder = useMemo(() => eerdereVerblijven(bookings), [bookings]);
+    // De timer hieronder leeft langer dan één render en ziet anders een oude waarde.
+    const magBoekingenVerversen = useRef(true);
+    magBoekingenVerversen.current = !editingId && !expandedRegId;
 
     const [isSaving, setIsSaving] = useState(false);
     const [isTranslating, setIsTranslating] = useState<string | null>(null);
@@ -197,10 +240,29 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         }
     };
 
+    const haalVoyando = async (forceer = false) => {
+        try {
+            if (forceer) setVoyandoBezig(true);
+            const res = await voyandoOphalen(forceer);
+            setVoyando(res);
+            if (res.actief) {
+                const data = await fetchAdminData();
+                setBookings(data.bookings || []);
+            }
+        } catch (e) {
+            console.error("Voyando ophalen mislukt:", e);
+        } finally {
+            setVoyandoBezig(false);
+        }
+        await herlaadSchoonmaak();
+    };
+
     useEffect(() => {
         if (!isAuthenticated) return;
         const vernieuw = () => {
-            if (document.visibilityState === "visible" && !beurtPaneelOpen()) herlaadSchoonmaak();
+            if (document.visibilityState !== "visible" || beurtPaneelOpen()) return;
+            if (magBoekingenVerversen.current) haalVoyando();
+            else herlaadSchoonmaak();
         };
         const timer = setInterval(vernieuw, 60_000);
         document.addEventListener("visibilitychange", vernieuw);
@@ -232,7 +294,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setSubtitle(data.property.subtitle || "Welkom terug");
             setKeyCode((data.property as any).keyCode || "");
 
-            setGames((data as any).games || []);
             setInsights((data.insights || []).map((item: any) => ({ ...item, detailContent: item.detailContent || "", widgetCode: item.widgetCode || "" })));
 
             setVideos(data.videos || []);
@@ -244,6 +305,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setExpiredPageContent((data as any).expiredPageContent || "");
             if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
             if ((data as any).aiMaxChars) setAiMaxChars((data as any).aiMaxChars);
+            setGeladen(n => n + 1);
+            haalVoyando();
         });
     };
 
@@ -264,12 +327,13 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         setPin("");
     };
 
-    const runSaveAction = async (actionFn: () => Promise<any>, successMsg: string) => {
+    const runSaveAction = async (actionFn: () => Promise<any>, successMsg: string, deel?: string) => {
         setIsSaving(true);
         setSaveMessage("⏳ Aan het opslaan...");
         const res = await actionFn();
         setIsSaving(false);
         if (res.success) {
+            if (deel) markeerOpgeslagen(deel);
             setSaveMessage("✅ " + successMsg);
             setTimeout(() => setSaveMessage(""), 3500);
         } else {
@@ -345,18 +409,17 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
     const handleSaveGeneral = () => runSaveAction(
         () => updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
-        "Algemene info succesvol opgeslagen!"
+        "Algemene info succesvol opgeslagen!", "algemeen"
     );
 
-    const handleSaveGames = () => runSaveAction(() => updateGames(games), "Gameroom succesvol opgeslagen!");
-    const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!");
-    const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!");
+    const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!", "insights");
+    const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!", "videos");
     const handleSaveOmgeving = () => runSaveAction(
         () => updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
-        "Omgeving succesvol opgeslagen!"
+        "Omgeving succesvol opgeslagen!", "omgeving"
     );
-    const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
-    const handleSaveExpiredPage = () => runSaveAction(() => updateExpiredPageContent(expiredPageContent), "Verlopen pagina succesvol opgeslagen!");
+    const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!", "chatbot");
+    const handleSaveExpiredPage = () => runSaveAction(() => updateExpiredPageContent(expiredPageContent), "Verlopen pagina succesvol opgeslagen!", "verlopen");
 
     const loadMediaLibrary = async (force = false) => {
         if ((mediaLoaded && !force) || isLoadingMedia) return;
@@ -449,17 +512,18 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const handleSaveAll = async () => {
         setIsSaving(true);
         setSaveMessage("⏳ Alles aan het opslaan...");
-        const results = await Promise.all([
-            updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
-            updateGames(games),
-            updateInsights(insights),
-            updateVideos(videos),
-            updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
-            updateChatbotContext(chatbotContext),
-            updateExpiredPageContent(expiredPageContent)
-        ]);
+        // Na elkaar: elke actie leest en schrijft dezelfde sleutel, tegelijk zouden ze elkaars wijziging overschrijven.
+        const results = [
+            await updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
+            await updateInsights(insights),
+            await updateVideos(videos),
+            await updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
+            await updateChatbotContext(chatbotContext),
+            await updateExpiredPageContent(expiredPageContent),
+        ];
         setIsSaving(false);
         if (results.every(r => r.success)) {
+            markeerOpgeslagen(...Object.keys(huidigRef.current));
             setSaveMessage("✅ Alle wijzigingen zijn succesvol opgeslagen!");
             setTimeout(() => setSaveMessage(""), 4000);
         } else {
@@ -507,79 +571,6 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             }
         };
     }
-
-    const parseDutchDate = (raw: string): string => {
-        const s = raw.trim().replace(/\//g, '-');
-        const parts = s.split('-');
-        if (parts.length !== 3) return '';
-        const [a, b, c] = parts;
-        // If first part is 4 digits: yyyy-mm-dd already
-        if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
-        // Otherwise: d-m-yyyy
-        return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
-    };
-
-    const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const text = ev.target?.result as string;
-            const lines = text.split(/\r?\n/).filter(l => l.trim());
-            const parsed: typeof csvRows = [];
-            for (const line of lines) {
-                const cols = line.split(';').map(c => c.trim().replace(/^"|"$/g, ''));
-                const name = cols[0];
-                if (!name) continue;
-
-                let checkIn = '', checkOut = '';
-                const dateCol = cols[1] || '';
-
-                if (dateCol.includes(' - ')) {
-                    // Format: "8-5-2026 - 10-5-2026"
-                    const [from, to] = dateCol.split(' - ');
-                    checkIn = parseDutchDate(from);
-                    checkOut = parseDutchDate(to);
-                } else {
-                    // Separate columns: cols[1] = checkIn, cols[2] = checkOut
-                    checkIn = parseDutchDate(dateCol);
-                    checkOut = parseDutchDate(cols[2] || '');
-                }
-
-                if (!checkIn || !checkOut) continue;
-                // Voorkom dubbele boekingen op basis van gastnaam + aankomstdatum (ongeacht hoofdletters/spaties)
-                const isDuplicate = bookings.some(b => b.guestName.trim().toLowerCase() === name.trim().toLowerCase() && b.checkIn === checkIn);
-
-                parsed.push({
-                    name,
-                    checkIn,
-                    checkOut,
-                    language: cols[3]?.trim() || 'nl',
-                    isDuplicate
-                });
-            }
-            setCsvRows(parsed);
-        };
-        reader.readAsText(file, 'UTF-8');
-        e.target.value = '';
-    };
-
-    const handleImportAll = async () => {
-        const validRows = csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate);
-        if (!validRows.length) return;
-        setImportProgress({ done: 0, total: validRows.length });
-        for (let i = 0; i < validRows.length; i++) {
-            const row = validRows[i];
-            await addBooking(row.name, row.checkIn, row.checkOut, row.language);
-            setImportProgress({ done: i + 1, total: validRows.length });
-        }
-        setCsvRows([]);
-        setImportProgress(null);
-        await refreshBookings();
-        const validRowsCount = csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate).length;
-        setSaveMessage(`✅ ${validRowsCount} boekingen geïmporteerd!`);
-        setTimeout(() => setSaveMessage(""), 4000);
-    };
 
     const refreshBookings = async () => {
         const data = await fetchAdminData();
@@ -637,6 +628,38 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         });
     };
 
+    const handleTaal = async (booking: any, taal: string) => {
+        setIsSaving(true);
+        const res = await updateBooking(booking.id, booking.checkIn, booking.checkOut, taal);
+        setIsSaving(false);
+        if (res.success) {
+            await refreshBookings();
+            toonMelding(`✅ Taal van ${booking.guestName}: ${naamVan(taal)}`);
+        } else {
+            toonMelding("❌ " + res.error);
+        }
+    };
+
+    const handleNeemOver = (booking: any) => {
+        const v = booking.voyando;
+        setDialog({
+            title: "Datums overnemen van Voyando?",
+            message: `"${booking.guestName}" staat in beheer op ${formatDatumNL(booking.checkIn)} t/m ${formatDatumNL(booking.checkOut)}. In Voyando is het ${formatDatumNL(v.checkIn)} t/m ${formatDatumNL(v.checkOut)}. De schoonmaakbeurt schuift mee.`,
+            confirmLabel: "Ja, overnemen",
+            variant: "primary",
+            onConfirm: async () => {
+                setDialog(null);
+                const res = await neemDatumsOverVanVoyando(booking.id);
+                if (res.success) {
+                    await refreshBookings();
+                    toonMelding("✅ Datums overgenomen uit Voyando.");
+                } else {
+                    toonMelding("❌ " + res.error);
+                }
+            },
+        });
+    };
+
     const doRemoveBooking = async (id: string) => {
         setIsSaving(true);
         setSaveMessage("⏳ Aan het verwijderen...");
@@ -686,21 +709,20 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     }
 
     return (
-        <div style={{ backgroundColor: "#f9f9f9", minHeight: "100vh", padding: "40px 20px" }}>
-            <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "white", borderRadius: "16px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", overflow: "hidden" }}>
-                <div style={{ backgroundColor: "#4A5D23", padding: "30px", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
+        <div className="beheer-buiten" style={{ backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+            <div className="beheer-kaart" style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "white", borderRadius: "16px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", overflow: "hidden" }}>
+                <div style={{ backgroundColor: "#4A5D23", padding: "12px 24px", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
                     <div>
-                        <h1 style={{ margin: 0, fontSize: "2rem", fontFamily: "'Lora', serif" }}>Geheim Beheer</h1>
-                        <p style={{ margin: "5px 0 0", opacity: 0.9 }}>Pas direct app-teksten aan. (Opgeslagen via Vercel KV)</p>
+                        <h1 style={{ margin: 0, fontSize: "1.35rem", fontFamily: "'Lora', serif", color: "white" }}>Beheer Veluwe Droomchalet Webapp</h1>
                     </div>
                     <div style={{ display: "flex", gap: "10px" }}>
                         <div style={{ position: "relative" }}>
                             <button
                                 onClick={() => setToonVertaalMenu(v => !v)}
                                 disabled={!!isTranslating}
-                                style={{ backgroundColor: "#ffb400", border: "none", borderRadius: "6px", color: "#333", padding: "8px 16px", cursor: isTranslating ? "wait" : "pointer", fontWeight: "bold", opacity: isTranslating ? 0.7 : 1 }}
+                                title="Vertaal de teksten van de gast-app" style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: "6px", color: "white", padding: "8px 16px", cursor: isTranslating ? "wait" : "pointer", fontWeight: "bold", opacity: isTranslating ? 0.7 : 1 }}
                             >
-                                {isTranslating ? `⏳ ${naamVan(isTranslating)}...` : "🌟 Vertaal ▾"}
+                                {isTranslating ? `⏳ ${naamVan(isTranslating)}...` : "Vertaal ▾"}
                             </button>
                             {toonVertaalMenu && !isTranslating && (
                                 <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 30, backgroundColor: "white", borderRadius: "10px", boxShadow: "0 10px 24px rgba(0,0,0,0.18)", padding: "6px", minWidth: "190px" }}>
@@ -729,11 +751,20 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                     </div>
                 </div>
 
-                <div style={{ padding: "30px" }}>
+                <div className="beheer-inhoud">
                     <style dangerouslySetInnerHTML={{
                         __html: `
                         @keyframes toastSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
                         .sectie[open] > .sectie-kop { border-bottom: 2px solid #eef0ea; padding-bottom: 10px; }
+                        .beheer-buiten { padding: 40px 20px; }
+                        .beheer-inhoud { padding: 30px; }
+                        .groepskop { font-size: 0.72rem; font-weight: bold; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8f80; padding-left: 4px; margin-bottom: -6px; }
+                        @media (max-width: 600px) {
+                            .beheer-buiten { padding: 0; }
+                            .beheer-kaart { border-radius: 0 !important; box-shadow: none !important; }
+                            .beheer-inhoud { padding: 12px 10px; }
+                            .sectie { padding: 10px 12px !important; }
+                        }
                         @keyframes toastFade { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
                     `}} />
                     {saveMessage && (
@@ -764,106 +795,21 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                     )}
 
                     <div style={{ display: "grid", gap: "14px" }}>
+                        <div className="groepskop">Dagelijks</div>
                         {/* Sectie: Boekingen */}
-                        <details className="sectie" style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "14px 18px", backgroundColor: "#fcfefc" }}>
-                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>✨ Gepersonaliseerde Gasten Links</summary>
+                        <details open className="sectie" style={{ border: "1px solid #4A5D23", borderRadius: "12px", padding: "14px 18px", backgroundColor: "#fcfefc" }}>
+                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📅 Boekingen
+                                {voyando?.actief && (
+                                    <button
+                                        aria-label="Laatste wijzigingen"
+                                        title={voyando.stand.gelukt === false ? "Ophalen uit Voyando is mislukt" : "Laatste wijzigingen uit Voyando"}
+                                        onClick={e => { e.preventDefault(); e.stopPropagation(); setVoyandoPopup(true); }}
+                                        style={{ marginLeft: "10px", verticalAlign: "middle", width: "26px", height: "26px", borderRadius: "50%", border: `1px solid ${voyando.stand.gelukt === false ? "#d9534f" : "#cfdcb8"}`, backgroundColor: voyando.stand.gelukt === false ? "#fde8e6" : "white", cursor: "pointer", padding: 0, fontSize: "0.85rem", lineHeight: 1 }}
+                                    >{voyando.stand.gelukt === false ? "⚠️" : "🕘"}</button>
+                                )}
+                            </summary>
                             <div style={{ marginTop: "15px" }}>
-                                <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>
-
-                                <div style={{ marginBottom: "20px", backgroundColor: "white", padding: "15px", borderRadius: "8px", border: "1px solid #ccc" }}>
-                                    <h3 style={{ fontSize: "1rem", marginBottom: "10px", color: "#333" }}>Nieuwe Link Aanmaken</h3>
-                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                                        <div style={{ flex: "1 1 200px" }}>
-                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
-                                            <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
-                                        </div>
-                                        <div style={{ flex: "1 1 140px" }}>
-                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Boekingsnummer</label>
-                                            <input type="text" value={newBookingNumber} onChange={e => setNewBookingNumber(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Voyando-nr" />
-                                        </div>
-                                        <DatumBereik
-                                            aankomst={newCheckIn}
-                                            vertrek={newCheckOut}
-                                            onChange={(a, v) => { setNewCheckIn(a); setNewCheckOut(v); }}
-                                            labelStyle={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}
-                                            veldStyle={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-                                        />
-                                        <div style={{ flex: "1 1 120px" }}>
-                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Weergavetaal</label>
-                                            <select value={newLanguage} onChange={e => setNewLanguage(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white" }}>
-                                                {TALEN.map(t => <option key={t.code} value={t.code}>{t.vlag} {t.naam}</option>)}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
-                                </div>
-
-                                {/* CSV Import */}
-                                <div style={{ marginBottom: "20px", backgroundColor: "white", padding: "15px", borderRadius: "8px", border: "1px dashed #bbb" }}>
-                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-                                        <div>
-                                            <strong style={{ fontSize: "0.95rem", color: "#333" }}>📂 Importeer uit CSV</strong>
-                                            <p style={{ fontSize: "0.78rem", color: "#888", marginTop: "2px" }}>Kolommen (puntkomma): <strong>Naam;d-m-jjjj - d-m-jjjj</strong> · ook los per kolom ondersteund · optioneel: taal</p>
-                                        </div>
-                                        <label style={{ backgroundColor: "#f0f0f0", color: "#333", padding: "8px 16px", borderRadius: "6px", border: "1px solid #ccc", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                            Kies CSV-bestand
-                                            <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} style={{ display: "none" }} />
-                                        </label>
-                                    </div>
-
-                                    {csvRows.length > 0 && (
-                                        <div style={{ marginTop: "12px" }}>
-                                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
-                                                <thead>
-                                                    <tr style={{ backgroundColor: "#f5f5f5" }}>
-                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Naam</th>
-                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Aankomst</th>
-                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Vertrek</th>
-                                                        <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid #ddd" }}>Taal</th>
-                                                        <th style={{ padding: "6px 8px", borderBottom: "1px solid #ddd" }}></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {csvRows.map((row, i) => {
-                                                        const isIgnored = row.isDuplicate && !row.overrideDuplicate;
-                                                        return (
-                                                            <tr key={i} style={{ borderBottom: "1px solid #eee", backgroundColor: isIgnored ? "#fafafa" : "transparent" }}>
-                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#333", textDecoration: isIgnored ? "line-through" : "none" }}>
-                                                                    {row.name} 
-                                                                    {row.isDuplicate && (
-                                                                        <button 
-                                                                            onClick={() => { const n = [...csvRows]; n[i].overrideDuplicate = !n[i].overrideDuplicate; setCsvRows(n); }}
-                                                                            style={{ fontSize: "0.7rem", backgroundColor: row.overrideDuplicate ? "#e8f5e9" : "#f0f0f0", color: row.overrideDuplicate ? "#2e7d32" : "#999", padding: "2px 6px", borderRadius: "8px", marginLeft: "4px", border: `1px solid ${row.overrideDuplicate ? "#c8e6c9" : "#e0e0e0"}`, cursor: "pointer", outline: "none" }}
-                                                                        >
-                                                                            {row.overrideDuplicate ? "Dubbel, toch toevoegen" : "Dubbel"}
-                                                                        </button>
-                                                                    )}
-                                                                </td>
-                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{formatDatumNL(row.checkIn)} - {formatDatumNL(row.checkOut)}</td>
-                                                                <td style={{ padding: "8px 0", color: isIgnored ? "#aaa" : "#666" }}>{row.language.toUpperCase()}</td>
-                                                                <td style={{ padding: "8px", textAlign: "right" }}>
-                                                                    <button onClick={() => setCsvRows(r => r.filter((_, j) => j !== i))} style={{ background: "none", border: "none", color: "#c00", cursor: "pointer", fontSize: "0.85rem", opacity: isIgnored ? 0.5 : 1 }}>✕</button>
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                            <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "12px" }}>
-                                                {importProgress ? (
-                                                    <span style={{ fontSize: "0.85rem", color: "#4A5D23" }}>⏳ {importProgress.done} / {importProgress.total} aangemaakt…</span>
-                                                ) : (
-                                                    <>
-                                                        <button onClick={handleImportAll} style={{ backgroundColor: "#4A5D23", color: "white", padding: "8px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem" }}>
-                                                            + Genereer {csvRows.filter(r => !r.isDuplicate || r.overrideDuplicate).length} links
-                                                        </button>
-                                                        <button onClick={() => setCsvRows([])} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: "0.85rem" }}>Annuleer</button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                {voyando && !voyando.actief && <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>Genereer unieke links voor elke boeking zodat gasten direct begroet worden met hun eigen vertrekdata.</p>}
 
                                 {/* Filter: nieuw / verlopen / alle */}
                                 <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
@@ -896,6 +842,11 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                         const beurt = schoonmaak?.beurten.find(b => b.automatisch && b.bookingId === booking.id);
                                         const isSchoonmaakOpen = !!beurt && expandedSchoonmaakId === booking.id;
                                         const schoonmakerNaam = beurt?.schoonmakerId ? schoonmaak?.schoonmakers.find(s => s.id === beurt.schoonmakerId)?.naam : undefined;
+                                        const voy = (booking as any).voyando;
+                                        const isGeannuleerd = !!(booking as any).geannuleerd || (!!voy && voy.status !== "accepted");
+                                        const afwijking = wijktAf(booking);
+                                        const magWeg = !isTestBooking && (!voy || voy.status !== "accepted");
+                                        const personen = voy ? (voy.volwassenen || 0) + (voy.kinderen || 0) : 0;
                                         return (
                                             <div key={booking.id} style={{ padding: "12px", backgroundColor: isExpired && !isEditing ? "#fafafa" : "white", borderRadius: "8px", border: isEditing ? "1px solid #4A5D23" : isExpired ? "1px solid #e0e0e0" : "1px solid #eee", opacity: isExpired && !isEditing ? 0.75 : 1, transition: "opacity 0.2s" }}>
                                                 {/* Rij 1: naam, periode en acties */}
@@ -914,7 +865,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         {!isEditing && (
                                                             <span style={{ fontSize: "0.82rem", color: isExpired ? "#aaa" : "#777", whiteSpace: "nowrap" }}>
                                                                 {periodeKort(booking.checkIn, booking.checkOut)}
-                                                                {booking.language && booking.language !== "nl" && <span style={{ marginLeft: "6px" }}>{vlagVan(booking.language)}</span>}
+                                                                {!voy && booking.language && booking.language !== "nl" && <span style={{ marginLeft: "6px" }}>{vlagVan(booking.language)}</span>}
                                                             </span>
                                                         )}
                                                     </div>
@@ -926,9 +877,15 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={rijKnop}>Bewerk</button>
+                                                                {voy ? (
+                                                                    <select value={booking.language || "nl"} onChange={e => handleTaal(booking, e.target.value)} disabled={isSaving} title="Weergavetaal van de gastpagina" style={{ ...rijKnop, backgroundColor: "white", border: "1px solid #ccc", padding: "4px 6px" }}>
+                                                                        {TALEN.map(t => <option key={t.code} value={t.code}>{t.vlag} {t.naam}</option>)}
+                                                                    </select>
+                                                                ) : (
+                                                                    <button onClick={() => { setEditingId(booking.id); setEditValues({ checkIn: booking.checkIn, checkOut: booking.checkOut, language: booking.language || "nl", bookingNumber: booking.id }); }} style={rijKnop}>Bewerk</button>
+                                                                )}
                                                                 <button onClick={() => !isExpired && copyToClipboard(shareUrl, booking.id)} disabled={isExpired} title={isExpired ? "Verlopen boeking" : shareUrl} style={{ ...rijKnop, backgroundColor: isExpired ? "#f0f0f0" : copiedId === booking.id ? "#4A5D23" : "#e0e0e0", color: isExpired ? "#bbb" : copiedId === booking.id ? "white" : "#333", cursor: isExpired ? "not-allowed" : "pointer", fontWeight: "bold", transition: "all 0.2s" }}>{copiedId === booking.id ? "✓ Gekopieerd" : "Kopieer link"}</button>
-                                                                {!isTestBooking && <button onClick={() => handleRemoveBooking(booking.id)} style={{ ...rijKnop, backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc" }}>Verwijder</button>}
+                                                                {magWeg && <button onClick={() => handleRemoveBooking(booking.id)} style={{ ...rijKnop, backgroundColor: "#fee", color: "#c00", border: "1px solid #ecc" }}>Verwijder</button>}
                                                             </>
                                                         )}
                                                     </div>
@@ -944,6 +901,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                     )}
                                                     {isExpired && !isEditing && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#f0f0f0", color: "#999", border: "1px solid transparent" }}>Verlopen</span>}
                                                     {isTestBooking && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#4A5D23", color: "white", border: "1px solid transparent" }}>🧪 Testboeking</span>}
+                                                    {voy && <span title="Deze boeking komt uit Voyando" style={{ ...labelKnop, cursor: "default", backgroundColor: "#eef2f7", color: "#4a5a70", border: "1px solid transparent" }}>{kanaalNaam(voy.kanaal)}{personen ? ` · ${personen} pers.` : ""}{voy.babys ? ` + ${voy.babys} baby` : ""}{voy.huisdieren ? " · 🐾" : ""}</span>}
+                                                    {eerder.has(booking.id) && <span title={eerder.get(booking.id)!.map(e => `${e.guestName}: ${formatDatumNL(e.checkIn)} t/m ${formatDatumNL(e.checkOut)}`).join("\n")} style={{ ...labelKnop, cursor: "help", backgroundColor: "#ede9fe", color: "#5b21b6", border: "1px solid transparent" }}>🔁 Was hier eerder · {eerder.get(booking.id)!.length === 1 ? formatDatumNL(eerder.get(booking.id)![0].checkIn).slice(3) : `${eerder.get(booking.id)!.length}×`}</span>}
+                                                    {isGeannuleerd && <span style={{ ...labelKnop, cursor: "default", backgroundColor: "#fde8e6", color: "#a3352a", border: "1px solid transparent" }}>Geannuleerd in Voyando</span>}
+                                                    {afwijking && !isGeannuleerd && <button onClick={() => handleNeemOver(booking)} title="Klik om de datums uit Voyando over te nemen" style={{ ...labelKnop, backgroundColor: "#fef3c7", color: "#92400e", border: "1px solid #f0d58a" }}>⚠ Voyando: {formatDatumNL(voy.checkIn)} t/m {formatDatumNL(voy.checkOut)} · neem over</button>}
                                                     <a href={shareUrl} target="_blank" rel="noreferrer" title={shareUrl} style={{ marginLeft: "auto", fontSize: "0.78rem", color: isExpired ? "#bbb" : "#4A5D23", textDecoration: isExpired ? "line-through" : "none", whiteSpace: "nowrap" }}>/b/{booking.id} ↗</a>
                                                 </div>
 
@@ -994,6 +955,38 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     })}
                                     {bookings.length === 0 && <p style={{ fontSize: "0.9rem", color: "#888", fontStyle: "italic" }}>Geen boekingen gevonden.</p>}
                                 </div>
+
+                                <details open={voyando ? !voyando.actief : false} style={{ marginTop: "16px", backgroundColor: "white", padding: "12px 15px", borderRadius: "8px", border: "1px solid #ccc" }}>
+                                    <summary style={{ fontSize: "0.95rem", color: "#333", cursor: "pointer", fontWeight: "bold" }}>{voyando?.actief ? "Losse link aanmaken (zonder Voyando-boeking)" : "Nieuwe Link Aanmaken"}</summary>
+                                    {voyando?.actief && <p style={{ fontSize: "0.8rem", color: "#777", margin: "8px 0 0" }}>Voor familie, een schoonmaakster of een proeflink. Een gewone boeking hoef je hier niet in te voeren.</p>}
+                                    <div style={{ height: "10px" }} />
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                        <div style={{ flex: "1 1 200px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam Gast</label>
+                                            <input type="text" value={newGuestName} onChange={e => setNewGuestName(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Bijv: Jan & Mien" />
+                                        </div>
+                                        {!voyando?.actief && (
+                                        <div style={{ flex: "1 1 140px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Boekingsnummer</label>
+                                            <input type="text" value={newBookingNumber} onChange={e => setNewBookingNumber(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="Voyando-nr" />
+                                        </div>
+                                        )}
+                                        <DatumBereik
+                                            aankomst={newCheckIn}
+                                            vertrek={newCheckOut}
+                                            onChange={(a, v) => { setNewCheckIn(a); setNewCheckOut(v); }}
+                                            labelStyle={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}
+                                            veldStyle={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                                        />
+                                        <div style={{ flex: "1 1 120px" }}>
+                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Weergavetaal</label>
+                                            <select value={newLanguage} onChange={e => setNewLanguage(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", backgroundColor: "white" }}>
+                                                {TALEN.map(t => <option key={t.code} value={t.code}>{t.vlag} {t.naam}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button onClick={handleAddBooking} disabled={isSaving} style={{ marginTop: "15px", backgroundColor: "#4A5D23", color: "white", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Genereer Link</button>
+                                </details>
                             </div>
                         </details>
 
@@ -1010,8 +1003,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             <SchoonmaakSectie data={schoonmaak} herlaad={herlaadSchoonmaak} toon={toonMelding} />
                         </details>
 
+                        <div className="groepskop" style={{ marginTop: "14px" }}>Gast-app inrichten</div>
                         {/* Sectie: Algemeen */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🏡 Algemene Informatie</summary>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <div>
@@ -1068,7 +1062,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Home Items */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📱 Home Pagina Items (Uw verblijf)</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>, <code>@sleutelcode</code>.</p>
@@ -1076,14 +1070,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
                                         <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                             {insights.map((item, idx) => (
-                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)}>
-                                                    <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
-
-                                                    <details style={{ marginTop: "34px", marginBottom: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>
-                                                        <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>
-                                                            👁 Zichtbaarheid <span style={{ fontWeight: "normal", color: "#888" }}>({samenvattingZichtbaarheid(item)})</span>
-                                                        </summary>
-                                                        <div style={{ marginTop: "10px" }}>
+                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)} titel={item.title} oog={{ tekst: samenvattingZichtbaarheid(item), inhoud: (
+                                                        <div>
                                                         <div style={{ fontSize: "0.75rem", color: "#777", marginBottom: "6px" }}>Zichtbaar in fase</div>
                                                         <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "8px" }}>
                                                             {FASES_VOOR_TEGELS.map(f => {
@@ -1138,7 +1126,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             📋 Alleen zolang de nachtregistratie nog niet is ingevuld (rode tegel)
                                                         </label>
                                                     </div>
-                                                    </details>
+                                                ) }}>
+                                                    <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+
 
                                                     <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
                                                         <div style={{ flex: 1 }}>
@@ -1246,13 +1236,13 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Videoinstructies */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎥 Videoinstructies</summary>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(videos, setVideos)}>
                                     <SortableContext items={videos.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                         {videos.map((vid, idx) => (
-                                            <SortableItem key={`vid-${idx}`} id={`item-${idx}`}>
+                                            <SortableItem key={`vid-${idx}`} id={`item-${idx}`} titel={vid.title}>
                                                 <button onClick={() => setVideos(videos.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
                                                 <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
@@ -1350,7 +1340,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Omgeving */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🌲 Omgeving TIPS</summary>
                             <div style={{ marginTop: "15px" }}>
 
@@ -1370,7 +1360,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(omgeving, setOmgeving)}>
                                         <SortableContext items={omgeving.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                             {omgeving.map((tip, idx) => (
-                                                <SortableItem key={`omg-${idx}`} id={`item-${idx}`}>
+                                                <SortableItem key={`omg-${idx}`} id={`item-${idx}`} titel={tip.name}>
                                                     <button onClick={() => setOmgeving(omgeving.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
 
                                                     <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
@@ -1462,7 +1452,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
 
                         {/* Sectie: Verlopen Boeking Pagina */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>⏰ Verlopen Boeking Pagina</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Deze pagina wordt getoond wanneer een gast zijn/haar link opent nadat de vertrekdatum is verstreken. Gebruik de editor om een persoonlijke boodschap samen te stellen.</p>
@@ -1473,9 +1463,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                         {/* Sectie: Mediabibliotheek */}
                         <details
-                            className="sectie"
+                            className="sectie inrichten"
                             style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}
-                            onToggle={(e) => { if ((e.target as HTMLDetailsElement).open) loadMediaLibrary(); }}
+                            onToggle={(e) => { if (e.target === e.currentTarget && e.currentTarget.open) loadMediaLibrary(); }}
                         >
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🖼️ Mediabibliotheek</summary>
                             <div style={{ marginTop: "15px" }}>
@@ -1611,44 +1601,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         />
 
 
-                        {/* Sectie: Gameroom */}
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
-                            <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎮 Gameroom</summary>
-                            <div style={{ marginTop: "15px" }}>
-                                <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Beheer de spellen in de gameroom. De ID wordt gebruikt in de URL (bijv. <code>tetris</code> → <code>/gameroom/tetris</code>). Het pad verwijst naar het HTML-bestand in <code>/public</code>.</p>
-                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(games, setGames)}>
-                                        <SortableContext items={games.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
-                                            {games.map((game, idx) => (
-                                                <SortableItem key={`game-${idx}`} id={`item-${idx}`}>
-                                                    <button onClick={() => setGames(games.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
-                                                    <div style={{ display: "flex", gap: "10px", marginTop: "5px", flexWrap: "wrap" }}>
-                                                        <div style={{ flex: "1 1 120px" }}>
-                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>ID (URL-slug)</label>
-                                                            <input type="text" value={game.id} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], id: e.target.value.toLowerCase().replace(/\s+/g, '-') }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "monospace" }} placeholder="bijv: tetris" />
-                                                        </div>
-                                                        <div style={{ flex: "1 1 150px" }}>
-                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Naam</label>
-                                                            <input type="text" value={game.title} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], title: e.target.value }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} placeholder="bijv: Tetris" />
-                                                        </div>
-                                                        <div style={{ flex: "2 1 250px" }}>
-                                                            <label style={{ display: "block", fontSize: "0.85rem", color: "#555", marginBottom: "5px" }}>Pad naar HTML-bestand</label>
-                                                            <input type="text" value={game.src} onChange={e => { const n = [...games]; n[idx] = { ...n[idx], src: e.target.value }; setGames(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "monospace" }} placeholder="/Gameroom/tetris/index.html" />
-                                                        </div>
-                                                    </div>
-                                                </SortableItem>
-                                            ))}
-                                        </SortableContext>
-                                    </DndContext>
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <button onClick={() => setGames([...games, { id: "", title: "Nieuw Spel", src: "/Gameroom//index.html" }])} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>+ Spel Toevoegen</button>
-                                        <button onClick={handleSaveGames} disabled={isSaving} style={{ backgroundColor: "#333", color: "white", padding: "10px 30px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold" }}>Opslaan</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </details>
-
-                        <details className="sectie" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Alles wat je hier invoert wordt als extra context meegegeven aan de Digitale Conciërge. Hoe meer detail, hoe beter de chatbot kan antwoorden.</p>
@@ -1668,8 +1621,39 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 </div>
             </div>
 
-            {/* Zwevende Alle Wijzigingen Opslaan Knop */}
-            <button
+            {voyandoPopup && voyando?.actief && (
+                <div onClick={() => setVoyandoPopup(false)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.35)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+                    <div role="dialog" aria-label="Laatste wijzigingen uit Voyando" onClick={e => e.stopPropagation()} style={{ backgroundColor: "white", borderRadius: "12px", padding: "20px 22px", width: "100%", maxWidth: "520px", maxHeight: "80vh", overflowY: "auto", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", fontSize: "0.9rem", color: "#444" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px" }}>
+                            <strong style={{ fontSize: "1.05rem", color: "#333" }}>🕘 Laatste wijzigingen uit Voyando</strong>
+                            <button onClick={() => setVoyandoPopup(false)} aria-label="Sluiten" style={{ background: "none", border: "none", fontSize: "1.3rem", cursor: "pointer", color: "#888", lineHeight: 1 }}>×</button>
+                        </div>
+                        {voyando.stand.gelukt === false && <div style={{ marginTop: "10px", color: "#a3352a", backgroundColor: "#fff4f2", border: "1px solid #e5b4ac", borderRadius: "6px", padding: "8px 10px" }}>Ophalen mislukt: {voyando.stand.fout}</div>}
+                        {voyando.stand.laatsteWijzigingen ? (
+                            <>
+                                <div style={{ marginTop: "12px", color: "#777", fontSize: "0.8rem" }}>{new Date(voyando.stand.laatsteWijzigingen.op).toLocaleString("nl-NL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</div>
+                                <ul style={{ margin: "6px 0 0", padding: 0, listStyle: "none" }}>
+                                    {voyando.stand.laatsteWijzigingen.regels.map((r, i) => (
+                                        <li key={i} style={{ padding: "7px 0", borderBottom: "1px solid #f0f0f0" }}>
+                                            <span style={{ ...labelKnop, cursor: "default", marginRight: "8px", backgroundColor: r.soort === "geannuleerd" ? "#fde8e6" : r.soort === "nieuw" ? "#dcfce7" : "#fef3c7", color: r.soort === "geannuleerd" ? "#a3352a" : r.soort === "nieuw" ? "#166534" : "#92400e" }}>{r.soort}</span>
+                                            <strong>{r.naam || r.id}</strong> <span style={{ color: "#999" }}>({r.id})</span>
+                                            <div style={{ color: "#666", fontSize: "0.82rem", marginTop: "2px" }}>{r.tekst}</div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        ) : <div style={{ marginTop: "12px", color: "#888" }}>Nog geen wijzigingen sinds de koppeling.</div>}
+                        <div style={{ marginTop: "14px", color: "#888", fontSize: "0.8rem", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                            <span>{voyando.stand.laatst ? `Laatst opgehaald ${new Date(voyando.stand.laatst).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${voyando.stand.aantal ?? 0} boekingen in Voyando` : "Nog niet opgehaald"}</span>
+                            <button onClick={() => haalVoyando(true)} disabled={voyandoBezig} title="Niet nodig: ophalen gaat vanzelf. Handig als je net iets in Voyando hebt gewijzigd en niet wilt wachten." style={{ background: "none", border: "none", padding: 0, color: "#4A5D23", textDecoration: "underline", cursor: voyandoBezig ? "default" : "pointer", fontSize: "0.8rem", opacity: voyandoBezig ? 0.6 : 1 }}>{voyandoBezig ? "Bezig…" : "Nu ophalen"}</button>
+                        </div>
+                        <div style={{ marginTop: "8px", color: "#999", fontSize: "0.78rem" }}>Nieuwe boekingen, andere datums en annuleringen komen vanzelf binnen. Het nummer en de datums wijzig je in Voyando.</div>
+                    </div>
+                </div>
+            )}
+
+            {/* Zwevende Alle Wijzigingen Opslaan Knop: alleen bij niet-opgeslagen wijzigingen in de inrichting. Boekingen en schoonmaak slaan zelf op. */}
+            {nietOpgeslagen && <button
                 onClick={handleSaveAll}
                 disabled={isSaving}
                 className="hover:scale-105 transition-transform"
@@ -1696,7 +1680,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 {/* @ts-ignore */}
                 <ion-icon name="save-outline" style={{ fontSize: "1.4rem" }}></ion-icon>
                 Alles Opslaan
-            </button>
+            </button>}
 
             <style>{`@keyframes vdcSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
 
