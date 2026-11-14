@@ -58,7 +58,7 @@ function samenvattingZichtbaarheid(item: any): string {
     return delen.join(" · ");
 }
 
-function SortableItem({ id, children, accent, titel }: { id: string, children: React.ReactNode, accent?: string, titel?: string }) {
+function SortableItem({ id, children, accent, titel, kop }: { id: string, children: React.ReactNode, accent?: string, titel?: string, kop?: React.ReactNode }) {
     const [open, setOpen] = useState(titel === undefined);
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
     const style = {
@@ -92,6 +92,7 @@ function SortableItem({ id, children, accent, titel }: { id: string, children: R
                             {titel || "(zonder titel)"}
                         </button>
                     )}
+                    {kop}
                     {open && children}
                 </div>
             </div>
@@ -181,8 +182,22 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
     const [voyando, setVoyando] = useState<{ actief: boolean; stand: VoyandoStand } | null>(null);
     const [voyandoBezig, setVoyandoBezig] = useState(false);
     const [voyandoPopup, setVoyandoPopup] = useState(false);
-    const [inrichtenOpen, setInrichtenOpen] = useState(false);
-    const telInrichten = () => setInrichtenOpen(document.querySelectorAll("details.inrichten[open]").length > 0);
+    // Wat er in de inrichting is ingevuld, per opslagactie. "Alles Opslaan" staat er alleen als dit afwijkt van wat is opgeslagen.
+    const huidig: Record<string, string> = useMemo(() => ({
+        algemeen: JSON.stringify([propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail]),
+        insights: JSON.stringify(insights),
+        videos: JSON.stringify(videos),
+        omgeving: JSON.stringify([omgeving, aiPrompt, aiMaxChars]),
+        chatbot: JSON.stringify(chatbotContext),
+        verlopen: JSON.stringify(expiredPageContent),
+    }), [propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail, insights, videos, omgeving, aiPrompt, aiMaxChars, chatbotContext, expiredPageContent]);
+    const [opgeslagen, setOpgeslagen] = useState<Record<string, string> | null>(null);
+    const [geladen, setGeladen] = useState(0);
+    const huidigRef = useRef(huidig);
+    huidigRef.current = huidig;
+    useEffect(() => { if (geladen) setOpgeslagen(huidigRef.current); }, [geladen]);
+    const markeerOpgeslagen = (...delen: string[]) => setOpgeslagen(o => o ? { ...o, ...Object.fromEntries(delen.map(d => [d, huidigRef.current[d]])) } : o);
+    const nietOpgeslagen = !!opgeslagen && Object.keys(huidig).some(k => huidig[k] !== opgeslagen[k]);
     const eerder = useMemo(() => eerdereVerblijven(bookings), [bookings]);
     // De timer hieronder leeft langer dan één render en ziet anders een oude waarde.
     const magBoekingenVerversen = useRef(true);
@@ -277,6 +292,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
             setExpiredPageContent((data as any).expiredPageContent || "");
             if ((data as any).aiPrompt) setAiPrompt((data as any).aiPrompt);
             if ((data as any).aiMaxChars) setAiMaxChars((data as any).aiMaxChars);
+            setGeladen(n => n + 1);
             haalVoyando();
         });
     };
@@ -298,12 +314,13 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         setPin("");
     };
 
-    const runSaveAction = async (actionFn: () => Promise<any>, successMsg: string) => {
+    const runSaveAction = async (actionFn: () => Promise<any>, successMsg: string, deel?: string) => {
         setIsSaving(true);
         setSaveMessage("⏳ Aan het opslaan...");
         const res = await actionFn();
         setIsSaving(false);
         if (res.success) {
+            if (deel) markeerOpgeslagen(deel);
             setSaveMessage("✅ " + successMsg);
             setTimeout(() => setSaveMessage(""), 3500);
         } else {
@@ -379,17 +396,17 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
     const handleSaveGeneral = () => runSaveAction(
         () => updateGeneralInfo(propName, hostName, phone, subtitle, headerImage, keyCode, staanplaats, campingEmail),
-        "Algemene info succesvol opgeslagen!"
+        "Algemene info succesvol opgeslagen!", "algemeen"
     );
 
-    const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!");
-    const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!");
+    const handleSaveInsights = () => runSaveAction(() => updateInsights(insights), "Home Items succesvol opgeslagen!", "insights");
+    const handleSaveVideos = () => runSaveAction(() => updateVideos(videos), "Videoinstructies succesvol opgeslagen!", "videos");
     const handleSaveOmgeving = () => runSaveAction(
         () => updateOmgevingWithAi(omgeving, aiPrompt, aiMaxChars),
-        "Omgeving succesvol opgeslagen!"
+        "Omgeving succesvol opgeslagen!", "omgeving"
     );
-    const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!");
-    const handleSaveExpiredPage = () => runSaveAction(() => updateExpiredPageContent(expiredPageContent), "Verlopen pagina succesvol opgeslagen!");
+    const handleSaveChatbotContext = () => runSaveAction(() => updateChatbotContext(chatbotContext), "Chatbot context succesvol opgeslagen!", "chatbot");
+    const handleSaveExpiredPage = () => runSaveAction(() => updateExpiredPageContent(expiredPageContent), "Verlopen pagina succesvol opgeslagen!", "verlopen");
 
     const loadMediaLibrary = async (force = false) => {
         if ((mediaLoaded && !force) || isLoadingMedia) return;
@@ -493,6 +510,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
         ];
         setIsSaving(false);
         if (results.every(r => r.success)) {
+            markeerOpgeslagen(...Object.keys(huidigRef.current));
             setSaveMessage("✅ Alle wijzigingen zijn succesvol opgeslagen!");
             setTimeout(() => setSaveMessage(""), 4000);
         } else {
@@ -974,7 +992,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
                         <div className="groepskop" style={{ marginTop: "14px" }}>Gast-app inrichten</div>
                         {/* Sectie: Algemeen */}
-                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🏡 Algemene Informatie</summary>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <div>
@@ -1031,7 +1049,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Home Items */}
-                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📱 Home Pagina Items (Uw verblijf)</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Variabelen: <code>@aankomst</code>, <code>@vertrek</code>, <code>@naamgast</code>, <code>@sleutelcode</code>.</p>
@@ -1039,10 +1057,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(insights, setInsights)}>
                                         <SortableContext items={insights.map((_, i) => `item-${i}`)} strategy={verticalListSortingStrategy}>
                                             {insights.map((item, idx) => (
-                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)} titel={item.title}>
-                                                    <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
-
-                                                    <details style={{ marginTop: "34px", marginBottom: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>
+                                                <SortableItem key={`insight-${idx}`} id={`item-${idx}`} accent={accentVanTegel(item)} titel={item.title} kop={(
+                                                    <details style={{ marginTop: "6px", marginBottom: "6px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "10px 12px" }}>
                                                         <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>
                                                             👁 Zichtbaarheid <span style={{ fontWeight: "normal", color: "#888" }}>({samenvattingZichtbaarheid(item)})</span>
                                                         </summary>
@@ -1102,6 +1118,9 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                         </label>
                                                     </div>
                                                     </details>
+                                                )}>
+                                                    <button onClick={() => setInsights(insights.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "10px", right: "10px", backgroundColor: "#d9534f", color: "white", border: "none", borderRadius: "4px", padding: "5px 10px", cursor: "pointer", fontSize: "0.8rem" }}>X Verwijder</button>
+
 
                                                     <div style={{ display: "flex", gap: "10px", marginBottom: "10px", marginTop: "5px" }}>
                                                         <div style={{ flex: 1 }}>
@@ -1209,7 +1228,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Videoinstructies */}
-                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🎥 Videoinstructies</summary>
                             <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "15px" }}>
                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragEnd(videos, setVideos)}>
@@ -1313,7 +1332,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         </details>
 
                         {/* Sectie: Omgeving */}
-                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🌲 Omgeving TIPS</summary>
                             <div style={{ marginTop: "15px" }}>
 
@@ -1425,7 +1444,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
 
                         {/* Sectie: Verlopen Boeking Pagina */}
-                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>⏰ Verlopen Boeking Pagina</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Deze pagina wordt getoond wanneer een gast zijn/haar link opent nadat de vertrekdatum is verstreken. Gebruik de editor om een persoonlijke boodschap samen te stellen.</p>
@@ -1438,7 +1457,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         <details
                             className="sectie inrichten"
                             style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}
-                            onToggle={(e) => { if (e.target !== e.currentTarget) return; telInrichten(); if (e.currentTarget.open) loadMediaLibrary(); }}
+                            onToggle={(e) => { if (e.target === e.currentTarget && e.currentTarget.open) loadMediaLibrary(); }}
                         >
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🖼️ Mediabibliotheek</summary>
                             <div style={{ marginTop: "15px" }}>
@@ -1574,7 +1593,7 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                         />
 
 
-                        <details className="sectie inrichten" onToggle={telInrichten} style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
+                        <details className="sectie inrichten" style={{ border: "1px solid #eee", borderRadius: "12px", padding: "14px 18px" }}>
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#333", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>🤖 Chatbot Kennisbank</summary>
                             <div style={{ marginTop: "15px" }}>
                                 <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>Alles wat je hier invoert wordt als extra context meegegeven aan de Digitale Conciërge. Hoe meer detail, hoe beter de chatbot kan antwoorden.</p>
@@ -1625,8 +1644,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                 </div>
             )}
 
-            {/* Zwevende Alle Wijzigingen Opslaan Knop: alleen als er een inrichtingssectie openstaat. Boekingen en schoonmaak slaan zelf op. */}
-            {inrichtenOpen && <button
+            {/* Zwevende Alle Wijzigingen Opslaan Knop: alleen bij niet-opgeslagen wijzigingen in de inrichting. Boekingen en schoonmaak slaan zelf op. */}
+            {nietOpgeslagen && <button
                 onClick={handleSaveAll}
                 disabled={isSaving}
                 className="hover:scale-105 transition-transform"
