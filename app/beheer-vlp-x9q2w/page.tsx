@@ -28,6 +28,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import DatumBereik from "../components/DatumBereik";
 import ImageLightbox from "../components/ImageLightbox";
 import { TALEN, VERTAALTALEN, vlagVan, naamVan } from "../utils/talen";
+import { INTERACTIEVE_ONDERDELEN } from "../components/interactief/register";
 
 const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: string }> = {
     uitgelicht: { bg: "#f3f8ec", border: "#4A5D23", label: "✨ Uitgelicht" },
@@ -157,7 +158,7 @@ export default function AdminPage() {
     const [keyCode, setKeyCode] = useState("");
 
     // Dynamic Arrays
-    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, fases?: string[], uitgelicht?: boolean, alleenLegeNachtregistratie?: boolean, toonMobiel?: boolean, toonDesktop?: boolean, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[] }[]>([]);
+    const [insights, setInsights] = useState<{ icon: string, title: string, subtitle: string, action: string, detailContent?: string, image?: string, widgetCode?: string, hideOnMobile?: boolean, visibility?: string, fases?: string[], uitgelicht?: boolean, alleenLegeNachtregistratie?: boolean, toonMobiel?: boolean, toonDesktop?: boolean, stappen?: { image?: string, tekst?: string, volleBreedte?: boolean }[], interactief?: string }[]>([]);
     const [videos, setVideos] = useState<{ title: string, thumb: string, url: string, subtitle?: string, leafStyle?: string, leafRotate?: number, leafScale?: number, leafTranslateX?: number, leafTranslateY?: number }[]>([]);
     const [omgeving, setOmgeving] = useState<{ name: string, desc: string, image: string, url: string, adres: string, widgetCode?: string, distance?: string, walkTime?: string, bikeTime?: string, carTime?: string }[]>([]);
     const [chatbotContext, setChatbotContext] = useState("");
@@ -1222,6 +1223,28 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                                             );
                                                         })}
                                                         <button onClick={() => { const n = [...insights]; n[idx] = { ...n[idx], stappen: [...(n[idx].stappen || []), { image: "", tekst: "" }] }; setInsights(n); }} style={{ backgroundColor: "#e0e0e0", color: "#333", padding: "7px 14px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem" }}>+ Stap toevoegen</button>
+                                                    </details>
+
+                                                    <details style={{ marginTop: "10px", backgroundColor: "#f8f7f2", borderRadius: "8px", padding: "12px" }}>
+                                                        <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "0.85rem", color: "#4A5D23" }}>
+                                                            👆 Interactief onderdeel ({INTERACTIEVE_ONDERDELEN.find(o => o.id === item.interactief)?.naam || "geen"}{INTERACTIEVE_ONDERDELEN.find(o => o.id === item.interactief)?.beperking ? " · alleen NL, breed scherm" : ""})
+                                                        </summary>
+                                                        <p style={{ fontSize: "0.75rem", color: "#888", margin: "8px 0" }}>
+                                                            Staat onderaan de detailpagina onder de kop "Probeer het zelf". De teksten staan klaar in alle gasttalen.
+                                                        </p>
+                                                        <select value={item.interactief || ""} onChange={e => { const n = [...insights]; n[idx] = { ...n[idx], interactief: e.target.value }; setInsights(n); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.85rem" }}>
+                                                            <option value="">-- Geen --</option>
+                                                            {INTERACTIEVE_ONDERDELEN.map(o => <option key={o.id} value={o.id}>{o.naam}{o.beperking ? " (alleen NL, breed scherm)" : ""}</option>)}
+                                                        </select>
+                                                        {INTERACTIEVE_ONDERDELEN.filter(o => o.id === item.interactief).map(o => (
+                                                            <div key={o.id}>
+                                                                <p style={{ fontSize: "0.75rem", color: "#888", margin: "8px 0 0" }}>{o.uitleg}</p>
+                                                                {o.beperking && <p style={{ fontSize: "0.8rem", color: "#8a5a00", backgroundColor: "#fff4d6", border: "1px solid #f0d58a", borderRadius: "6px", padding: "8px 10px", margin: "8px 0 0" }}>⚠️ {o.beperking}</p>}
+                                                            </div>
+                                                        ))}
+                                                        {item.interactief === "sleutelkastje" && !/\d/.test(keyCode) && (
+                                                            <p style={{ fontSize: "0.8rem", color: "#b3362a", margin: "8px 0 0" }}>Er is nog geen sleutelcode ingevuld bij Algemene Informatie. Zonder code ziet de gast het kastje niet.</p>
+                                                        )}
                                                     </details>
                                                 </SortableItem>
                                             ))}

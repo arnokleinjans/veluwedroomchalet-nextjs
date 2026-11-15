@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useBooking } from "../../context/BookingContext";
 import { parseTemplateString } from "../../utils/templateParser";
+import { interactiefOnderdeel } from "../../components/interactief/register";
 import { tegelZichtbaar, toontOpMobiel, toontOpDesktop, accentVanTegel, vraagtOmNachtregistratie } from "../../utils/testModus";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +50,7 @@ export default function Home() {
           const rawDetail = (insight.detailContent || '').trim();
           const hasWidgetCode = (insight.widgetCode || '').trim().length > 0;
           // TipTap laat vaak lege tags achter als een veld is leeggemaakt.
-          const hasDetail = (rawDetail.length > 0 && rawDetail !== '<p></p>' && rawDetail !== '<p><br></p>') || hasWidgetCode;
+          const hasDetail = (rawDetail.length > 0 && rawDetail !== '<p></p>' && rawDetail !== '<p><br></p>') || hasWidgetCode || !!interactiefOnderdeel((insight as any).interactief, booking?.language);
 
           const cardContent = (
             <>

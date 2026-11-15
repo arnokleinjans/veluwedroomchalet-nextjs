@@ -5,6 +5,8 @@ import { parseTemplateString } from "../../../../../utils/templateParser";
 import Link from "next/link";
 import WidgetEmbed from "../../../../../components/WidgetEmbed";
 import Stappenplan from "../../../../../components/Stappenplan";
+import InteractiefOnderdeel from "../../../../../components/interactief/InteractiefOnderdeel";
+import { interactiefOnderdeel } from "../../../../../components/interactief/register";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,7 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
     const insights = appData.insights || [];
     const item = insights[itemIndex] as any;
     const stappen = (item?.stappen || []) as any[];
-    const hasContent = (item?.detailContent && item.detailContent.trim() !== '' && item.detailContent.trim() !== '<p></p>' && item.detailContent.trim() !== '<p><br></p>') || (item?.widgetCode && item.widgetCode.trim() !== '') || stappen.length > 0;
+    const hasContent = (item?.detailContent && item.detailContent.trim() !== '' && item.detailContent.trim() !== '<p></p>' && item.detailContent.trim() !== '<p><br></p>') || (item?.widgetCode && item.widgetCode.trim() !== '') || stappen.length > 0 || !!interactiefOnderdeel(item?.interactief, rawBooking?.language);
 
     if (!item || !hasContent) {
         return (
@@ -102,6 +104,7 @@ export default async function HomeItemDetail({ params }: { params: { bookingId: 
                         <WidgetEmbed code={parseTemplateString(item.detailContent || "", booking)} />
                     </div>
                     <Stappenplan stappen={stappen.map((s: any) => ({ ...s, tekst: parseTemplateString(s.tekst || "", booking) }))} />
+                    <InteractiefOnderdeel id={item.interactief} lang={booking?.language || "nl"} keyCode={booking?.keyCode || ""} />
                 </div>
             </div>
         </div>
