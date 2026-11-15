@@ -29,6 +29,8 @@ import DatumBereik from "../components/DatumBereik";
 import ImageLightbox from "../components/ImageLightbox";
 import { TALEN, VERTAALTALEN, vlagVan, naamVan } from "../utils/talen";
 import { INTERACTIEVE_ONDERDELEN } from "../components/interactief/register";
+import LandingspaginaHeader from "../components/LandingspaginaHeader";
+import LandingspaginaPromo from "../components/LandingspaginaPromo";
 
 const VISIBILITY_ACCENT: Record<string, { bg: string; border: string; label: string }> = {
     uitgelicht: { bg: "#f3f8ec", border: "#4A5D23", label: "✨ Uitgelicht" },
@@ -1639,6 +1641,10 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                                 </div>
                             </div>
                         </details>
+
+                        <div className="groepskop" style={{ marginTop: "14px" }}>Landingspagina</div>
+                        <LandingspaginaHeader toonMelding={toonMelding} />
+                        <LandingspaginaPromo toonMelding={toonMelding} />
 
                     </div>
                 </div>
