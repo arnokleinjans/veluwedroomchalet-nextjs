@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { getKV, getAppDataFresh, invalidateCache } from "./db";
 import { synchroniseerNaBoekingen, vervalBeurtenVanBoeking } from "./schoonmaakMail";
-import { haalAlleBoekingen, haalBoeking, detailNodig, voegSamen, gastVan, momentVan, voyandoSleutel, Gast, RapportRegel } from "./voyandoKern";
+import { haalAlleBoekingen, haalBoeking, detailNodig, voegSamen, gastVan, momentVan, voyandoSleutel, kanaalNaam, Gast, RapportRegel, VoyandoBoeking } from "./voyandoKern";
 
 const STAND = "voyando:sync";
 const MIN_TUSSENTIJD_MS = 2 * 60_000;
@@ -14,7 +14,35 @@ export type VoyandoStand = {
     fout?: string;
     aantal?: number;
     laatsteWijzigingen?: { op: string; regels: RapportRegel[] };
+    historie?: HistorieRegel[];
 };
+
+// op = binnenkomst in Voyando bij een nieuwe boeking, anders het moment van ophalen.
+export type HistorieRegel = RapportRegel & { op: string };
+
+const MAX_HISTORIE = 10;
+const BEGINVULLING_DAGEN = 30;
+
+function voegToeAanHistorie(historie: HistorieRegel[], erbij: HistorieRegel[]): HistorieRegel[] {
+    const sleutel = (r: HistorieRegel) => `${r.soort}|${r.id}|${r.op}`;
+    const bekend = new Set(historie.map(sleutel));
+    return [...historie, ...erbij.filter(r => !bekend.has(sleutel(r)))]
+        .sort((a, b) => b.op.localeCompare(a.op))
+        .slice(0, MAX_HISTORIE);
+}
+
+// Eerste keer: de historie bestond nog niet, dus vullen met wat Voyando de afgelopen weken binnenkreeg.
+function beginHistorie(stand: VoyandoStand, voyando: VoyandoBoeking[], bookings: any[]): HistorieRegel[] {
+    const grens = new Date(Date.now() - BEGINVULLING_DAGEN * 86_400_000).toISOString();
+    const naamVanId = new Map(bookings.map(b => [voyandoSleutel(b), b.guestName as string]));
+    const nieuw: HistorieRegel[] = voyando
+        .filter(v => v.status === "accepted" && v.created_at && v.created_at >= grens && v.check_in && v.check_out)
+        .map(v => ({ id: String(v.id), soort: "nieuw", naam: naamVanId.get(String(v.id)), tekst: `${v.check_in} t/m ${v.check_out} · ${kanaalNaam(v.channel)}`, op: v.created_at! }));
+    const oud: HistorieRegel[] = (stand.laatsteWijzigingen?.regels || [])
+        .filter(r => r.soort !== "nieuw")
+        .map(r => ({ ...r, op: stand.laatsteWijzigingen!.op }));
+    return voegToeAanHistorie([], [...nieuw, ...oud]);
+}
 
 export function voyandoActief(): boolean {
     return !!process.env.VOYANDO_API_KEY;
@@ -71,12 +99,16 @@ export async function synchroniseerVoyando(opties: { forceer?: boolean } = {}): 
             revalidatePath("/", "layout");
         }
 
-        const meldenswaard = rapport.filter(r => ["nieuw", "bijgewerkt", "geannuleerd", "hersteld"].includes(r.soort));
+        const binnen = new Map(voyando.map(v => [String(v.id), v.created_at]));
+        const meldenswaard: HistorieRegel[] = rapport
+            .filter(r => ["nieuw", "bijgewerkt", "geannuleerd", "hersteld"].includes(r.soort))
+            .map(r => ({ ...r, op: (r.soort === "nieuw" && binnen.get(r.id)) || nu }));
+        const basis = stand.historie ?? beginHistorie(stand, voyando, bookings ?? (appData as any).bookings ?? []);
         const nieuw: VoyandoStand = {
             laatst: nu,
             gelukt: true,
             aantal: voyando.length,
-            laatsteWijzigingen: meldenswaard.length ? { op: nu, regels: meldenswaard } : stand.laatsteWijzigingen,
+            historie: voegToeAanHistorie(basis, meldenswaard),
         };
         await kv.set(STAND, nieuw);
         return nieuw;
@@ -104,7 +136,12 @@ export async function importeerOpVerzoek(rawId: string): Promise<boolean> {
                 bookings: [...huidig, { id, guestName: gast.naam || "Gast", checkIn: detail.check_in, checkOut: detail.check_out, language: "nl", voyando: momentVan(detail, gast) }],
             };
         });
-        if (bookings) await synchroniseerNaBoekingen(bookings).catch(e => console.error("Schoonmaak bijwerken na Voyando mislukt:", e));
+        if (bookings) {
+            await synchroniseerNaBoekingen(bookings).catch(e => console.error("Schoonmaak bijwerken na Voyando mislukt:", e));
+            const stand = await leesVoyandoStand();
+            const regel: HistorieRegel = { id, soort: "nieuw", naam: gast.naam || undefined, tekst: `${detail.check_in} t/m ${detail.check_out} · ${kanaalNaam(detail.channel)}`, op: detail.created_at || new Date().toISOString() };
+            if (stand.historie) await getKV().set(STAND, { ...stand, historie: voegToeAanHistorie(stand.historie, [regel]) }).catch(() => {});
+        }
         return true;
     } catch (e) {
         console.error("Voyando-boeking op verzoek ophalen mislukt:", e);

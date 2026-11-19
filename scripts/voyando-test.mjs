@@ -51,7 +51,7 @@ try {
     await page.type("input[type=password]", PIN);
     await page.locator("::-p-text(Inloggen)").click();
     await page.waitForSelector("::-p-text(Beheer Veluwe Droomchalet Webapp)", { timeout: 20000 });
-    check(!!(await page.waitForSelector("button[aria-label='Laatste wijzigingen']", { timeout: 30000 }).catch(() => null)), "icoon 'laatste wijzigingen' achter de titel Boekingen");
+    check(!!(await page.waitForSelector("button[aria-label='Historie']", { timeout: 30000 }).catch(() => null)), "icoon 'historie' achter de titel Boekingen");
     await wacht(2000);
     const tekst = () => page.evaluate(() => document.body.innerText);
     check(!/CSV/i.test(await tekst()), "CSV-import is weg");
@@ -73,13 +73,13 @@ try {
     check((await beurtVan(String(GEANNULEERD.id)))?.status === "open", "beurt bestaat voor de boeking die geannuleerd gaat worden");
     check((await beurtVan(idA))?.datum === plus(A.check_out, 1), "beurt A staat op het verschoven vertrek");
 
-    await page.click("button[aria-label='Laatste wijzigingen']");
+    await (await page.waitForSelector("button[aria-label='Historie']", { timeout: 30000 })).click();
     await page.locator("::-p-text(Nu ophalen)").click();
     await wacht(300);
     await page.waitForFunction(() => ![...document.querySelectorAll("button")].some(b => b.textContent.trim() === "Bezig…"), { timeout: 90000 });
     await wacht(1500);
     const popup = await page.$eval("[role=dialog]", el => el.innerText).catch(() => "");
-    check(popup.includes("Laatst opgehaald") && popup.includes("geannuleerd") && popup.includes("nieuw"), "pop-up toont de laatste wijzigingen");
+    check(popup.includes("Laatst opgehaald") && popup.includes("geannuleerd") && popup.includes("nieuw"), "pop-up toont de historie");
     if (SCHERM) await page.screenshot({ path: SCHERM.replace(".png", "-popup.png") });
     await page.click("button[aria-label='Sluiten']");
     check(!(await page.$("[role=dialog]")), "pop-up sluit");

@@ -18,6 +18,7 @@ export type VoyandoBoeking = {
     babies: number | null;
     pets: number | null;
     updated_at: string;
+    created_at?: string;
 };
 
 export type VoyandoMoment = {

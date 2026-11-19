@@ -804,8 +804,8 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
                             <summary className="sectie-kop" style={{ fontSize: "1.15rem", color: "#4A5D23", cursor: "pointer", fontWeight: "bold", listStylePosition: "inside", outline: "none" }}>📅 Boekingen
                                 {voyando?.actief && (
                                     <button
-                                        aria-label="Laatste wijzigingen"
-                                        title={voyando.stand.gelukt === false ? "Ophalen uit Voyando is mislukt" : "Laatste wijzigingen uit Voyando"}
+                                        aria-label="Historie"
+                                        title={voyando.stand.gelukt === false ? "Ophalen uit Voyando is mislukt" : "Historie uit Voyando"}
                                         onClick={e => { e.preventDefault(); e.stopPropagation(); setVoyandoPopup(true); }}
                                         style={{ marginLeft: "10px", verticalAlign: "middle", width: "26px", height: "26px", borderRadius: "50%", border: `1px solid ${voyando.stand.gelukt === false ? "#d9534f" : "#cfdcb8"}`, backgroundColor: voyando.stand.gelukt === false ? "#fde8e6" : "white", cursor: "pointer", padding: 0, fontSize: "0.85rem", lineHeight: 1 }}
                                     >{voyando.stand.gelukt === false ? "⚠️" : "🕘"}</button>
@@ -1652,26 +1652,32 @@ Houd het kort (max 200 woorden), uitnodigend en informatief. Schrijf in het Nede
 
             {voyandoPopup && voyando?.actief && (
                 <div onClick={() => setVoyandoPopup(false)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.35)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
-                    <div role="dialog" aria-label="Laatste wijzigingen uit Voyando" onClick={e => e.stopPropagation()} style={{ backgroundColor: "white", borderRadius: "12px", padding: "20px 22px", width: "100%", maxWidth: "520px", maxHeight: "80vh", overflowY: "auto", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", fontSize: "0.9rem", color: "#444" }}>
+                    <div role="dialog" aria-label="Historie uit Voyando" onClick={e => e.stopPropagation()} style={{ backgroundColor: "white", borderRadius: "12px", padding: "20px 22px", width: "100%", maxWidth: "520px", maxHeight: "80vh", overflowY: "auto", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", fontSize: "0.9rem", color: "#444" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px" }}>
-                            <strong style={{ fontSize: "1.05rem", color: "#333" }}>🕘 Laatste wijzigingen uit Voyando</strong>
+                            <strong style={{ fontSize: "1.05rem", color: "#333" }}>🕘 Historie uit Voyando</strong>
                             <button onClick={() => setVoyandoPopup(false)} aria-label="Sluiten" style={{ background: "none", border: "none", fontSize: "1.3rem", cursor: "pointer", color: "#888", lineHeight: 1 }}>×</button>
                         </div>
                         {voyando.stand.gelukt === false && <div style={{ marginTop: "10px", color: "#a3352a", backgroundColor: "#fff4f2", border: "1px solid #e5b4ac", borderRadius: "6px", padding: "8px 10px" }}>Ophalen mislukt: {voyando.stand.fout}</div>}
-                        {voyando.stand.laatsteWijzigingen ? (
-                            <>
-                                <div style={{ marginTop: "12px", color: "#777", fontSize: "0.8rem" }}>{new Date(voyando.stand.laatsteWijzigingen.op).toLocaleString("nl-NL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</div>
-                                <ul style={{ margin: "6px 0 0", padding: 0, listStyle: "none" }}>
-                                    {voyando.stand.laatsteWijzigingen.regels.map((r, i) => (
+                        {(() => {
+                            const historie = voyando.stand.historie ?? (voyando.stand.laatsteWijzigingen ? voyando.stand.laatsteWijzigingen.regels.map(r => ({ ...r, op: voyando.stand.laatsteWijzigingen!.op })) : []);
+                            if (!historie.length) return <div style={{ marginTop: "12px", color: "#888" }}>Nog geen wijzigingen sinds de koppeling.</div>;
+                            return (
+                                <ul style={{ margin: "8px 0 0", padding: 0, listStyle: "none" }}>
+                                    {historie.map((r, i) => (
                                         <li key={i} style={{ padding: "7px 0", borderBottom: "1px solid #f0f0f0" }}>
-                                            <span style={{ ...labelKnop, cursor: "default", marginRight: "8px", backgroundColor: r.soort === "geannuleerd" ? "#fde8e6" : r.soort === "nieuw" ? "#dcfce7" : "#fef3c7", color: r.soort === "geannuleerd" ? "#a3352a" : r.soort === "nieuw" ? "#166534" : "#92400e" }}>{r.soort}</span>
-                                            <strong>{r.naam || r.id}</strong> <span style={{ color: "#999" }}>({r.id})</span>
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
+                                                <span>
+                                                    <span style={{ ...labelKnop, cursor: "default", marginRight: "8px", backgroundColor: r.soort === "geannuleerd" ? "#fde8e6" : r.soort === "nieuw" ? "#dcfce7" : "#fef3c7", color: r.soort === "geannuleerd" ? "#a3352a" : r.soort === "nieuw" ? "#166534" : "#92400e" }}>{r.soort}</span>
+                                                    <strong>{r.naam || r.id}</strong> <span style={{ color: "#999" }}>({r.id})</span>
+                                                </span>
+                                                <span style={{ color: "#999", fontSize: "0.78rem", whiteSpace: "nowrap" }}>{new Date(r.op).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                            </div>
                                             <div style={{ color: "#666", fontSize: "0.82rem", marginTop: "2px" }}>{r.tekst}</div>
                                         </li>
                                     ))}
                                 </ul>
-                            </>
-                        ) : <div style={{ marginTop: "12px", color: "#888" }}>Nog geen wijzigingen sinds de koppeling.</div>}
+                            );
+                        })()}
                         <div style={{ marginTop: "14px", color: "#888", fontSize: "0.8rem", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
                             <span>{voyando.stand.laatst ? `Laatst opgehaald ${new Date(voyando.stand.laatst).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${voyando.stand.aantal ?? 0} boekingen in Voyando` : "Nog niet opgehaald"}</span>
                             <button onClick={() => haalVoyando(true)} disabled={voyandoBezig} title="Niet nodig: ophalen gaat vanzelf. Handig als je net iets in Voyando hebt gewijzigd en niet wilt wachten." style={{ background: "none", border: "none", padding: 0, color: "#4A5D23", textDecoration: "underline", cursor: voyandoBezig ? "default" : "pointer", fontSize: "0.8rem", opacity: voyandoBezig ? 0.6 : 1 }}>{voyandoBezig ? "Bezig…" : "Nu ophalen"}</button>
